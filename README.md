@@ -1,6 +1,7 @@
-# fairness-variance
+# Virny Software Library
 
-Studying model uncertainty and instability for different demographic groups
+
+Audit model fairness and stability.
 
 
 ## 🛠 Installation
