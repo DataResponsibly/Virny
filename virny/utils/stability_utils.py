@@ -6,13 +6,13 @@ from os import listdir
 from os.path import isfile, join
 from matplotlib import pyplot as plt
 
-from configs.constants import CountPredictionStatsResponse
+from virny.configs.constants import CountPredictionStatsResponse
 from virny.utils.data_viz_utils import set_size
 from virny.metrics.stability_metrics import compute_std_mean_iqr_metrics, compute_entropy, compute_jitter, \
     compute_per_sample_accuracy
 
 
-def count_prediction_stats(y_test: pd.DataFrame, uq_results):
+def count_prediction_stats(y_test, uq_results):
     """
     Compute means, stds, iqr, entropy, jitter, label stability, and transform predictions to pd.Dataframe.
 

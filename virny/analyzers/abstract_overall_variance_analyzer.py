@@ -85,6 +85,9 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         ----------
         make_plots
             bool, if to display plots for analysis
+        save_results
+            If to save result metrics in a file
+
         """
         # Quantify uncertainty for the base model
         boostrap_size = int(self.bootstrap_fraction * self.X_train.shape[0])

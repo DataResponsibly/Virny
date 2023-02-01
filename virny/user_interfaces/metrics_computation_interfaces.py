@@ -5,8 +5,8 @@ from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 from IPython.display import display
 
-from configs.constants import ModelSetting
-from configs.models_config_for_tuning import reset_model_seed
+from virny.configs.constants import ModelSetting
+from virny.utils.common_helpers import reset_model_seed
 from virny.utils.custom_initializers import create_base_pipeline
 from virny.custom_classes.base_dataset import BaseDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer

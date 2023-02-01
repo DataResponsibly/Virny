@@ -1,6 +1,6 @@
 import pandas as pd
 
-from configs.constants import ModelSetting
+from virny.configs.constants import ModelSetting
 from virny.custom_classes.generic_pipeline import GenericPipeline
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -13,7 +13,7 @@ class SubgroupVarianceAnalyzer:
     Parameters
     ----------
     model_setting
-        Model learning type; a constant from configs.constants.ModelSetting
+        Model learning type; a constant from virny.configs.constants.ModelSetting
     n_estimators
         Number of estimators for bootstrap
     base_model

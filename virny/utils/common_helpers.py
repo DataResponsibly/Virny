@@ -1,10 +1,9 @@
 import os
-from datetime import datetime, timezone
-
 import pandas as pd
+from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
 
-from configs.constants import INTERSECTION_SIGN
+from virny.configs.constants import INTERSECTION_SIGN
 
 
 def validate_config(config_obj):
@@ -34,6 +33,12 @@ def validate_config(config_obj):
             if sensitive_attr.count(INTERSECTION_SIGN) > 1:
                 raise ValueError('sensitive_attributes_dct must contain only plain sensitive attributes or '
                                  'intersections of two sensitive attributes (not more attributes intersections)')
+
+
+def reset_model_seed(model, new_seed):
+    if 'random_state' in model.get_params():
+        model.set_params(random_state=new_seed)
+    return model
 
 
 def save_metrics_to_file(metrics_df, result_filename, save_dir_path):

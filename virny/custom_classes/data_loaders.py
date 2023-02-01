@@ -286,7 +286,7 @@ class ACSIncomeDataset(BaseDataset):
         categorical_columns = ['COW','MAR','OCCP','POBP','RELP','WKHP','SEX','RAC1P']
         numerical_columns = ['AGEP', 'SCHL']
 
-        if with_nulls==True:
+        if with_nulls:
             X_data = acs_data[features]
         else:
             X_data = acs_data[features].apply(lambda x: np.nan_to_num(x, -1))
@@ -338,12 +338,12 @@ class ACSDataset_from_demodq(BaseDataset):
         categorical_columns = ['COW', 'SCHL', 'MAR', 'OCCP', 'POBP', 'RELP', 'SEX', 'RAC1P']
         numerical_columns = ['AGEP', 'WKHP']
 
-        if with_nulls==True:
+        if with_nulls:
             X_data = acs_data[features]
         else:
             X_data = acs_data[features].apply(lambda x: np.nan_to_num(x, -1))
 
-        if optimize==True:
+        if optimize:
             X_data = optimize_data_loading(X_data, categorical_columns)
 
         filtered_X_data = X_data

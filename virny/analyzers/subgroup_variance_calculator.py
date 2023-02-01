@@ -26,6 +26,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
     def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict, test_protected_groups=None):
         super().__init__(X_test, y_test, sensitive_attributes_dct, test_protected_groups)
         self.overall_variance_metrics = None
+        self.subgroup_variance_metrics_dict = None
 
     def set_overall_variance_metrics(self, overall_variance_metrics):
         self.overall_variance_metrics = overall_variance_metrics

@@ -12,7 +12,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, accuracy_score, f1_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 
-from configs.models_config_for_tuning import MODELS_TUNING_TEST_SET_FRACTION, MODELS_TUNING_SEED, MODELS_CONFIG
+from virny.configs.constants import MODELS_TUNING_TEST_SET_FRACTION, MODELS_TUNING_SEED
 from virny.preprocessing.basic_preprocessing import make_features_dfs
 
 
@@ -28,7 +28,7 @@ def folds_iterator(n_folds, samples_per_fold, size):
               np.arange(size - samples_per_fold * (i + 1), size - samples_per_fold * i)
 
 
-def test_baseline_models(dataset, dataset_name, n_folds = 3):
+def test_baseline_models(models_config, dataset, dataset_name, n_folds = 3):
     """
     Prepare datasets and find the best model for an original baseline dataset without nulls.
 
@@ -47,13 +47,13 @@ def test_baseline_models(dataset, dataset_name, n_folds = 3):
     best_results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
                                             'Accuracy_Score',
                                             'Model_Best_Params', 'Model_Pred'))
-    ML_results_df = test_ML_models(best_results_df, MODELS_CONFIG, n_folds, samples_per_fold,
+    ML_results_df = test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
                                    X_train_features, y_train, X_test_features, y_test, dataset_name,
                                    show_plots=True, debug_mode=True)
     return ML_results_df
 
 
-def test_models(X_train_features, y_train, X_test_features, y_test, n_folds = 3):
+def test_models(models_config, X_train_features, y_train, X_test_features, y_test, n_folds = 3):
     """
     Find the best model for a non-baseline dataset without nulls.
 
@@ -63,7 +63,7 @@ def test_models(X_train_features, y_train, X_test_features, y_test, n_folds = 3)
     best_results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
                                             'Accuracy_Score',
                                             'Model_Best_Params', 'Model_Pred'))
-    ML_results_df = test_ML_models(best_results_df, MODELS_CONFIG, n_folds, samples_per_fold,
+    ML_results_df = test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
                                    X_train_features, y_train, X_test_features, y_test, "Folktables [NY 2018]",
                                    show_plots=True, debug_mode=True)
     return ML_results_df
@@ -125,7 +125,7 @@ def test_evaluation(cur_best_model, model_name, cur_best_params,
     return test_f1_score, test_accuracy, cur_model_pred
 
 
-def test_ML_models(best_results_df, config_models, n_folds, samples_per_fold,
+def test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
                    X_train, y_train, X_test, y_test, dataset_title, show_plots, debug_mode):
     """
     Find the best model from defined list.
@@ -142,8 +142,8 @@ def test_ML_models(best_results_df, config_models, n_folds, samples_per_fold,
     best_model_name = 'No model'
     best_params = None
     idx = 0
-    # find the best model among defined in config_models
-    for model_config in config_models:
+    # find the best model among defined in models_config
+    for model_config in models_config:
         try:
             print(f"{datetime.now().strftime('%Y/%m/%d, %H:%M:%S')}: Tuning {model_config['model_name']}...")
             cur_model, cur_f1_score, cur_accuracy, cur_params = validate_model(deepcopy(model_config['model']),
