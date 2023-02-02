@@ -1,88 +1,14 @@
-import os
-import pytest
 import numpy as np
-import pandas as pd
 from munch import DefaultMunch
 from sklearn.model_selection import train_test_split
 
-from virny.custom_classes.base_dataset import BaseDataset
+from tests import config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
 from virny.utils.common_helpers import (
     check_sensitive_attrs_in_columns,
     validate_config,
     create_test_protected_groups,
     confusion_matrix_metrics
 )
-
-
-# Configure a location of root dir
-cur_folder_name = os.getcwd().split('/')[-1]
-if cur_folder_name == "tests":
-    ROOT_DIR = os.path.join('..')
-else:
-    # For the root repo path
-    if os.path.exists(os.path.join('virny', 'datasets')):
-        ROOT_DIR = os.getcwd()
-    else:
-        ROOT_DIR = os.path.join('..', '..')
-
-
-@pytest.fixture(scope='module')
-def config_params():
-    config_dct = {
-        "dataset_name": 'COMPAS',
-        "test_set_fraction": 0.2,
-        "bootstrap_fraction": 0.8,
-        "n_estimators": 100,
-        "runs_seed_lst": [100, 200, 300, 400, 500, 600],
-        "sensitive_attributes_dct": {'sex': 0, 'race': 'Caucasian', 'sex&race': None},
-    }
-    return DefaultMunch.fromDict(config_dct)
-
-
-@pytest.fixture(scope='module')
-def compas_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
-    df = pd.read_csv(dataset_path)
-
-    int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
-                   'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
-    int_columns_dct = {col: "int" for col in int_columns}
-    df = df.astype(int_columns_dct)
-
-    target = 'recidivism'
-    numerical_columns = ['age', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count']
-    categorical_columns = ['race', 'age_cat_25 - 45', 'age_cat_Greater than 45',
-                           'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
-    features = numerical_columns + categorical_columns
-
-    return BaseDataset(pandas_df=df,
-                       features=features,
-                       target=target,
-                       numerical_columns=numerical_columns,
-                       categorical_columns=categorical_columns)
-
-
-@pytest.fixture(scope='module')
-def compas_without_sensitive_attrs_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
-    df = pd.read_csv(dataset_path)
-
-    int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
-                   'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
-    int_columns_dct = {col: "int" for col in int_columns}
-    df = df.astype(int_columns_dct)
-
-    target = 'recidivism'
-    numerical_columns = ['juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count']
-    categorical_columns = ['age_cat_25 - 45', 'age_cat_Greater than 45',
-                           'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M']
-    features = numerical_columns + categorical_columns
-
-    return BaseDataset(pandas_df=df,
-                       features=features,
-                       target=target,
-                       numerical_columns=numerical_columns,
-                       categorical_columns=categorical_columns)
 
 
 def test_check_sensitive_attrs_in_columns_true(config_params):
