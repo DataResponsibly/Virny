@@ -47,10 +47,10 @@ setup(
     url=URL,
     author=AUTHORS,
     author_email=EMAILS,
-    license="MIT",
+    license="BSD-3",
     classifiers=[
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",

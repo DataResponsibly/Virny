@@ -4,7 +4,7 @@ convert-notebooks:
 	jupyter nbconvert --to markdown docs/examples/**.ipynb
 
 doc:
-	yamp source --out docs/api --verbose
+	yamp virny --out docs/api --verbose
 	mkdocs build
 
 livedoc: doc

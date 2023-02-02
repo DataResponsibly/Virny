@@ -6,9 +6,9 @@ Analyzer to compute variance metrics for subgroups.
 
 ## Parameters
 
-- **model_setting** (*configs.constants.ModelSetting*)
+- **model_setting** (*virny.configs.constants.ModelSetting*)
 
-    Model learning type; a constant from configs.constants.ModelSetting
+    Model learning type; a constant from virny.configs.constants.ModelSetting
 
 - **n_estimators** (*int*)
 

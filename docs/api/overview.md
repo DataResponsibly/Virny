@@ -16,6 +16,9 @@ The purpose of an analyzer is to analyse defined metrics for defined subgroups.
 - [SubgroupVarianceAnalyzer](../analyzers/SubgroupVarianceAnalyzer)
 - [SubgroupVarianceCalculator](../analyzers/SubgroupVarianceCalculator)
 
+## configs
+
+
 ## custom_classes
 
 

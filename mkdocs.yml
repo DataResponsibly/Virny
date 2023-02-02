@@ -4,7 +4,7 @@ site_description: Responsible AI Toolset in Python
 
 # Repository
 repo_name: virny
-repo_url: https://github.com/FalaahArifKhan/fairness-variance/tree/denys
+repo_url: https://github.com/DataResponsibly/Virny
 edit_uri: ""
 
 theme:
@@ -29,7 +29,7 @@ extra:
     property: UA-63302552-3
   social:
     - icon: fontawesome/brands/github-alt
-      link: https://github.com/FalaahArifKhan/fairness-variance/tree/denys
+      link: https://github.com/DataResponsibly/Virny
   version:
     provider: mike
 

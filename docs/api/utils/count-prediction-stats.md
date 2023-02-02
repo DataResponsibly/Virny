@@ -6,7 +6,7 @@ Return a 1D numpy array of predictions, 2D array of each model prediction for y_
 
 ## Parameters
 
-- **y_test** (*pandas.core.frame.DataFrame*)
+- **y_test**
 
     True labels
 
