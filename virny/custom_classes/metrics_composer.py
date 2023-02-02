@@ -17,7 +17,7 @@ class MetricsComposer:
     def __init__(self, models_metrics_dct: dict, sensitive_attributes_dct: dict):
         self.models_metrics_dct = models_metrics_dct
         self.sensitive_attributes_dct = sensitive_attributes_dct
-        self.models_average_metrics_dct = None # will be created in self.compose_metrics()
+        self.models_average_metrics_dct = None  # will be created in self.compose_metrics()
 
     def compose_metrics(self):
         """
@@ -51,7 +51,7 @@ class MetricsComposer:
                     'Disparate_Impact': cfm[dis_group]['Positive-Rate'] / cfm[priv_group]['Positive-Rate'],
                     'Statistical_Parity_Impact': cfm[dis_group]['Positive-Rate'] - cfm[priv_group]['Positive-Rate'],
                     'Accuracy_Parity': cfm[dis_group]['Accuracy'] - cfm[priv_group]['Accuracy'],
-                    # Group variance metrics
+                    # Group variance metrics            m
                     'Label_Stability_Ratio': cfm[dis_group]['Label_Stability'] / cfm[priv_group]['Label_Stability'],
                     'IQR_Parity': cfm[dis_group]['IQR'] - cfm[priv_group]['IQR'],
                     'Std_Parity': cfm[dis_group]['Std'] - cfm[priv_group]['Std'],

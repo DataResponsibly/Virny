@@ -16,11 +16,9 @@ def test_make_features_dfs_true1(compas_without_sensitive_attrs_dataset_class, c
     # Number of columns and their names are the same in train and test sets
     assert np.array_equal(X_train_features.columns, X_test_features.columns)
 
-    # Values in a numerical column are in range [-1., 1.]
-    assert (X_train_features[X_train_features.columns[0]] >= -1.).all()
-    assert (X_train_features[X_train_features.columns[0]] <= 1.).all()
-    assert (X_test_features[X_test_features.columns[0]] >= -1.).all()
-    assert (X_test_features[X_test_features.columns[0]] <= 1.).all()
+    # Check if values changed after normalization
+    assert (X_train['juv_fel_count'].values == X_train_features['juv_fel_count'].values).any() == False
+    assert (X_test['juv_fel_count'].values == X_test_features['juv_fel_count'].values).any() == False
 
 
 def test_make_features_dfs_true2(compas_dataset_class, config_params):
@@ -33,8 +31,6 @@ def test_make_features_dfs_true2(compas_dataset_class, config_params):
     # Number of columns and their names are the same in train and test sets
     assert np.array_equal(X_train_features.columns, X_test_features.columns)
 
-    # Values in a numerical column are in range [-1., 1.]
-    assert (X_train_features[X_train_features.columns[0]] >= -1.).all()
-    assert (X_train_features[X_train_features.columns[0]] <= 1.).all()
-    assert (X_test_features[X_test_features.columns[0]] >= -1.).all()
-    assert (X_test_features[X_test_features.columns[0]] <= 1.).all()
+    # Check if values changed after normalization
+    assert (X_train['juv_fel_count'].values == X_train_features['juv_fel_count'].values).any() == False
+    assert (X_test['juv_fel_count'].values == X_test_features['juv_fel_count'].values).any() == False

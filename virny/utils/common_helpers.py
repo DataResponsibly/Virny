@@ -29,8 +29,8 @@ def validate_config(config_obj):
             or config_obj.bootstrap_fraction > 1.0:
         raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
 
-    elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 0:
-        raise ValueError('n_estimators must be integer greater than 0')
+    elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
+        raise ValueError('n_estimators must be integer greater than 1')
 
     elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
         raise ValueError('runs_seed_lst must be python list')
@@ -112,10 +112,8 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
     # Check if input sensitive attributes are in X_test.columns.
     # If no, add them only to create test groups
     if check_sensitive_attrs_in_columns(X_test.columns, sensitive_attributes_dct):
-        print('sensitive_attrs in')
         X_test_with_sensitive_attrs = X_test
     else:
-        print('sensitive_attrs not in')
         plain_sensitive_attributes = [attr for attr in sensitive_attributes_dct.keys() if INTERSECTION_SIGN not in attr]
         cols_with_sensitive_attrs = set(list(X_test.columns) + plain_sensitive_attributes)
         X_test_with_sensitive_attrs = full_df[cols_with_sensitive_attrs].loc[X_test.index]
