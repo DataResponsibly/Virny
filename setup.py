@@ -61,6 +61,10 @@ setup(
     include_package_data=True,
     install_requires=base_packages,
     extras_require={
+        "dev": base_packages
+                + [
+                    "pytest~=7.2.1",
+                ],
         "docs": base_packages
                 + [
                     "dominate",

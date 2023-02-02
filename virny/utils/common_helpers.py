@@ -33,6 +33,7 @@ def validate_config(config_obj):
             if sensitive_attr.count(INTERSECTION_SIGN) > 1:
                 raise ValueError('sensitive_attributes_dct must contain only plain sensitive attributes or '
                                  'intersections of two sensitive attributes (not more attributes intersections)')
+    return True
 
 
 def reset_model_seed(model, new_seed):
@@ -66,9 +67,8 @@ def partition_by_group_binary(df, column_name, priv_value):
 
 def check_sensitive_attrs_in_columns(df_columns, sensitive_attributes_dct):
     for sensitive_attr in sensitive_attributes_dct.keys():
-        if sensitive_attr not in df_columns:
+        if INTERSECTION_SIGN not in sensitive_attr and sensitive_attr not in df_columns:
             return False
-
     return True
 
 
