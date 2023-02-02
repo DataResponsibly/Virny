@@ -522,7 +522,7 @@ visualizer.visualize_overall_metrics(
 
 
     
-![png](Multiple_Runs_Interface_Use_Case_Example_files/Multiple_Runs_Interface_Use_Case_Example_34_0.png)
+![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_Example_34_0.png)
     
 
 
@@ -533,7 +533,7 @@ visualizer.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std'
 
 
     
-![png](Multiple_Runs_Interface_Use_Case_Example_files/Multiple_Runs_Interface_Use_Case_Example_35_0.png)
+![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_Example_35_0.png)
     
 
 

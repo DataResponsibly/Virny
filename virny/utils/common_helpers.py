@@ -24,7 +24,7 @@ def validate_config(config_obj):
         raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
     elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 0:
         raise ValueError('n_estimators must be integer greater than 0')
-    elif not isinstance(config_obj.runs_seed_lst, list):
+    elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
         raise ValueError('runs_seed_lst must be python list')
     elif not isinstance(config_obj.sensitive_attributes_dct, dict):
         raise ValueError('sensitive_attributes_dct must be python dictionary')

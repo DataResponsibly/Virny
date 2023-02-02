@@ -6,6 +6,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime, timezone
 
+from virny.configs.constants import ReportType
+
 # TODO: complete documentation when finish this class
 
 class MetricsVisualizer:
@@ -206,23 +208,33 @@ class MetricsVisualizer:
                 )
         )
 
-    def create_html_report(self, report_save_path: str):
+    def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
         # Create a directory if it does not exist
         if not os.path.exists(report_save_path):
             os.makedirs(report_save_path, exist_ok=True)
 
         self.__create_report = True
-        boxes_and_whiskers_plot = self.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std', 'IQR', 'Jitter', 'FNR','FPR'])
-        interactive_bar_chart = self.create_bias_variance_interactive_bar_chart()
+        report_filename = f'{dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
+        if report_type == ReportType.MULTIPLE_RUNS_MULTIPLE_MODELS:
+            boxes_and_whiskers_plot = self.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std', 'IQR', 'Jitter', 'FNR','FPR'])
+            interactive_bar_chart = self.create_bias_variance_interactive_bar_chart()
 
-        report_filename = f'Statistical_Bias_and_Variance_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
-        dp.Report("# Statistical Bias and Variance Report",
-               "## Models Composed Metrics",
-               dp.DataTable(self.models_composed_metrics_df, caption="Models Composed Metrics"),
-               "## Boxes and Whiskers Plot for Multiple Models Runs",
-               dp.Plot(boxes_and_whiskers_plot, caption="Boxes and Whiskers Plot for Multiple Models Runs"),
-               "## Bias and Variance Interactive Bar Chart",
-               dp.Plot(interactive_bar_chart, caption="Bias and Variance Interactive Bar Chart"),
-               ).save(path=os.path.join(report_save_path, report_filename))
+            dp.Report("# Statistical Bias and Variance Report",
+                   "## Models Composed Metrics",
+                   dp.DataTable(self.models_composed_metrics_df, caption="Models Composed Metrics"),
+                   "## Boxes and Whiskers Plot for Multiple Models Runs",
+                   dp.Plot(boxes_and_whiskers_plot, caption="Boxes and Whiskers Plot for Multiple Models Runs"),
+                   "## Bias and Variance Interactive Bar Chart",
+                   dp.Plot(interactive_bar_chart, caption="Bias and Variance Interactive Bar Chart"),
+                   ).save(path=os.path.join(report_save_path, report_filename))
+        else:
+            interactive_bar_chart = self.create_bias_variance_interactive_bar_chart()
+
+            dp.Report("# Statistical Bias and Variance Report",
+                      "## Models Composed Metrics",
+                      dp.DataTable(self.models_composed_metrics_df, caption="Models Composed Metrics"),
+                      "## Bias and Variance Interactive Bar Chart",
+                      dp.Plot(interactive_bar_chart, caption="Bias and Variance Interactive Bar Chart"),
+                      ).save(path=os.path.join(report_save_path, report_filename))
 
         self.__create_report = False

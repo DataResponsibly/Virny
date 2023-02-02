@@ -129,6 +129,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Seed'] = model_seed
+    metrics_df['Model_Name'] = base_model_name
 
     if save_results:
         # Save metrics
@@ -231,7 +232,6 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
                                                      save_results=save_results,
                                                      save_results_dir_path=save_results_dir_path,
                                                      debug_mode=debug_mode)
-            model_metrics_df['Model_Name'] = model_name
             models_metrics_dct[model_name] = model_metrics_df
             if debug_mode:
                 print(f'\n[{model_name}] Metrics matrix:')
