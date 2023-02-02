@@ -7,6 +7,10 @@ repo_name: virny
 repo_url: https://github.com/DataResponsibly/Virny
 edit_uri: ""
 
+# Copyright
+copyright: Copyright &copy; 2023
+
+# Theme configuration
 theme:
   name: material
   custom_dir: docs/overrides
