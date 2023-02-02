@@ -30,6 +30,7 @@ print('Current location: ', os.getcwd())
 
 ## Import dependencies
 
+
 ```python
 import os
 import pandas as pd
@@ -38,9 +39,9 @@ from datetime import datetime, timezone
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 
-from virny.custom_initializers import create_config_obj
-from virny.custom_classes.data_loaders import CompasWithoutSensitiveAttrsDataset
-from virny.metrics_computation_interfaces import run_metrics_computation_with_config, compute_model_metrics_with_config
+from source.custom_initializers import create_config_obj
+from source.custom_classes.data_loaders import CompasWithoutSensitiveAttrsDataset
+from source.metrics_computation_interfaces import run_metrics_computation_with_config, compute_model_metrics_with_config
 ```
 
 ## Configs
