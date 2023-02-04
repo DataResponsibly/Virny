@@ -86,7 +86,8 @@ class MetricsVisualizer:
                                                                                       value_name="Value")
         self.sorted_models_composed_metrics_df = self.melted_models_composed_metrics_df.sort_values(by=['Value'])
 
-    def create_overall_metrics_with_altair(self, metrics_names: list, reversed_metrics_names: list = None):
+    def create_overall_metrics_bar_char(self, metrics_names: list, reversed_metrics_names: list = None,
+                                        metrics_title: str = "Overall Metrics"):
         if reversed_metrics_names is None:
             reversed_metrics_names = []
         metrics_names = set(metrics_names + reversed_metrics_names)
@@ -107,7 +108,7 @@ class MetricsVisualizer:
 
         models_metrics_chart = (
             alt.Chart(overall_metrics_df).mark_bar().encode(
-                alt.Row('metric:N', title="Overall Metrics"),
+                alt.Row('metric:N', title=metrics_title),
                 alt.Y('model_name:N', axis=None),
                 alt.X('overall:Q', axis=alt.Axis(grid=True), title=''),
                 alt.Color('model_name:N',
@@ -130,43 +131,6 @@ class MetricsVisualizer:
         )
 
         return models_metrics_chart
-
-    def visualize_overall_metrics(self, metrics_names: list, reversed_metrics_names: list = None,
-                                  x_label: str = "Prediction Metrics"):
-        if reversed_metrics_names is None:
-            reversed_metrics_names = []
-        metrics_names = set(metrics_names + reversed_metrics_names)
-
-        overall_metrics_df = pd.DataFrame()
-        for model_name in self.models_average_metrics_dct.keys():
-            model_average_results_df = self.models_average_metrics_dct[model_name].copy(deep=True)
-            model_average_results_df = model_average_results_df.loc[model_average_results_df['Metric'].isin(metrics_names)]
-
-            overall_model_metrics_df = pd.DataFrame()
-            overall_model_metrics_df['overall'] = model_average_results_df['overall']
-            overall_model_metrics_df['metric'] = model_average_results_df['Metric']
-            overall_model_metrics_df['model_name'] = model_name
-            overall_metrics_df = pd.concat([overall_metrics_df, overall_model_metrics_df])
-
-        overall_metrics_df.loc[overall_metrics_df['metric'].isin(reversed_metrics_names), 'overall'] = \
-            1 - overall_metrics_df.loc[overall_metrics_df['metric'].isin(reversed_metrics_names), 'overall']
-
-        # Draw a nested barplot
-        height = 9 if len(metrics_names) >= 7 else 6
-        g = sns.catplot(
-            data=overall_metrics_df, kind="bar",
-            x="overall", y="metric", hue="model_name",
-            palette="tab20",
-            alpha=.8,
-            height=height
-        )
-        g.despine(left=True)
-        g.set_axis_labels("", x_label)
-        g.legend.set_title("")
-
-        if self.__create_report:
-            plt.close()
-            return g
 
     def create_boxes_and_whiskers_for_models_multiple_runs(self, metrics_lst: list):
         """
@@ -359,10 +323,15 @@ class MetricsVisualizer:
             os.makedirs(report_save_path, exist_ok=True)
 
         self.__create_report = True
-        overall_metrics_plot = self.visualize_overall_metrics(metrics_names=['TPR', 'PPV', 'Accuracy', 'F1', 'Selection-Rate',
-                                                                             'Per_Sample_Accuracy', 'Label_Stability'],
-                                                              reversed_metrics_names=['Std', 'IQR', 'Jitter'],
-                                                              x_label="Overall Metrics")
+        bias_overall_metrics_bar_chart = self.create_overall_metrics_bar_char(
+            metrics_names=['TPR', 'PPV', 'Accuracy', 'F1', 'Selection-Rate', 'Positive-Rate'],
+            metrics_title="Bias Metrics"
+        )
+        variance_overall_metrics_bar_chart = self.create_overall_metrics_bar_char(
+            metrics_names=['Label_Stability'],
+            reversed_metrics_names=['Std', 'IQR', 'Jitter'],
+            metrics_title="Variance Metrics"
+        )
         interactive_bar_chart = self.create_bias_variance_interactive_bar_chart()
         model_rank_heatmap, total_model_rank_heatmap = \
             self.create_model_rank_heatmaps(metrics_lst=[
@@ -389,8 +358,10 @@ class MetricsVisualizer:
                       dp.DataTable(self.models_composed_metrics_df, caption="Models Composed Metrics"),
                       "## Boxes and Whiskers Plot for Multiple Models Runs",
                       dp.Plot(boxes_and_whiskers_plot, caption="Boxes and Whiskers Plot for Multiple Models Runs"),
-                      "## Bar Chart",
-                      dp.Plot(overall_metrics_plot, caption="Bias and Variance Interactive Bar Chart"),
+                      "## Bias Overall Metrics Models Comparison",
+                      dp.Plot(bias_overall_metrics_bar_chart, responsive=False),
+                      "## Variance Overall Metrics Models Comparison",
+                      dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
                       "## Bias and Variance Interactive Bar Chart",
                       dp.Plot(interactive_bar_chart, caption="Bias and Variance Interactive Bar Chart"),
                       "## Model Ranks Based On Group Statistical Bias and Variance Metrics",
@@ -404,6 +375,10 @@ class MetricsVisualizer:
                       dp.DataTable(self.models_composed_metrics_df, caption="Models Composed Metrics"),
                       "## Bias and Variance Interactive Bar Chart",
                       dp.Plot(interactive_bar_chart, caption="Bias and Variance Interactive Bar Chart"),
+                      "## Bias Overall Metrics Models Comparison",
+                      dp.Plot(bias_overall_metrics_bar_chart, responsive=False),
+                      "## Variance Overall Metrics Models Comparison",
+                      dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
                       "## Model Ranks Based On Group Statistical Bias and Variance Metrics",
                       dp.Plot(model_rank_heatmap, responsive=False),
                       "## Total Ranks Sum For Group Statistical Bias and Variance Metrics",
