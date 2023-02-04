@@ -38,6 +38,20 @@ class MetricsVisualizer:
         self.model_names = model_names
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.__create_report = False
+        self.bias_metrics_lst = [
+            'Accuracy_Parity',
+            'Equalized_Odds_TPR',
+            'Equalized_Odds_FPR',
+            'Disparate_Impact',
+            'Statistical_Parity_Difference',
+        ]
+        self.variance_metrics_lst = [
+            'IQR_Parity',
+            'Label_Stability_Impact',
+            'Std_Parity',
+            'Std_Ratio',
+            'Jitter_Parity',
+        ]
 
         # Create models_average_metrics_dct
         models_average_metrics_dct = dict()
@@ -178,25 +192,11 @@ class MetricsVisualizer:
         return models_metrics_chart, select_metric_legend, color_legend
 
     def create_bias_variance_interactive_bar_chart(self):
-        bias_metrics_lst = [
-            'Accuracy_Parity',
-            'Equalized_Odds_TPR',
-            'Equalized_Odds_FPR',
-            'Disparate_Impact',
-            'Statistical_Parity_Difference',
-        ]
         models_bias_metrics_chart, select_bias_metric_legend, bias_color_legend = \
-            self.create_models_metrics_bar_chart(bias_metrics_lst, metrics_group_name="Bias")
+            self.create_models_metrics_bar_chart(self.bias_metrics_lst, metrics_group_name="Bias")
 
-        variance_metrics_lst = [
-            'IQR_Parity',
-            'Label_Stability_Impact',
-            'Std_Parity',
-            'Std_Ratio',
-            'Jitter_Parity',
-        ]
         models_variance_metrics_chart, select_variance_metric_legend, variance_color_legend = \
-            self.create_models_metrics_bar_chart(variance_metrics_lst, metrics_group_name="Variance")
+            self.create_models_metrics_bar_chart(self.variance_metrics_lst, metrics_group_name="Variance")
 
         return (
                 alt.hconcat(
@@ -211,7 +211,7 @@ class MetricsVisualizer:
         )
 
     @staticmethod
-    def create_sorted_matrix_by_rank(model_metrics_matrix):
+    def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
         models_distances_matrix = model_metrics_matrix.copy(deep=True).T
         metric_names = models_distances_matrix.columns
         for metric_name in metric_names:
@@ -246,6 +246,42 @@ class MetricsVisualizer:
             plt.close()
             return ax
 
+    def create_total_model_rank_heatmap(self, sorted_matrix_by_rank, num_models):
+        total_model_ranks = dict()
+        matrix_bias_metrics = [metric_name for metric_name in sorted_matrix_by_rank[self.model_names[0]].index
+                               if metric_name[:metric_name.rfind('_')] in self.bias_metrics_lst]
+        matrix_variance_metrics = [metric_name for metric_name in sorted_matrix_by_rank[self.model_names[0]].index
+                                   if metric_name[:metric_name.rfind('_')] in self.variance_metrics_lst]
+
+        for model_name in self.model_names:
+            model_ranks = dict()
+            model_ranks['Bias_Ranks_Sum'] = np.sum(sorted_matrix_by_rank[model_name][matrix_bias_metrics] + 1)
+            model_ranks['Variance_Ranks_Sum'] = np.sum(sorted_matrix_by_rank[model_name][matrix_variance_metrics] + 1)
+            total_model_ranks[model_name] = model_ranks
+
+        total_model_ranks_df = pd.DataFrame(total_model_ranks).T
+
+        matrix_width = 6
+        matrix_height = num_models // 2
+        plt.figure(figsize=(matrix_width, matrix_height))
+        # rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()[::-1]
+        ax = sns.heatmap(total_model_ranks_df, annot=True, cmap="coolwarm_r", fmt = '')
+        ax.set(xlabel="", ylabel="")
+        ax.xaxis.tick_top()
+
+        # cbar = ax.collections[0].colorbar
+        # model_ranks = [idx for idx in range(num_models)]
+        # cbar.set_ticks([float(idx) for idx in model_ranks])
+        # tick_labels = [str(idx + 1) for idx in model_ranks]
+        # tick_labels[0] = tick_labels[0] + ', best'
+        # tick_labels[-1] = tick_labels[-1] + ', worst'
+        # cbar.set_ticklabels(tick_labels)
+        # cbar.set_label('Model Ranks')
+
+        if self.__create_report:
+            plt.close()
+            return ax
+
     def create_ranked_models_matrix(self, metrics_lst, groups_lst):
         results = {}
         num_models = len(self.model_names)
@@ -268,8 +304,11 @@ class MetricsVisualizer:
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
-        sorted_matrix_by_rank = self.create_sorted_matrix_by_rank(model_metrics_matrix)
-        return self.create_model_rank_heatmap(model_metrics_matrix, sorted_matrix_by_rank, num_models)
+        sorted_matrix_by_rank = MetricsVisualizer.create_sorted_matrix_by_rank(model_metrics_matrix)
+        model_rank_heatmap = self.create_model_rank_heatmap(model_metrics_matrix, sorted_matrix_by_rank, num_models)
+        total_model_rank_heatmap = self.create_total_model_rank_heatmap(sorted_matrix_by_rank, num_models)
+        if self.__create_report:
+            return model_rank_heatmap, total_model_rank_heatmap
 
     def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
         # Create a directory if it does not exist
