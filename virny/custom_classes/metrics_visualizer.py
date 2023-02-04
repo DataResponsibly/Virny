@@ -1,5 +1,6 @@
 import os
 import altair as alt
+import numpy as np
 import pandas as pd
 import datapane as dp
 import seaborn as sns
@@ -69,6 +70,7 @@ class MetricsVisualizer:
         self.melted_models_composed_metrics_df = self.models_composed_metrics_df.melt(id_vars=["Metric", "Model_Name"],
                                                                                       var_name="Subgroup",
                                                                                       value_name="Value")
+        self.sorted_models_composed_metrics_df = self.melted_models_composed_metrics_df.sort_values(by=['Value'])
 
     def visualize_overall_metrics(self, metrics_names: list, reversed_metrics_names: list = None,
                                   x_label: str = "Prediction Metrics"):
@@ -181,7 +183,7 @@ class MetricsVisualizer:
             'Equalized_Odds_TPR',
             'Equalized_Odds_FPR',
             'Disparate_Impact',
-            'Statistical_Parity_Impact',
+            'Statistical_Parity_Difference',
         ]
         models_bias_metrics_chart, select_bias_metric_legend, bias_color_legend = \
             self.create_models_metrics_bar_chart(bias_metrics_lst, metrics_group_name="Bias")
@@ -207,6 +209,50 @@ class MetricsVisualizer:
                     models_variance_metrics_chart.properties(height=200, width=300, title="Variance Metric Plot"),
                 )
         )
+
+    def create_model_rank_heatmap(self, ranked_models_matrix, num_models):
+        sorted_matrix_by_rank = np.argsort(np.argsort(ranked_models_matrix, axis=1), axis=1)
+
+        plt.figure(figsize=(11, 9))
+        rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()
+        ax = sns.heatmap(sorted_matrix_by_rank, annot=ranked_models_matrix, cmap=rank_colors, fmt = '')
+        ax.set(xlabel="", ylabel="")
+        ax.xaxis.tick_top()
+
+        cbar = ax.collections[0].colorbar
+        model_ranks = [idx for idx in range(num_models)]
+        cbar.set_ticks([float(idx) for idx in model_ranks])
+        cbar.set_ticklabels([str(idx + 1) for idx in model_ranks[::-1]])
+        cbar.set_label('Model Ranks')
+
+        if self.__create_report:
+            plt.close()
+            return ax
+
+    def create_ranked_models_matrix(self, metrics_lst, subgroups_lst, num_models):
+        results = {}
+
+        for metric in metrics_lst:
+            for subgroup in subgroups_lst:
+                subgroup_metric = metric + '_' + subgroup
+                results[subgroup_metric] = dict()
+                sorted_model_names_arr = self.sorted_models_composed_metrics_df[
+                    (self.sorted_models_composed_metrics_df.Metric == metric) &
+                    (self.sorted_models_composed_metrics_df.Subgroup == subgroup)
+                    ]['Model_Name'].values
+                # Add values to results dict
+                for idx, model_name in enumerate(sorted_model_names_arr):
+                    rank = idx + 1
+                    metric_value = self.sorted_models_composed_metrics_df[
+                        (self.sorted_models_composed_metrics_df.Metric == metric) &
+                        (self.sorted_models_composed_metrics_df.Subgroup == subgroup) &
+                        (self.sorted_models_composed_metrics_df.Model_Name == model_name)
+                        ]['Value'].values[0]
+                    metric_value = round(metric_value, 3)
+                    results[subgroup_metric][model_name] = (metric_value, rank)
+
+        ranked_models_matrix = pd.DataFrame(results).T.applymap(lambda cell_value: cell_value[0])
+        return self.create_model_rank_heatmap(ranked_models_matrix, num_models)
 
     def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
         # Create a directory if it does not exist
