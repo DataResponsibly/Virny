@@ -129,20 +129,20 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
 
                 if groups[attr1 + INTERSECTION_SIGN + attr2 + '_priv'].shape[0] == 0:
                     raise ValueError(f"Protected group ({attr1 + INTERSECTION_SIGN + attr2 + '_priv'}) from X_test is empty. "
-                                     f"Please replace the sensitive attribute or extend test_set_fraction")
+                                     f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
                 if groups[attr1 + INTERSECTION_SIGN + attr2 + '_dis'].shape[0] == 0:
                     raise ValueError(f"Protected group ({attr1 + INTERSECTION_SIGN + attr2 + '_dis'}) from X_test is empty. "
-                                     f"Please replace the sensitive attribute or extend test_set_fraction")
+                                     f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
         else:
             groups[attr + '_priv'], groups[attr + '_dis'] = \
                 partition_by_group_binary(X_test_with_sensitive_attrs, attr, sensitive_attributes_dct[attr])
 
             if groups[attr + '_priv'].shape[0] == 0:
                 raise ValueError(f"Protected group ({attr + '_priv'}) from X_test is empty. "
-                                 f"Please replace the sensitive attribute or extend test_set_fraction")
+                                 f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
             if groups[attr + '_dis'].shape[0] == 0:
                 raise ValueError(f"Protected group ({attr + '_dis'}) from X_test is empty. "
-                                 f"Please replace the sensitive attribute or extend test_set_fraction")
+                                 f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
 
     return groups
 
