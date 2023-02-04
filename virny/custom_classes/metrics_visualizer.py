@@ -210,49 +210,62 @@ class MetricsVisualizer:
                 )
         )
 
-    def create_model_rank_heatmap(self, ranked_models_matrix, num_models):
-        sorted_matrix_by_rank = np.argsort(np.argsort(ranked_models_matrix, axis=1), axis=1)
+    def create_model_rank_heatmap(self, model_metrics_matrix, num_models):
+        models_distances_matrix = model_metrics_matrix.copy(deep=True).T
+        metric_names = models_distances_matrix.columns
+        for metric_name in metric_names:
+            if 'impact' in metric_name.lower() or 'ratio' in metric_name.lower():
+                models_distances_matrix[metric_name] = models_distances_matrix[metric_name] - 1
+            models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
 
-        plt.figure(figsize=(11, 9))
-        rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()
-        ax = sns.heatmap(sorted_matrix_by_rank, annot=ranked_models_matrix, cmap=rank_colors, fmt = '')
+        models_distances_matrix = models_distances_matrix.T
+        sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+
+        matrix_width = num_models * 3
+        matrix_height = model_metrics_matrix.shape[0] // 3
+        plt.figure(figsize=(matrix_width, matrix_height))
+        rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()[::-1]
+        ax = sns.heatmap(sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
+                         fmt = '', annot_kws={'color': 'black', 'alpha': 0.7})
         ax.set(xlabel="", ylabel="")
         ax.xaxis.tick_top()
 
         cbar = ax.collections[0].colorbar
         model_ranks = [idx for idx in range(num_models)]
         cbar.set_ticks([float(idx) for idx in model_ranks])
-        cbar.set_ticklabels([str(idx + 1) for idx in model_ranks[::-1]])
+        tick_labels = [str(idx + 1) for idx in model_ranks]
+        tick_labels[0] = tick_labels[0] + ', best'
+        tick_labels[-1] = tick_labels[-1] + ', worst'
+        cbar.set_ticklabels(tick_labels)
         cbar.set_label('Model Ranks')
 
         if self.__create_report:
             plt.close()
             return ax
 
-    def create_ranked_models_matrix(self, metrics_lst, subgroups_lst, num_models):
+    def create_ranked_models_matrix(self, metrics_lst, groups_lst):
         results = {}
-
+        num_models = len(self.model_names)
         for metric in metrics_lst:
-            for subgroup in subgroups_lst:
-                subgroup_metric = metric + '_' + subgroup
-                results[subgroup_metric] = dict()
+            for group in groups_lst:
+                group_metric = metric + '_' + group
+                results[group_metric] = dict()
                 sorted_model_names_arr = self.sorted_models_composed_metrics_df[
                     (self.sorted_models_composed_metrics_df.Metric == metric) &
-                    (self.sorted_models_composed_metrics_df.Subgroup == subgroup)
+                    (self.sorted_models_composed_metrics_df.Subgroup == group)
                     ]['Model_Name'].values
                 # Add values to results dict
                 for idx, model_name in enumerate(sorted_model_names_arr):
-                    rank = idx + 1
                     metric_value = self.sorted_models_composed_metrics_df[
                         (self.sorted_models_composed_metrics_df.Metric == metric) &
-                        (self.sorted_models_composed_metrics_df.Subgroup == subgroup) &
+                        (self.sorted_models_composed_metrics_df.Subgroup == group) &
                         (self.sorted_models_composed_metrics_df.Model_Name == model_name)
                         ]['Value'].values[0]
                     metric_value = round(metric_value, 3)
-                    results[subgroup_metric][model_name] = (metric_value, rank)
+                    results[group_metric][model_name] = metric_value
 
-        ranked_models_matrix = pd.DataFrame(results).T.applymap(lambda cell_value: cell_value[0])
-        return self.create_model_rank_heatmap(ranked_models_matrix, num_models)
+        model_metrics_matrix = pd.DataFrame(results).T
+        return self.create_model_rank_heatmap(model_metrics_matrix, num_models)
 
     def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
         # Create a directory if it does not exist
