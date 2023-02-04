@@ -210,7 +210,8 @@ class MetricsVisualizer:
                 )
         )
 
-    def create_model_rank_heatmap(self, model_metrics_matrix, num_models):
+    @staticmethod
+    def create_sorted_matrix_by_rank(model_metrics_matrix):
         models_distances_matrix = model_metrics_matrix.copy(deep=True).T
         metric_names = models_distances_matrix.columns
         for metric_name in metric_names:
@@ -220,7 +221,9 @@ class MetricsVisualizer:
 
         models_distances_matrix = models_distances_matrix.T
         sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+        return sorted_matrix_by_rank
 
+    def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models):
         matrix_width = num_models * 3
         matrix_height = model_metrics_matrix.shape[0] // 3
         plt.figure(figsize=(matrix_width, matrix_height))
@@ -265,7 +268,8 @@ class MetricsVisualizer:
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
-        return self.create_model_rank_heatmap(model_metrics_matrix, num_models)
+        sorted_matrix_by_rank = self.create_sorted_matrix_by_rank(model_metrics_matrix)
+        return self.create_model_rank_heatmap(model_metrics_matrix, sorted_matrix_by_rank, num_models)
 
     def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
         # Create a directory if it does not exist
