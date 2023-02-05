@@ -14,8 +14,8 @@ NAME = 'virny'
 DESCRIPTION = "Python library for auditing model stability and fairness"
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
 URL = "https://github.com/DataResponsibly/Virny"
-EMAILS = "herasymuk@ucu.edu.ua and fa2161@nyu.edu"
-AUTHORS = "Denys Herasymuk and Falaah Arif Khan"
+EMAILS = "denis.gerasymuk799@gmail.com"
+AUTHORS = "Denys Herasymuk"
 
 # The directory containing this file
 HERE = os.getcwd()
@@ -28,7 +28,6 @@ about: dict = {}
 with open(os.path.join(HERE, NAME, "__version__.py")) as f:
     exec(f.read(), about)
 
-# TODO: clean requirements later
 with pathlib.Path('requirements.txt').open() as requirements_txt:
     base_packages = [
         str(requirement)
