@@ -1,0 +1,57 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - development
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-virny:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [3.8, 3.9]
+        os: [ubuntu-latest, macos-latest]
+
+    uses: ./.github/workflows/build-virny.yml
+    with:
+      python: ${{ matrix.python }}
+      os: ${{ matrix.os }}
+
+  unit-tests:
+    needs: build-virny
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [3.8, 3.9]
+        os: [ubuntu-latest, macos-latest]
+
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      python: ${{ matrix.python }}
+      os: ${{ matrix.os }}
+
+  branch-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - uses: actions/cache@v2
+        with:
+          key: ${{ github.ref }}
+          path: .cache
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install wheel
+          pip install -e ".[docs]"
+
+      - name: Deploy docs
+        run: mkdocs gh-deploy --force
