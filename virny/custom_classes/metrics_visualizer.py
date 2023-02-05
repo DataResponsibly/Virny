@@ -91,7 +91,17 @@ class MetricsVisualizer:
         This bar chart includes all defined models and all overall subgroup bias and variance metrics,
         which are averaged across multiple runs. Using it, you can compare all models for each subgroup bias or variance metric.
         This comparison also includes reversed metrics, in which values closer to zero are better
-        since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better
+        since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
+
+        Parameters
+        ----------
+        metrics_names
+            List of subgroup metric names to visualize that have a scale from 0 to 1 where closer to 1 is better
+        reversed_metrics_names
+            List of subgroup metric names to visualize that have a scale from 0 to 1 where closer to 0 is better
+        metrics_title
+            Title to input metrics (both metrics_names and reversed_metrics_names) to display on the plot
+
         """
         if reversed_metrics_names is None:
             reversed_metrics_names = []
@@ -142,6 +152,12 @@ class MetricsVisualizer:
         This boxes and whiskers plot is based on overall subgroup bias and variance metrics for all defined models
         and results after all runs. Using it, you can see combined information on one plot that includes different models,
          subgroup metrics, and results after multiple runs.
+
+        Parameters
+        ----------
+        metrics_lst
+            List of subgroup metric names to visualize
+
         """
         to_plot = self.all_models_metrics_df[self.all_models_metrics_df['Metric'].isin(metrics_lst)]
 
@@ -249,7 +265,7 @@ class MetricsVisualizer:
         sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
         return sorted_matrix_by_rank
 
-    def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models):
+    def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
         """
         This heatmap includes all group bias and variance metrics and all defined models.
         Using it, you can visually compare all models across all group metrics. On this plot,
@@ -259,6 +275,16 @@ class MetricsVisualizer:
         1) if the metric is created based on the difference operation, closer values to zero have ranks that are closer to the first rank
 
         2) if the metric is created based on the ratio operation, closer values to one have ranks that are closer to the first rank
+
+        Parameters
+        ----------
+        model_metrics_matrix
+            Matrix of model metrics values where indexes are group metric names and columns are model names
+        sorted_matrix_by_rank
+            Matrix of model ranks per metric where indexes are group metric names and columns are model names
+        num_models
+            Number of models to visualize
+
         """
         matrix_width = num_models * 3
         matrix_height = model_metrics_matrix.shape[0] // 3
@@ -290,6 +316,14 @@ class MetricsVisualizer:
         On this plot, colors display sums of ranks for one model. If the sum is smaller,
         the model has better bias or variance characteristics than other models.
         Using this plot, you can visually compare all models for bias and variance characteristics.
+
+        Parameters
+        ----------
+        sorted_matrix_by_rank
+            Matrix of model ranks per metric where indexes are group metric names and columns are model names
+        num_models
+            Number of models to visualize
+
         """
         total_model_ranks = dict()
         matrix_bias_metrics = [metric_name for metric_name in sorted_matrix_by_rank[self.model_names[0]].index
@@ -318,9 +352,17 @@ class MetricsVisualizer:
 
         ax.set_title('Total Ranks Sum For Group Statistical Bias and Variance Metrics', fontsize=15)
 
-    def create_model_rank_heatmaps(self, metrics_lst, groups_lst):
+    def create_model_rank_heatmaps(self, metrics_lst: list, groups_lst):
         """
-        Create model rank and total model rank heatmaps
+        Create model rank and total model rank heatmaps.
+
+        Parameters
+        ----------
+        metrics_lst
+            List of group metric names to visualize
+        groups_lst
+            List of sensitive attributes
+
         """
         results = {}
         num_models = len(self.model_names)

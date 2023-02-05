@@ -46,6 +46,15 @@ Class to create useful visualizations of models metrics.
     
 ???- note "create_html_report"
 
+    Create Statistical Bias and Variance Report depending on report type. It includes visualizations and helpful details to them.
+
+    **Parameters**
+
+    - **report_type**     (*virny.configs.constants.ReportType*)    
+    - **dataset_name**     (*str*)    
+        Name of a dataset that was included in metric filenames and was used for the metrics computation
+    - **report_save_path**     (*str*)    
+    
 ???- note "create_model_rank_heatmap"
 
     This heatmap includes all group bias and variance metrics and all defined models. Using it, you can visually compare all models across all group metrics. On this plot, colors display ranks where 1 is the best model for the metric. These ranks are conditioned on difference or ratio operations used to create these group metrics:
@@ -79,8 +88,6 @@ Class to create useful visualizations of models metrics.
     - **reversed_metrics_names**     (*list*)     – defaults to `None`    
     - **metrics_title**     (*str*)     – defaults to `Overall Metrics`    
     
-???- note "create_sorted_matrix_by_rank"
-
 ???- note "create_total_model_rank_heatmap"
 
     This heatmap includes all defined models and sums of their bias and variance ranks. On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better bias or variance characteristics than other models. Using this plot, you can visually compare all models for bias and variance characteristics.
