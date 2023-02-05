@@ -240,7 +240,6 @@ with open(config_yaml_path, 'w', encoding='utf-8') as f:
 
 ```python
 config = create_config_obj(config_yaml_path=config_yaml_path)
-# TODO: delete 'results' before this notebook execution
 SAVE_RESULTS_DIR_PATH = os.path.join(ROOT_DIR, 'results',
                                      f'{config.dataset_name}_Metrics_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}')
 ```

@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 
 from virny.configs.constants import ReportType
 
-# TODO: complete documentation when finish this class
 
 class MetricsVisualizer:
     """
@@ -18,11 +17,11 @@ class MetricsVisualizer:
     Parameters
     ----------
     models_metrics_dct
-        Dictionary where keys are model names and values are dataframes of subgroups metrics for each model
+        Dictionary where keys are model names and values are dataframes of subgroup metrics for each model
     models_composed_metrics_df
-        Dataframe of all models composed metrics
+        Dataframe of all model composed metrics
     dataset_name
-        Name of a dataset that was included in metrics filenames and was used for the metrics computation
+        Name of a dataset that was included in metric filenames and was used for the metrics computation
     model_names
         Metrics for what model names to visualize
     sensitive_attributes_dct
@@ -88,6 +87,12 @@ class MetricsVisualizer:
 
     def create_overall_metrics_bar_char(self, metrics_names: list, reversed_metrics_names: list = None,
                                         metrics_title: str = "Overall Metrics"):
+        """
+        This bar chart includes all defined models and all overall subgroup bias and variance metrics,
+        which are averaged across multiple runs. Using it, you can compare all models for each subgroup bias or variance metric.
+        This comparison also includes reversed metrics, in which values closer to zero are better
+        since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better
+        """
         if reversed_metrics_names is None:
             reversed_metrics_names = []
         metrics_names = set(metrics_names + reversed_metrics_names)
@@ -134,7 +139,9 @@ class MetricsVisualizer:
 
     def create_boxes_and_whiskers_for_models_multiple_runs(self, metrics_lst: list):
         """
-        Create a boxes-and-whiskers plot for subgroup metrics after multiple runs
+        This boxes and whiskers plot is based on overall subgroup bias and variance metrics for all defined models
+        and results after all runs. Using it, you can see combined information on one plot that includes different models,
+         subgroup metrics, and results after multiple runs.
         """
         to_plot = self.all_models_metrics_df[self.all_models_metrics_df['Metric'].isin(metrics_lst)]
 
@@ -205,6 +212,12 @@ class MetricsVisualizer:
         return models_metrics_chart, select_metric_legend, color_legend
 
     def create_bias_variance_interactive_bar_chart(self):
+        """
+        This interactive bar chart includes all groups, all composed group bias and variance metrics,
+         and all defined models. Using it, you can select any pair of group bias and variance metrics and
+          compare them across all groups and models. Since this plot is interactive, it saves a lot of space for other plots.
+           Also, it could be more convenient to compare individual group bias and variance metrics using the interactive mode.
+        """
         models_bias_metrics_chart, select_bias_metric_legend, bias_color_legend = \
             self.create_models_metrics_bar_chart(self.bias_metrics_lst, metrics_group_name="Bias")
 
@@ -224,7 +237,7 @@ class MetricsVisualizer:
         )
 
     @staticmethod
-    def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
+    def _create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
         models_distances_matrix = model_metrics_matrix.copy(deep=True).T
         metric_names = models_distances_matrix.columns
         for metric_name in metric_names:
@@ -237,6 +250,16 @@ class MetricsVisualizer:
         return sorted_matrix_by_rank
 
     def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models):
+        """
+        This heatmap includes all group bias and variance metrics and all defined models.
+        Using it, you can visually compare all models across all group metrics. On this plot,
+        colors display ranks where 1 is the best model for the metric. These ranks are conditioned
+        on difference or ratio operations used to create these group metrics:
+
+        1) if the metric is created based on the difference operation, closer values to zero have ranks that are closer to the first rank
+
+        2) if the metric is created based on the ratio operation, closer values to one have ranks that are closer to the first rank
+        """
         matrix_width = num_models * 3
         matrix_height = model_metrics_matrix.shape[0] // 3
         plt.figure(figsize=(matrix_width, matrix_height))
@@ -262,6 +285,12 @@ class MetricsVisualizer:
         ax.set_title('Model Ranks Based On Group Statistical Bias and Variance Metrics', fontsize=20)
 
     def create_total_model_rank_heatmap(self, sorted_matrix_by_rank, num_models):
+        """
+        This heatmap includes all defined models and sums of their bias and variance ranks.
+        On this plot, colors display sums of ranks for one model. If the sum is smaller,
+        the model has better bias or variance characteristics than other models.
+        Using this plot, you can visually compare all models for bias and variance characteristics.
+        """
         total_model_ranks = dict()
         matrix_bias_metrics = [metric_name for metric_name in sorted_matrix_by_rank[self.model_names[0]].index
                                if metric_name[:metric_name.rfind('_')] in self.bias_metrics_lst]
@@ -290,6 +319,9 @@ class MetricsVisualizer:
         ax.set_title('Total Ranks Sum For Group Statistical Bias and Variance Metrics', fontsize=15)
 
     def create_model_rank_heatmaps(self, metrics_lst, groups_lst):
+        """
+        Create model rank and total model rank heatmaps
+        """
         results = {}
         num_models = len(self.model_names)
         for metric in metrics_lst:
@@ -311,13 +343,17 @@ class MetricsVisualizer:
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
-        sorted_matrix_by_rank = MetricsVisualizer.create_sorted_matrix_by_rank(model_metrics_matrix)
+        sorted_matrix_by_rank = MetricsVisualizer._create_sorted_matrix_by_rank(model_metrics_matrix)
         model_rank_heatmap = self.create_model_rank_heatmap(model_metrics_matrix, sorted_matrix_by_rank, num_models)
         total_model_rank_heatmap = self.create_total_model_rank_heatmap(sorted_matrix_by_rank, num_models)
         if self.__create_report:
             return model_rank_heatmap, total_model_rank_heatmap
 
     def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
+        """
+        Create Statistical Bias and Variance Report depending on report type.
+        It includes visualizations and helpful details to them.
+        """
         # Create a directory if it does not exist
         if not os.path.exists(report_save_path):
             os.makedirs(report_save_path, exist_ok=True)

@@ -12,7 +12,7 @@ Return a 1D numpy array of predictions, 2D array of each model prediction for y_
 
 - **uq_results**
 
-    2D array of prediction labels by each model
+    2D array of prediction proba for the zero value label by each model
 
 
 
