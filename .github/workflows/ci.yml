@@ -18,8 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [3.8]
-        os: [ubuntu-latest]
+        python: [3.8, 3.9]
+        os: [ubuntu-latest, macos-latest]
 
     uses: ./.github/workflows/build-virny.yml
     with:
@@ -31,8 +31,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [3.8]
-        os: [ubuntu-latest]
+        python: [3.8, 3.9]
+        os: [ubuntu-latest, macos-latest]
 
     uses: ./.github/workflows/unit-tests.yml
     with:
@@ -57,4 +57,5 @@ jobs:
           pip install wheel
           pip install -e ".[docs]"
 
-      - run: mkdocs gh-deploy --force
+      - name: Deploy docs
+        run: mkdocs gh-deploy --force

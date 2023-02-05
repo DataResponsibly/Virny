@@ -11,10 +11,9 @@ from os import path
 
 
 NAME = 'virny'
-DESCRIPTION = "Responsible AI Toolset in Python"
+DESCRIPTION = "Python library for auditing model stability and fairness"
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
-# TODO: change
-URL = "https://medium-multiply.readthedocs.io/"
+URL = "https://github.com/DataResponsibly/Virny"
 EMAILS = "herasymuk@ucu.edu.ua and fa2161@nyu.edu"
 AUTHORS = "Denys Herasymuk and Falaah Arif Khan"
 
@@ -65,8 +64,10 @@ setup(
                 + [
                     "pytest~=7.2.1",
                 ],
-        "docs": base_packages
-                + [
+        "docs": [
+                    "numpy>=1.23",
+                    "scipy",
+                    "pandas>=1.5",
                     "dominate",
                     "flask",
                     "ipykernel",
