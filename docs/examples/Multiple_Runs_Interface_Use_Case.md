@@ -1,6 +1,6 @@
 # Multiple Runs Interface Usage
 
-In this example, we are going to audit 4 models for stability and fairness, visualize metrics, and create an analysis report. To get better analysis accuracy, we will use `compute_metrics_multiple_runs` interface that will make multiple runs per model. For that, we will need to do next steps:
+In this example, we are going to audit 4 models for stability and fairness, visualize metrics, and create an analysis report. To get better analysis accuracy, we will use `compute_metrics_multiple_runs` interface that will make multiple runs per model. For that, we will need to do the next steps:
 
 * Initialize input variables
 
@@ -44,6 +44,7 @@ Based on the library flow, we need to create 3 input objects for a user interfac
 ### Create a Dataset class
 
 Based on the BaseDataset class, your **dataset class** should include the following attributes:
+
 * **Obligatory attributes**: dataset, target, features, numerical_columns, categorical_columns
 
 * **Optional attributes**: X_data, y_data, columns_with_nulls
@@ -440,12 +441,6 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
 ## Group Metrics Composition
 
 **Metrics Composer** is responsible for this second stage of the model audit. Currently, it computes our custom group statistical bias and variance metrics, but extending it for new group metrics is very simple. We noticed that more and more group metrics have appeared during the last decade, but most of them are based on the same subgroup metrics. Hence, such a separation of subgroup and group metrics computation allows one to experiment with different combinations of subgroup metrics and avoid subgroup metrics recomputation for a new set of grouped metrics.
-
-
-```python
-SAVE_RESULTS_DIR_PATH = os.path.join(ROOT_DIR, 'results',
-                                     'COMPAS_Without_Sensitive_Attributes_Metrics_20230201__201309')
-```
 
 
 ```python

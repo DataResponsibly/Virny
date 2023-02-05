@@ -1,6 +1,6 @@
-dataset_name: COMPAS_Without_Sensitive_Attributes
+
+dataset_name: Folktables_GA_2018
 test_set_fraction: 0.2
 bootstrap_fraction: 0.8
-n_estimators: 50  # Better to input higher number of estimators than 100; this is only for this use case example
-runs_seed_lst: [100, 200, 300, 400, 500]
-sensitive_attributes_dct: {'sex': 0, 'race': 'Caucasian', 'sex&race': None}
+n_estimators: 20  # Better to input the higher number of estimators than 100; this is only for this use case example
+sensitive_attributes_dct: {'SEX': '1', 'RAC1P': '1', 'SEX&RAC1P': None}
