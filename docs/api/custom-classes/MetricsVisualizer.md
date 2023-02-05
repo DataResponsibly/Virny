@@ -51,8 +51,6 @@ Class to create useful visualizations of models metrics.
     **Parameters**
 
     - **report_type**     (*virny.configs.constants.ReportType*)    
-    - **dataset_name**     (*str*)    
-        Name of a dataset that was included in metric filenames and was used for the metrics computation
     - **report_save_path**     (*str*)    
     
 ???- note "create_model_rank_heatmap"
