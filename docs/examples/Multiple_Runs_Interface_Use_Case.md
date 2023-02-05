@@ -93,7 +93,7 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataset):
 
 ```python
 dataset = CompasWithoutSensitiveAttrsDataset(dataset_path=os.path.join('virny', 'datasets', 'COMPAS.csv'))
-dataset.X_data[dataset.X_data.columns[:6]].head()
+dataset.X_data[dataset.X_data.columns[:5]].head()
 ```
 
 
@@ -196,7 +196,7 @@ config_yaml_content = \
 """dataset_name: COMPAS_Without_Sensitive_Attributes
 test_set_fraction: 0.2
 bootstrap_fraction: 0.8
-n_estimators: 10  # Better to input higher number of estimators than 100; this is only for this use case example
+n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
 runs_seed_lst: [100, 200, 300, 400, 500]
 sensitive_attributes_dct: {'sex': 0, 'race': 'Caucasian', 'sex&race': None}
 """
@@ -247,7 +247,7 @@ multiple_run_metrics_dct = compute_metrics_multiple_runs(dataset, config, models
 ```
 
 A lot of progress logs ...
-    
+
 
 
 Look at several columns in top rows of computed metrics
@@ -291,146 +291,182 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>0</th>
       <td>Mean</td>
-      <td>0.527167</td>
-      <td>0.565160</td>
-      <td>0.518345</td>
-      <td>0.591202</td>
-      <td>0.483697</td>
+      <td>0.525182</td>
+      <td>0.558977</td>
+      <td>0.517335</td>
+      <td>0.588704</td>
+      <td>0.482060</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Std</td>
-      <td>0.072034</td>
-      <td>0.080399</td>
-      <td>0.070091</td>
-      <td>0.071393</td>
-      <td>0.072469</td>
+      <td>0.071942</td>
+      <td>0.078615</td>
+      <td>0.070393</td>
+      <td>0.071601</td>
+      <td>0.072175</td>
     </tr>
     <tr>
       <th>2</th>
       <td>IQR</td>
-      <td>0.085493</td>
-      <td>0.093574</td>
-      <td>0.083616</td>
-      <td>0.089052</td>
-      <td>0.083076</td>
+      <td>0.089570</td>
+      <td>0.096166</td>
+      <td>0.088039</td>
+      <td>0.091559</td>
+      <td>0.088220</td>
     </tr>
     <tr>
       <th>3</th>
       <td>Entropy</td>
       <td>0.000000</td>
-      <td>0.214731</td>
       <td>0.000000</td>
       <td>0.000000</td>
-      <td>0.200901</td>
+      <td>0.000000</td>
+      <td>0.193735</td>
     </tr>
     <tr>
       <th>4</th>
       <td>Jitter</td>
-      <td>0.116760</td>
-      <td>0.136509</td>
-      <td>0.112175</td>
-      <td>0.106162</td>
-      <td>0.123955</td>
+      <td>0.116624</td>
+      <td>0.129681</td>
+      <td>0.113592</td>
+      <td>0.108870</td>
+      <td>0.121888</td>
     </tr>
     <tr>
       <th>5</th>
       <td>Per_Sample_Accuracy</td>
-      <td>0.666004</td>
-      <td>0.681206</td>
-      <td>0.662474</td>
-      <td>0.659742</td>
-      <td>0.670254</td>
+      <td>0.661913</td>
+      <td>0.681508</td>
+      <td>0.657363</td>
+      <td>0.662061</td>
+      <td>0.661812</td>
     </tr>
     <tr>
       <th>6</th>
       <td>Label_Stability</td>
-      <td>0.844621</td>
-      <td>0.811256</td>
-      <td>0.852369</td>
-      <td>0.854286</td>
-      <td>0.838060</td>
+      <td>0.843598</td>
+      <td>0.826131</td>
+      <td>0.847655</td>
+      <td>0.851710</td>
+      <td>0.838092</td>
     </tr>
     <tr>
       <th>7</th>
       <td>TPR</td>
-      <td>0.624230</td>
-      <td>0.557143</td>
-      <td>0.635492</td>
-      <td>0.459119</td>
-      <td>0.704268</td>
+      <td>0.632444</td>
+      <td>0.571429</td>
+      <td>0.642686</td>
+      <td>0.477987</td>
+      <td>0.707317</td>
     </tr>
     <tr>
       <th>8</th>
       <td>TNR</td>
-      <td>0.727592</td>
+      <td>0.725835</td>
       <td>0.751938</td>
-      <td>0.720455</td>
-      <td>0.794776</td>
+      <td>0.718182</td>
+      <td>0.791045</td>
       <td>0.667774</td>
     </tr>
     <tr>
       <th>9</th>
       <td>PPV</td>
-      <td>0.662309</td>
-      <td>0.549296</td>
-      <td>0.682990</td>
-      <td>0.570312</td>
-      <td>0.697885</td>
+      <td>0.663793</td>
+      <td>0.555556</td>
+      <td>0.683673</td>
+      <td>0.575758</td>
+      <td>0.698795</td>
     </tr>
     <tr>
       <th>10</th>
       <td>FNR</td>
-      <td>0.375770</td>
-      <td>0.442857</td>
-      <td>0.364508</td>
-      <td>0.540881</td>
-      <td>0.295732</td>
+      <td>0.367556</td>
+      <td>0.428571</td>
+      <td>0.357314</td>
+      <td>0.522013</td>
+      <td>0.292683</td>
     </tr>
     <tr>
       <th>11</th>
       <td>FPR</td>
-      <td>0.272408</td>
+      <td>0.274165</td>
       <td>0.248062</td>
-      <td>0.279545</td>
-      <td>0.205224</td>
+      <td>0.281818</td>
+      <td>0.208955</td>
       <td>0.332226</td>
     </tr>
     <tr>
       <th>12</th>
       <td>Accuracy</td>
-      <td>0.679924</td>
-      <td>0.683417</td>
-      <td>0.679113</td>
-      <td>0.669789</td>
-      <td>0.686804</td>
+      <td>0.682765</td>
+      <td>0.688442</td>
+      <td>0.681447</td>
+      <td>0.674473</td>
+      <td>0.688394</td>
     </tr>
     <tr>
       <th>13</th>
       <td>F1</td>
-      <td>0.642706</td>
-      <td>0.553191</td>
-      <td>0.658385</td>
-      <td>0.508711</td>
-      <td>0.701062</td>
+      <td>0.647739</td>
+      <td>0.563380</td>
+      <td>0.662546</td>
+      <td>0.522337</td>
+      <td>0.703030</td>
     </tr>
     <tr>
       <th>14</th>
       <td>Selection-Rate</td>
-      <td>0.434659</td>
-      <td>0.356784</td>
-      <td>0.452742</td>
-      <td>0.299766</td>
-      <td>0.526232</td>
+      <td>0.439394</td>
+      <td>0.361809</td>
+      <td>0.457410</td>
+      <td>0.309133</td>
+      <td>0.527822</td>
     </tr>
     <tr>
       <th>15</th>
       <td>Positive-Rate</td>
-      <td>0.942505</td>
-      <td>1.014286</td>
-      <td>0.930456</td>
-      <td>0.805031</td>
-      <td>1.009146</td>
+      <td>0.952772</td>
+      <td>1.028571</td>
+      <td>0.940048</td>
+      <td>0.830189</td>
+      <td>1.012195</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>Mean</td>
+      <td>0.524371</td>
+      <td>0.560791</td>
+      <td>0.515861</td>
+      <td>0.591471</td>
+      <td>0.481953</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Std</td>
+      <td>0.069567</td>
+      <td>0.077170</td>
+      <td>0.067791</td>
+      <td>0.070342</td>
+      <td>0.069077</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>IQR</td>
+      <td>0.085142</td>
+      <td>0.092375</td>
+      <td>0.083452</td>
+      <td>0.087349</td>
+      <td>0.083748</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Entropy</td>
+      <td>0.000000</td>
+      <td>0.222123</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
     </tr>
   </tbody>
 </table>
@@ -477,7 +513,7 @@ visualizer.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std'
 
 
     
-![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_35_0.png)
+![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_34_0.png)
     
 
 
@@ -493,13 +529,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-f3df63a3a5d44609b4ab04f1d46bb045"></div>
+<div id="altair-viz-cd6765fe259844c4ae70e3afd8c6920b"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-f3df63a3a5d44609b4ab04f1d46bb045") {
-      outputDiv = document.getElementById("altair-viz-f3df63a3a5d44609b4ab04f1d46bb045");
+    if (outputDiv.id !== "altair-viz-cd6765fe259844c4ae70e3afd8c6920b") {
+      outputDiv = document.getElementById("altair-viz-cd6765fe259844c4ae70e3afd8c6920b");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -545,7 +581,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-8b2bdb023d8fca0979f61be2f38e75eb"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Bias Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-8b2bdb023d8fca0979f61be2f38e75eb": [{"overall": 0.674084595959596, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6435550166155557, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6529719031239843, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9721573590272031, "metric": "Positive-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.450915404040404, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6345999495009255, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6567234848484849, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6170344375083968, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.6506213855707094, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.9028583058823468, "metric": "Positive-Rate", "model_name": "LogisticRegression"}, {"overall": 0.42534722222222215, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.5870238551632988, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.6661931818181818, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6208774427479112, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6751784688939569, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.8548724381591111, "metric": "Positive-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.4064078282828283, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.5758959417228052, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.6751893939393939, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6454244674160758, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.6713543111407899, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.9256632515911104, "metric": "Positive-Rate", "model_name": "XGBClassifier"}, {"overall": 0.440340909090909, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.6214890924790984, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-fd7b2ee95de43239fadf41b8dcaf5e01"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Bias Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-fd7b2ee95de43239fadf41b8dcaf5e01": [{"overall": 0.6801136363636363, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6504402880373518, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6627372557361907, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9644934963129117, "metric": "Positive-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4492424242424242, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6388269611776994, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6600378787878788, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6199889298320485, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.653641138239119, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.9033205755153567, "metric": "Positive-Rate", "model_name": "LogisticRegression"}, {"overall": 0.4246212121212121, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.5899478361231674, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.6676136363636364, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6251645861816336, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6827393347950576, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.8496145297124584, "metric": "Positive-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.40738636363636366, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.5779741009599183, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.675, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6472314731167365, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.6713400255768536, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.9309059679873537, "metric": "Positive-Rate", "model_name": "XGBClassifier"}, {"overall": 0.4441287878787879, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.6248878586439098, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 
@@ -563,13 +599,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-951dbf4d2e594a658bbd5e40eda9a157"></div>
+<div id="altair-viz-da6526e6fc604e92b32e6629a0c90200"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-951dbf4d2e594a658bbd5e40eda9a157") {
-      outputDiv = document.getElementById("altair-viz-951dbf4d2e594a658bbd5e40eda9a157");
+    if (outputDiv.id !== "altair-viz-da6526e6fc604e92b32e6629a0c90200") {
+      outputDiv = document.getElementById("altair-viz-da6526e6fc604e92b32e6629a0c90200");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -615,14 +651,9 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-2c208a06270adac5a8a6012bdb1de427"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Variance Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-2c208a06270adac5a8a6012bdb1de427": [{"overall": 0.9100717313399418, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8817908568003267, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8429450757575757, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9266480172156538, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9719186499060426, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.952948646821753, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9352809343434343, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9790568575451921, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.9465250781056644, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.9378378481787573, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9157828282828282, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9601314257008164, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.9375073259550551, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.900761593204775, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.8600315656565657, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.9528647201756637, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-bfeaedb2591c451cc64e705317b3cfd3"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Variance Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-bfeaedb2591c451cc64e705317b3cfd3": [{"overall": 0.9129468994841241, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8792411873840446, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8411060606060605, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.926668761176367, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9723001277107443, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.9548531230674089, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9378484848484849, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9792936156402017, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.9480487270117715, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.9355575139146568, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9119696969696969, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9606283310736627, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.9385613391147645, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.9057578849721707, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.8686969696969697, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.9529354810714722, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
-
-
-Below is an example of an interactive plot. It requires that you run the below cell in Jupyter in the browser.
-
-You can use this plot to compare any pair of bias and variance metrics for all models.
 
 
 
@@ -636,7 +667,7 @@ visualizer.create_model_rank_heatmaps(
         'Statistical_Parity_Difference',
         'Accuracy_Parity',
         # Group variance metrics
-        'Label_Stability_Impact',
+        'Label_Stability_Ratio',
         'IQR_Parity',
         'Std_Parity',
         'Std_Ratio',
@@ -648,17 +679,17 @@ visualizer.create_model_rank_heatmaps(
 
 
     
-![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_40_0.png)
+![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_37_0.png)
     
 
 
 
     
-![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_40_1.png)
+![png](Multiple_Runs_Interface_Use_Case_files/Multiple_Runs_Interface_Use_Case_37_1.png)
     
 
 
-Create an analysis report. It includes correspondent visualizations and explanations for your result metrics.
+Create an analysis report. It includes correspondent visualizations and details about your result metrics.
 
 
 ```python
@@ -667,4 +698,10 @@ visualizer.create_html_report(report_type=ReportType.MULTIPLE_RUNS_MULTIPLE_MODE
 ```
 
 
-App saved to ./docs/examples/results/reports/COMPAS_Without_Sensitive_Attributes_Metrics_Report_20230205__151716.html
+App saved to ./docs/examples/results/reports/COMPAS_Without_Sensitive_Attributes_Metrics_Report_20230205__171832.html
+
+
+
+```python
+
+```
