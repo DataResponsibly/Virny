@@ -24,6 +24,18 @@
     width: 10rem;
 }
 
+.md-grid {
+    max-width: 70rem;
+}
+
+.md-content {
+    width: 42rem;
+}
+
+.md-content__inner {
+    width: 40rem;
+}
+
 .md-typeset h2 {
   margin: 1.5em 0;
   padding-bottom: 0.4rem;

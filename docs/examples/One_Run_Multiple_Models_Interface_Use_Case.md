@@ -708,8 +708,3 @@ visualizer.create_html_report(report_type=ReportType.ONE_RUN_MULTIPLE_MODELS,
 
 App saved to ./docs/examples/results/reports/Folktables_GA_2018_Metrics_Report_20230205__165240.html
 
-
-
-```python
-
-```

@@ -715,9 +715,3 @@ visualizer.create_overall_metrics_bar_char(
   })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-2bdca5438465147db1f00c21f79ff68c"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Variance Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-2bdca5438465147db1f00c21f79ff68c": [{"overall": 0.8825543491634812, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8405827211509027, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.7785227272727273, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9060266424497246, "metric": "Std", "model_name": "DecisionTreeClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
-
-
-
-```python
-
-```

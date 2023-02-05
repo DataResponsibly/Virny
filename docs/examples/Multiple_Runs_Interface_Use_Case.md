@@ -700,8 +700,3 @@ visualizer.create_html_report(report_type=ReportType.MULTIPLE_RUNS_MULTIPLE_MODE
 
 App saved to ./docs/examples/results/reports/COMPAS_Without_Sensitive_Attributes_Metrics_Report_20230205__171832.html
 
-
-
-```python
-
-```
