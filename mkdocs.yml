@@ -3,7 +3,7 @@ site_name: Virny
 site_description: Responsible AI Toolset in Python
 
 # Repository
-repo_name: virny
+repo_name: DataResponsibly/virny
 repo_url: https://github.com/DataResponsibly/Virny
 edit_uri: ""
 
