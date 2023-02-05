@@ -1,12 +1,32 @@
 name: ci
+
 on:
   push:
     branches:
+      - main
+
+  pull_request:
+    branches:
       - development
       - main
+
 permissions:
   contents: write
+
 jobs:
+
+  unit-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [3.8, 3.9]
+        os: [ubuntu-latest, macos-latest]
+
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      python: ${{ matrix.python }}
+      os: ${{ matrix.os }}
+
   deploy:
     runs-on: ubuntu-latest
     steps:

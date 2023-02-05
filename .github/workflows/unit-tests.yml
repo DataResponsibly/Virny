@@ -1,0 +1,21 @@
+name: unit-tests
+
+on:
+  workflow_call:
+    inputs:
+      python:
+        type: string
+      os:
+        type: string
+
+jobs:
+  test:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: pytest [Branch]
+        run: |
+          source ~/.venv/bin/activate
+          pytest --durations=10 -n logical # Run pytest on all logical CPU cores

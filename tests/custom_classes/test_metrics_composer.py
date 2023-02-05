@@ -30,7 +30,7 @@ def test_compose_metrics_true1(models_metrics_dct, config_params):
 
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact',
-                                                                                     'Statistical_Parity_Impact', 'Accuracy_Parity', 'Label_Stability_Ratio',
+                                                                                     'Statistical_Parity_Difference', 'Accuracy_Parity', 'Label_Stability_Ratio',
                                                                                      'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity'])
 
 
@@ -49,5 +49,5 @@ def test_compose_metrics_true2(models_metrics_dct, config_params):
 
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact',
-                                                                                     'Statistical_Parity_Impact', 'Accuracy_Parity', 'Label_Stability_Ratio',
+                                                                                     'Statistical_Parity_Difference', 'Accuracy_Parity', 'Label_Stability_Ratio',
                                                                                      'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity'])
