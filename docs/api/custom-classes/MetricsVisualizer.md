@@ -65,22 +65,22 @@ Class to create useful visualizations of models metrics.
 
     - **model_metrics_matrix**    
     - **sorted_matrix_by_rank**    
-    - **num_models**    
+    - **num_models**     (*int*)    
     
 ???- note "create_model_rank_heatmaps"
 
-    Create model rank and total model rank heatmaps
+    Create model rank and total model rank heatmaps.
 
     **Parameters**
 
-    - **metrics_lst**    
+    - **metrics_lst**     (*list*)    
     - **groups_lst**    
     
 ???- note "create_models_metrics_bar_chart"
 
 ???- note "create_overall_metrics_bar_char"
 
-    This bar chart includes all defined models and all overall subgroup bias and variance metrics, which are averaged across multiple runs. Using it, you can compare all models for each subgroup bias or variance metric. This comparison also includes reversed metrics, in which values closer to zero are better since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better
+    This bar chart includes all defined models and all overall subgroup bias and variance metrics, which are averaged across multiple runs. Using it, you can compare all models for each subgroup bias or variance metric. This comparison also includes reversed metrics, in which values closer to zero are better since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
 
     **Parameters**
 

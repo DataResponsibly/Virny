@@ -46,7 +46,7 @@ class MetricsVisualizer:
         ]
         self.variance_metrics_lst = [
             'IQR_Parity',
-            'Label_Stability_Impact',
+            'Label_Stability_Ratio',
             'Std_Parity',
             'Std_Ratio',
             'Jitter_Parity',
@@ -391,7 +391,7 @@ class MetricsVisualizer:
         if self.__create_report:
             return model_rank_heatmap, total_model_rank_heatmap
 
-    def create_html_report(self, report_type: ReportType, dataset_name: str, report_save_path: str):
+    def create_html_report(self, report_type: ReportType, report_save_path: str):
         """
         Create Statistical Bias and Variance Report depending on report type.
         It includes visualizations and helpful details to them.
@@ -471,7 +471,7 @@ class MetricsVisualizer:
             "* You can find the best or most balanced model based on bias or variance metrics\n"
         )
 
-        report_filename = f'{dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
+        report_filename = f'{self.dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
         if report_type == ReportType.MULTIPLE_RUNS_MULTIPLE_MODELS:
             boxes_and_whiskers_plot = self.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std', 'IQR', 'Jitter', 'FNR','FPR'])
 

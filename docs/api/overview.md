@@ -19,7 +19,7 @@ The purpose of an analyzer is to analyse defined metrics for defined subgroups.
 ## configs
 
 
-Configs amd constants for the source code logic
+Configs amd constants for the source code logic.
 
 
 

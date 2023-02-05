@@ -799,7 +799,7 @@ visualizer.create_model_rank_heatmaps(
         'Statistical_Parity_Difference',
         'Accuracy_Parity',
         # Group variance metrics
-        'Label_Stability_Impact',
+        'Label_Stability_Ratio',
         'IQR_Parity',
         'Std_Parity',
         'Std_Ratio',
