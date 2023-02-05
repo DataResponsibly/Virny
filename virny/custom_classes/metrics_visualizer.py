@@ -348,53 +348,49 @@ class MetricsVisualizer:
             f"* __Sensitive attributes__: {list(self.sensitive_attributes_dct.keys())}\n"
         )
         composed_metrics_desc = dp.Text(
-            "The below you can find a dataframe of composed metrics for all defined models and sensitive attributes.\n"
+            "Below you can find a dataframe of composed group metrics for all defined models and sensitive attributes.\n"
         )
         boxes_and_whiskers_plot_desc = dp.Text(
-            "The below boxes and whiskers plot is based on subgroup bias and variance metrics for all defined models and all runs results.\n"
+            "The below boxes and whiskers plot is based on _overall_ subgroup bias and variance metrics for all defined models and results after all runs.\n"
             "This plot can give you the following benefits:\n"
-            "* you can combine all information on one plot that includes different models, subgroup metrics, and results after multiple runs\n"
-            "* you can see all quartiles for each model metric based on multiple runs\n"
-            "* you can compare different models for each metric\n"
-            "* you can see the variance of each model metric\n"
+            "* You can see combined information on one plot that includes different models, subgroup metrics, and results after multiple runs\n"
+            "* You can see all quartiles for each model metric based on multiple runs\n"
+            "* You can compare different models for each metric\n"
+            "* You can see the variance of each model metric\n"
         )
-        overall_bias_metrics_desc = dp.Text(
-            "The below bar chart includes all subgroup bias metrics, which are averaged across multiple runs, and all defined models.\n"
+        overall_metrics_desc = dp.Text(
+            "The below bar chart includes all defined models and all _overall_ subgroup bias and variance metrics, which are averaged across multiple runs.\n"
             "This plot can give you the following benefits:\n"
-            "* you can compare all models for each subgroup bias metric\n"
-            "* this comparison also includes reversed metrics, for which values closer to zero are better, "
-            "since in this plot straight and reversed metrics are converted to the same format -- values closer to one is better\n"
-        )
-        overall_variance_metrics_desc = dp.Text(
-            "The below bar chart includes all subgroup variance metrics, which are averaged across multiple runs, and all defined models.\n"
-            "This plot can give you the following benefits:\n"
-            "* you can compare all models for each subgroup variance metric\n"
-            "* this comparison also includes reversed metrics, for which values closer to zero are better, "
-            "since in this plot straight and reversed metrics are converted to the same format -- values closer to one is better\n"
+            "* You can compare all models for each subgroup bias or variance metric\n"
+            "* This comparison also includes reversed metrics, in which values closer to zero are better "
+            "since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better\n"
         )
         individual_metrics_interactive_bar_chart_desc = dp.Text(
             "The below interactive bar chart includes all groups, all composed group bias and variance metrics, "
             "and all defined models.\n"
             "This plot can give you the following benefits:\n"
-            "* you can select any pair of group bias and variance metrics and compare them across all groups and models\n"
-            "* this plot is interactive, therefore it saves a lot of space for other plots. "
+            "* You can select any pair of group bias and variance metrics and compare them across all groups and models\n"
+            "* Since this plot is interactive, it saves a lot of space for other plots. "
             "Also, it could be more convenient to compare individual group bias and variance metrics using the interactive mode\n"
         )
         model_ranked_heatmap_desc = dp.Text(
-            "The below heatmap includes all group bias and variance metrics for each group and all defined models.\n"
-            "On this plot, colors display ranks where 1 is the best metric. These ranks are conditions for group metrics created based on difference or ratio:\n"
-            "* if the metric is created based on the difference operation, closer values to zero have ranks, which are closer to the first rank\n"
-            "* if the metric is created based on the ratio operation, closer values to one have ranks, which are closer to the first rank\n\n"
+            "The below heatmap includes all group bias and variance metrics and all defined models.\n"
+            "On this plot, colors display ranks where 1 is the best model for the metric. "
+            "These ranks are conditioned on difference or ratio operations used to create these group metrics:\n"
+            "* If the metric is created based on the difference operation, **closer values to zero** have ranks that are closer to the first rank\n"
+            "* If the metric is created based on the ratio operation, **closer values to one** have ranks that are closer to the first rank\n\n"
             "This plot can give you the following benefits:\n"
-            "* you can visually compare all models across all group metrics\n"
-            "* you can find best and worst models for each group metric\n"
+            "* You can visually compare all models across all group metrics\n"
+            "* You can visually understand where one model is better or worse than other models\n"
+            "* You can find the best and worst models for each group metric\n"
         )
         overall_model_ranked_heatmap_desc = dp.Text(
             "The below heatmap includes all defined models and sums of their bias and variance ranks.\n"
             "On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better bias or variance characteristics than other models.\n"
             "This plot can give you the following benefits:\n"
-            "* you can visually compare all models for bias and variance characteristics\n"
-            "* you can find the best or most balanced model based on bias or variance metrics\n"
+            "* You can visually compare all models for bias and variance characteristics\n"
+            "* You can visually understand where one model is better or worse than other models\n"
+            "* You can find the best or most balanced model based on bias or variance metrics\n"
         )
 
         report_filename = f'{dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
@@ -404,20 +400,17 @@ class MetricsVisualizer:
             dp.Report("# Statistical Bias and Variance Report",
                       general_desc,
 
-                      "## Models Composed Metrics",
+                      "## Model Composed Metrics",
                       composed_metrics_desc,
                       dp.DataTable(self.models_composed_metrics_df),
 
-                      "## Boxes and Whiskers Plot for Multiple Models Runs",
+                      "## Boxes and Whiskers Plot Based On Multiple Models Runs",
                       boxes_and_whiskers_plot_desc,
                       dp.Plot(boxes_and_whiskers_plot),
 
-                      "## Bias Overall Metrics Models Comparison",
-                      overall_bias_metrics_desc,
+                      "## Overall Bias and Variance Model Metrics Comparison",
+                      overall_metrics_desc,
                       dp.Plot(bias_overall_metrics_bar_chart, responsive=False),
-
-                      "## Variance Overall Metrics Models Comparison",
-                      overall_variance_metrics_desc,
                       dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
 
                       "## Bias and Variance Interactive Bar Chart",
@@ -436,21 +429,18 @@ class MetricsVisualizer:
             dp.Report("# Statistical Bias and Variance Report",
                       general_desc,
 
-                      "## Models Composed Metrics",
+                      "## Model Composed Metrics",
                       composed_metrics_desc,
                       dp.DataTable(self.models_composed_metrics_df),
 
-                      "## Bias and Variance Interactive Bar Chart",
-                      boxes_and_whiskers_plot_desc,
-                      dp.Plot(interactive_bar_chart),
-
-                      "## Bias Overall Metrics Models Comparison",
-                      overall_bias_metrics_desc,
+                      "## Overall Bias and Variance Model Metrics Comparison",
+                      overall_metrics_desc,
                       dp.Plot(bias_overall_metrics_bar_chart, responsive=False),
-
-                      "## Variance Overall Metrics Models Comparison",
-                      overall_variance_metrics_desc,
                       dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
+
+                      "## Bias and Variance Interactive Bar Chart",
+                      individual_metrics_interactive_bar_chart_desc,
+                      dp.Plot(interactive_bar_chart),
 
                       "## Model Ranks Based On Group Statistical Bias and Variance Metrics",
                       model_ranked_heatmap_desc,
