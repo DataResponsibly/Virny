@@ -76,7 +76,7 @@ This section briefly explains the main terminology used in our library.
 
 ## Installation 🛠
 
-Virny supports **Python 3.8** and can be installed with `pip`:
+Virny supports **Python 3.8, 3.9** and can be installed with `pip`:
 
 ```bash
 pip install virny
