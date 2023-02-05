@@ -36,6 +36,16 @@ that are highly  customizable for future library features.
 - [MetricsComposer](../custom-classes/MetricsComposer)
 - [MetricsVisualizer](../custom-classes/MetricsVisualizer)
 
+## datasets
+
+
+This module contains sample datasets and data loaders.
+The purpose is to provide sample datasets for functionality testing and show examples of data loaders (aka dataset classes).
+
+
+- [CompasDataset](../datasets/CompasDataset)
+- [CompasWithoutSensitiveAttrsDataset](../datasets/CompasWithoutSensitiveAttrsDataset)
+
 ## metrics
 
 

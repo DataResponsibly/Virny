@@ -3,6 +3,7 @@
 from . import (
     analyzers,
     custom_classes,
+    datasets,
     metrics,
     preprocessing,
     user_interfaces,
@@ -12,6 +13,7 @@ from . import (
 __all__ = [
     "analyzers",
     "custom_classes",
+    "datasets",
     "metrics",
     "preprocessing",
     "user_interfaces",
