@@ -15,7 +15,7 @@
   </a>
   <!-- License -->
   <a href="https://opensource.org/licenses/BSD-3-Clause">
-    <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square" alt="bsd_3_license">
+    <img src="https://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_(%22BSD_License_2.0%22,_%22Revised_BSD_License%22,_%22New_BSD_License%22,_or_%22Modified_BSD_License%22)" alt="bsd_3_license">
   </a>
   <!-- Code Size -->
   <a href="">
