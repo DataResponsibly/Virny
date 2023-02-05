@@ -16,10 +16,10 @@ theme:
   custom_dir: docs/overrides
   language: en
   palette:
-    primary: indigo
-    accent: indigo
+    primary: deep purple
+    accent: deep purple
   font:
-    text: Rubik
+    text: Open Sans
     code: Roboto Mono
   features:
     - navigation.tabs
