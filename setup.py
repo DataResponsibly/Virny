@@ -75,6 +75,7 @@ setup(
                     "mkdocs",
                     "mkdocs-awesome-pages-plugin",
                     "mkdocs-material",
+                    "mkdocs-redirects",
                     "nbconvert",
                     "python-slugify",
                     "spacy",

@@ -54,6 +54,9 @@ plugins:
   - search
   - awesome-pages
   - mike
+  - redirects:
+      redirect_maps:
+        index.md: introduction/welcome_to_virny.md
 
 extra_javascript:
   - javascripts/config.js
