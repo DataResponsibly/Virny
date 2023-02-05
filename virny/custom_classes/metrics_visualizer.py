@@ -473,7 +473,9 @@ class MetricsVisualizer:
 
         report_filename = f'{self.dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
         if report_type == ReportType.MULTIPLE_RUNS_MULTIPLE_MODELS:
-            boxes_and_whiskers_plot = self.create_boxes_and_whiskers_for_models_multiple_runs(metrics_lst=['Std', 'IQR', 'Jitter', 'FNR','FPR'])
+            boxes_and_whiskers_plot = self.create_boxes_and_whiskers_for_models_multiple_runs(
+                metrics_lst=['Std', 'IQR', 'Jitter', 'Label_Stability', 'Accuracy', 'TPR', 'TNR', 'FPR', 'FNR']
+            )
 
             dp.Report("# Statistical Bias and Variance Report",
                       general_desc,
