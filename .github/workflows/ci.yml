@@ -14,13 +14,25 @@ permissions:
   contents: write
 
 jobs:
-
-  unit-tests:
+  build-virny:
     strategy:
       fail-fast: false
       matrix:
-        python: [3.8, 3.9]
-        os: [ubuntu-latest, macos-latest]
+        python: [3.8]
+        os: [ubuntu-latest]
+
+    uses: ./.github/workflows/build-virny.yml
+    with:
+      python: ${{ matrix.python }}
+      os: ${{ matrix.os }}
+
+  unit-tests:
+    needs: build-virny
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [3.8]
+        os: [ubuntu-latest]
 
     uses: ./.github/workflows/unit-tests.yml
     with:
