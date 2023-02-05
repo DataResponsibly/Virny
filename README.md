@@ -63,7 +63,7 @@ For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.i
 * Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
 
 
-## Library Terminology 🔖
+## Library Terminology 📖
 
 This section briefly explains the main terminology used in our library.
 
