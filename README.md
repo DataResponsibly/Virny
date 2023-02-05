@@ -7,7 +7,7 @@
   </a>
   <!-- Documentation -->
   <a href="https://dataresponsibly.github.io/Virny/">
-    <img src="https://img.shields.io/website?label=docs&style=flat-square&url=https%3A%2F%2Friverml.xyz%2F" alt="documentation">
+    <img src="https://img.shields.io/website?label=docs&style=flat-square&url=https://dataresponsibly.github.io/Virny/" alt="documentation">
   </a>
   <!-- PyPI -->
   <a href="https://pypi.org/project/virny">
