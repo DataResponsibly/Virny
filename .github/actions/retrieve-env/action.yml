@@ -1,0 +1,26 @@
+name: Create Environment
+description: Retrieves Python
+
+inputs:
+  python:
+    description: 'Python version'
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Retrieve the Python environment
+      uses: actions/cache/restore@v3
+      id: retrieve-venv
+      with:
+        path: ~/.venv
+        key: ${{ github.run_id }}-venv-${{ runner.os }}-${{ inputs.python }}
+        restore-keys: |
+          ${{ runner.os }}-${{ inputs.python }}-venv
+
+    - name: Retrieve Virny
+      uses: actions/cache/restore@v3
+      id: retrieve-virny
+      with:
+        path: ${{ github.workspace }}
+        key: virny-build-${{ github.run_id }}-${{ runner.os }}-${{ inputs.python }}

@@ -19,6 +19,10 @@ The purpose of an analyzer is to analyse defined metrics for defined subgroups.
 ## configs
 
 
+Configs amd constants for the source code logic.
+
+
+
 ## custom_classes
 
 
@@ -28,8 +32,6 @@ that are highly  customizable for future library features.
 
 
 - [BaseDataset](../custom-classes/BaseDataset)
-- [CompasDataset](../custom-classes/CompasDataset)
-- [CompasWithoutSensitiveAttrsDataset](../custom-classes/CompasWithoutSensitiveAttrsDataset)
 - [GenericPipeline](../custom-classes/GenericPipeline)
 - [MetricsComposer](../custom-classes/MetricsComposer)
 - [MetricsVisualizer](../custom-classes/MetricsVisualizer)

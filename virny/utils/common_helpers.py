@@ -18,21 +18,40 @@ def validate_config(config_obj):
     """
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
-    elif not isinstance(config_obj.test_set_fraction, float):
+
+    elif not isinstance(config_obj.test_set_fraction, float) \
+            or config_obj.test_set_fraction < 0.0 \
+            or config_obj.test_set_fraction > 1.0:
         raise ValueError('test_set_fraction must be float in [0.0, 1.0] range')
-    elif not isinstance(config_obj.bootstrap_fraction, float):
+
+    elif not isinstance(config_obj.bootstrap_fraction, float) \
+            or config_obj.bootstrap_fraction < 0.0 \
+            or config_obj.bootstrap_fraction > 1.0:
         raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
-    elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 0:
-        raise ValueError('n_estimators must be integer greater than 0')
+
+    elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
+        raise ValueError('n_estimators must be integer greater than 1')
+
     elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
         raise ValueError('runs_seed_lst must be python list')
+
     elif not isinstance(config_obj.sensitive_attributes_dct, dict):
         raise ValueError('sensitive_attributes_dct must be python dictionary')
+
     elif isinstance(config_obj.sensitive_attributes_dct, dict):
         for sensitive_attr in config_obj.sensitive_attributes_dct.keys():
             if sensitive_attr.count(INTERSECTION_SIGN) > 1:
                 raise ValueError('sensitive_attributes_dct must contain only plain sensitive attributes or '
                                  'intersections of two sensitive attributes (not more attributes intersections)')
+        intersectional_attrs = [attr for attr in config_obj.sensitive_attributes_dct.keys()
+                                if INTERSECTION_SIGN in attr]
+        for intersectional_attr in intersectional_attrs:
+            attr1, attr2 = intersectional_attr.split(INTERSECTION_SIGN)
+            if attr1 not in config_obj.sensitive_attributes_dct.keys() or \
+                attr2 not in config_obj.sensitive_attributes_dct.keys():
+                raise ValueError('intersectional attributes in sensitive_attributes_dct must contain '
+                                 'sensitive attributes that also exist in sensitive_attributes_dct')
+    return True
 
 
 def reset_model_seed(model, new_seed):
@@ -53,22 +72,22 @@ def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
 def partition_by_group_intersectional(df, attr1, attr2, priv_value1, priv_value2):
     priv = df[(df[attr1] == priv_value1) & (df[attr2] == priv_value2)]
     dis = df[(df[attr1] != priv_value1) & (df[attr2] != priv_value2)]
+
     return priv, dis
 
 
 def partition_by_group_binary(df, column_name, priv_value):
     priv = df[df[column_name] == priv_value]
     dis = df[df[column_name] != priv_value]
-    if len(priv)+len(dis) != len(df):
+    if len(priv) + len(dis) != len(df):
         raise ValueError("Error! Not a partition")
     return priv, dis
 
 
 def check_sensitive_attrs_in_columns(df_columns, sensitive_attributes_dct):
     for sensitive_attr in sensitive_attributes_dct.keys():
-        if sensitive_attr not in df_columns:
+        if INTERSECTION_SIGN not in sensitive_attr and sensitive_attr not in df_columns:
             return False
-
     return True
 
 
@@ -107,9 +126,23 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
                 groups[attr1 + INTERSECTION_SIGN + attr2 + '_priv'], groups[attr1 + INTERSECTION_SIGN + attr2 + '_dis'] = \
                     partition_by_group_intersectional(X_test_with_sensitive_attrs, attr1, attr2,
                                                       sensitive_attributes_dct[attr1], sensitive_attributes_dct[attr2])
+
+                if groups[attr1 + INTERSECTION_SIGN + attr2 + '_priv'].shape[0] == 0:
+                    raise ValueError(f"Protected group ({attr1 + INTERSECTION_SIGN + attr2 + '_priv'}) from X_test is empty. "
+                                     f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
+                if groups[attr1 + INTERSECTION_SIGN + attr2 + '_dis'].shape[0] == 0:
+                    raise ValueError(f"Protected group ({attr1 + INTERSECTION_SIGN + attr2 + '_dis'}) from X_test is empty. "
+                                     f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
         else:
             groups[attr + '_priv'], groups[attr + '_dis'] = \
                 partition_by_group_binary(X_test_with_sensitive_attrs, attr, sensitive_attributes_dct[attr])
+
+            if groups[attr + '_priv'].shape[0] == 0:
+                raise ValueError(f"Protected group ({attr + '_priv'}) from X_test is empty. "
+                                 f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
+            if groups[attr + '_dis'].shape[0] == 0:
+                raise ValueError(f"Protected group ({attr + '_dis'}) from X_test is empty. "
+                                 f"Please check types of sensitive attributes in config, or replace the sensitive attribute, or extend test_set_fraction")
 
     return groups
 

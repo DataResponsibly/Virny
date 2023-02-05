@@ -23,7 +23,8 @@ def count_prediction_stats(y_test, uq_results):
     y_test
         True labels
     uq_results
-        2D array of prediction labels by each model
+        2D array of prediction proba for the zero value label by each model
+
     """
     if isinstance(uq_results, np.ndarray):
         results = pd.DataFrame(uq_results)
@@ -32,8 +33,11 @@ def count_prediction_stats(y_test, uq_results):
 
     means_lst, stds_lst, iqr_lst = compute_std_mean_iqr_metrics(results)
 
-    # Convert predict proba results of each model to correspondent labels
+    # Convert predict proba results of each model to correspondent labels.
+    # Here we use int(x<0.5) since we use predict_probe()[:, 0] to make predictions.
+    # Hence, if value is for example, 0.3 --> label == 1, 0.6 -- > label == 0
     uq_labels = results.applymap(lambda x: int(x<0.5))
+
     entropy_lst = np.apply_along_axis(compute_entropy, 1, uq_labels.transpose().values)
     jitter = compute_jitter(uq_labels.values)
 

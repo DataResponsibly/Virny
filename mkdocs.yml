@@ -3,19 +3,23 @@ site_name: Virny
 site_description: Responsible AI Toolset in Python
 
 # Repository
-repo_name: virny
+repo_name: DataResponsibly/virny
 repo_url: https://github.com/DataResponsibly/Virny
 edit_uri: ""
 
+# Copyright
+copyright: Copyright &copy; 2023
+
+# Theme configuration
 theme:
   name: material
   custom_dir: docs/overrides
   language: en
   palette:
-    primary: indigo
-    accent: indigo
+    primary: deep purple
+    accent: deep purple
   font:
-    text: Rubik
+    text: Open Sans
     code: Roboto Mono
   features:
     - navigation.tabs
@@ -50,6 +54,9 @@ plugins:
   - search
   - awesome-pages
   - mike
+  - redirects:
+      redirect_maps:
+        index.md: introduction/welcome_to_virny.md
 
 extra_javascript:
   - javascripts/config.js

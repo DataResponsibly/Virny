@@ -25,7 +25,7 @@ def get_dummies(data: pd.DataFrame, categorical_columns: list, numerical_columns
     return feature_df
 
 
-def make_features_dfs(X_train, X_test, dataset: BaseDataset):
+def make_features_dfs(X_train: pd.DataFrame, X_test: pd.DataFrame, dataset: BaseDataset):
     """
     Return preprocessed train and test feature dataframes after one-hot encoding and standard scaling.
 

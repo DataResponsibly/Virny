@@ -17,7 +17,7 @@ class MetricsComposer:
     def __init__(self, models_metrics_dct: dict, sensitive_attributes_dct: dict):
         self.models_metrics_dct = models_metrics_dct
         self.sensitive_attributes_dct = sensitive_attributes_dct
-        self.models_average_metrics_dct = None # will be created in self.compose_metrics()
+        self.models_average_metrics_dct = None  # will be created in self.compose_metrics()
 
     def compose_metrics(self):
         """
@@ -45,11 +45,11 @@ class MetricsComposer:
                 priv_group = sensitive_attr + '_priv'
 
                 groups_metrics_dct[sensitive_attr] = {
-                    # Group statistical Bias metrics
+                    # Group statistical bias metrics
                     'Equalized_Odds_TPR': cfm[dis_group]['TPR'] - cfm[priv_group]['TPR'],
                     'Equalized_Odds_FPR': cfm[dis_group]['FPR'] - cfm[priv_group]['FPR'],
                     'Disparate_Impact': cfm[dis_group]['Positive-Rate'] / cfm[priv_group]['Positive-Rate'],
-                    'Statistical_Parity_Impact': cfm[dis_group]['Positive-Rate'] - cfm[priv_group]['Positive-Rate'],
+                    'Statistical_Parity_Difference': cfm[dis_group]['Positive-Rate'] - cfm[priv_group]['Positive-Rate'],
                     'Accuracy_Parity': cfm[dis_group]['Accuracy'] - cfm[priv_group]['Accuracy'],
                     # Group variance metrics
                     'Label_Stability_Ratio': cfm[dis_group]['Label_Stability'] / cfm[priv_group]['Label_Stability'],

@@ -1,5 +1,5 @@
 :root > * {
-    --md-primary-fg-color:#286bc8;
+    --md-primary-fg-color: #6e08b2;
 }
 
 .md-typeset h1,
@@ -22,6 +22,18 @@
 
 .md-nav--secondary {
     width: 10rem;
+}
+
+.md-grid {
+    max-width: 70rem;
+}
+
+.md-content {
+    width: 42rem;
+}
+
+.md-content__inner {
+    width: 40rem;
 }
 
 .md-typeset h2 {

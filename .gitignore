@@ -3,7 +3,7 @@
 .ipynb_checkpoints
 
 # Remove big files from GitHub repo
-virny/data/2018
+virny/datasets/2018
 
 # Created by https://www.gitignore.io/api/python,pycharm+all
 # Edit at https://www.gitignore.io/?templates=python,pycharm+all

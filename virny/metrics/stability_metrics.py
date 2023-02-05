@@ -20,7 +20,7 @@ def compute_label_stability(predicted_labels: list):
     count_pos = sum(predicted_labels)
     count_neg = len(predicted_labels) - count_pos
 
-    return np.abs(count_pos - count_neg)/len(predicted_labels)
+    return np.abs(count_pos - count_neg) / len(predicted_labels)
 
 
 def compute_churn(predicted_labels_1: list, predicted_labels_2: list):
