@@ -80,7 +80,6 @@ setup(
                     "nbconvert",
                     "python-slugify",
                     "spacy",
-                    "watermark",
                 ],
     },
 )
