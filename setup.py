@@ -64,6 +64,7 @@ setup(
                     "pytest~=7.2.1",
                 ],
         "docs": [
+                    "scikit-learn",
                     "numpy",
                     "scipy",
                     "pandas",
