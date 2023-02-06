@@ -1,0 +1,2185 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Responsible AI Toolset in Python">
+      
+      
+      
+      
+        <link rel="prev" href="../One_Run_Multiple_Models_Interface_Use_Case/">
+      
+      
+        <link rel="next" href="../../release_notes/0.1.0/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.11">
+    
+    
+      
+        <title>One Run One Model Interface Usage - Virny</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0d440cfe.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Open Sans";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+
+  <script id="__analytics">function __md_analytics(){window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-63302552-3","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");ga("send","event","feedback","click",t,e),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){ga("send","pageview",e.pathname)})});var e=document.createElement("script");e.async=!0,e.src="https://www.google-analytics.com/analytics.js",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#one-run-one-model-interface-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Virny" class="md-header__button md-logo" aria-label="Virny" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Virny
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              One Run One Model Interface Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/DataResponsibly/Virny" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DataResponsibly/virny
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../introduction/welcome_to_virny/" class="md-tabs__link">
+        Introduction 🚀
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/overview/" class="md-tabs__link">
+        API Reference 📚
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../Multiple_Runs_Interface_Use_Case/" class="md-tabs__link md-tabs__link--active">
+        Examples 🍱
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../release_notes/0.1.0/" class="md-tabs__link">
+        Release Notes 📒
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Virny" class="md-nav__button md-logo" aria-label="Virny" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Virny
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/DataResponsibly/Virny" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    DataResponsibly/virny
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+          Introduction 🚀
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Introduction 🚀
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/welcome_to_virny/" class="md-nav__link">
+        Welcome to Virny
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          API Reference 📚
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          API Reference 📚
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          analyzers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          analyzers
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/AbstractOverallVarianceAnalyzer/" class="md-nav__link">
+        AbstractOverallVarianceAnalyzer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/AbstractSubgroupAnalyzer/" class="md-nav__link">
+        AbstractSubgroupAnalyzer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/BatchOverallVarianceAnalyzer/" class="md-nav__link">
+        BatchOverallVarianceAnalyzer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/SubgroupStatisticalBiasAnalyzer/" class="md-nav__link">
+        SubgroupStatisticalBiasAnalyzer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/SubgroupVarianceAnalyzer/" class="md-nav__link">
+        SubgroupVarianceAnalyzer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/analyzers/SubgroupVarianceCalculator/" class="md-nav__link">
+        SubgroupVarianceCalculator
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          custom_classes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          custom_classes
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/custom-classes/BaseDataset/" class="md-nav__link">
+        BaseDataset
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/custom-classes/GenericPipeline/" class="md-nav__link">
+        GenericPipeline
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/custom-classes/MetricsComposer/" class="md-nav__link">
+        MetricsComposer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/custom-classes/MetricsVisualizer/" class="md-nav__link">
+        MetricsVisualizer
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+          datasets
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          datasets
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/datasets/CompasDataset/" class="md-nav__link">
+        CompasDataset
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/datasets/CompasWithoutSensitiveAttrsDataset/" class="md-nav__link">
+        CompasWithoutSensitiveAttrsDataset
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+          metrics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          metrics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-churn/" class="md-nav__link">
+        compute_churn
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-conf-interval/" class="md-nav__link">
+        compute_conf_interval
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-entropy/" class="md-nav__link">
+        compute_entropy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-jitter/" class="md-nav__link">
+        compute_jitter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-per-sample-accuracy/" class="md-nav__link">
+        compute_per_sample_accuracy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/metrics/compute-std-mean-iqr-metrics/" class="md-nav__link">
+        compute_std_mean_iqr_metrics
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+          preprocessing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_6">
+          <span class="md-nav__icon md-icon"></span>
+          preprocessing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/preprocessing/get-dummies/" class="md-nav__link">
+        get_dummies
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/preprocessing/make-features-dfs/" class="md-nav__link">
+        make_features_dfs
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_7" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_7" id="__nav_2_7_label" tabindex="0">
+          user_interfaces
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_7">
+          <span class="md-nav__icon md-icon"></span>
+          user_interfaces
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user-interfaces/compute-metrics-multiple-runs/" class="md-nav__link">
+        compute_metrics_multiple_runs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user-interfaces/compute-model-metrics-with-config/" class="md-nav__link">
+        compute_model_metrics_with_config
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user-interfaces/compute-model-metrics/" class="md-nav__link">
+        compute_model_metrics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user-interfaces/run-metrics-computation-with-config/" class="md-nav__link">
+        run_metrics_computation_with_config
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/user-interfaces/run-metrics-computation/" class="md-nav__link">
+        run_metrics_computation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_8" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_2_8" id="__nav_2_8_label" tabindex="0">
+          utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2_8">
+          <span class="md-nav__icon md-icon"></span>
+          utils
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/utils/count-prediction-stats/" class="md-nav__link">
+        count_prediction_stats
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/utils/create-test-protected-groups/" class="md-nav__link">
+        create_test_protected_groups
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/utils/validate-config/" class="md-nav__link">
+        validate_config
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Examples 🍱
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Examples 🍱
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Multiple_Runs_Interface_Use_Case/" class="md-nav__link">
+        Multiple Runs Interface Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../One_Run_Multiple_Models_Interface_Use_Case/" class="md-nav__link">
+        One Run Multiple Models Interface Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          One Run One Model Interface Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        One Run One Model Interface Usage
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-dependencies" class="md-nav__link">
+    Import dependencies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialize-input-variables" class="md-nav__link">
+    Initialize Input Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="Initialize Input Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-dataset-class" class="md-nav__link">
+    Create a Dataset class
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-config-object" class="md-nav__link">
+    Create a config object
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-models-config" class="md-nav__link">
+    Create a models config
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subgroup-metrics-computation" class="md-nav__link">
+    Subgroup Metrics Computation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-metrics-composition" class="md-nav__link">
+    Group Metrics Composition
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-visualization" class="md-nav__link">
+    Metrics Visualization
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Release Notes 📒
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Release Notes 📒
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../release_notes/0.1.0/" class="md-nav__link">
+        0.1.0 - 2023-02-06
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#import-dependencies" class="md-nav__link">
+    Import dependencies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialize-input-variables" class="md-nav__link">
+    Initialize Input Variables
+  </a>
+  
+    <nav class="md-nav" aria-label="Initialize Input Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-dataset-class" class="md-nav__link">
+    Create a Dataset class
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-config-object" class="md-nav__link">
+    Create a config object
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-models-config" class="md-nav__link">
+    Create a models config
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subgroup-metrics-computation" class="md-nav__link">
+    Subgroup Metrics Computation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#group-metrics-composition" class="md-nav__link">
+    Group Metrics Composition
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-visualization" class="md-nav__link">
+    Metrics Visualization
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="one-run-one-model-interface-usage">One Run One Model Interface Usage<a class="headerlink" href="#one-run-one-model-interface-usage" title="Permanent link">&para;</a></h1>
+<p>In this example, we are going to audit 1 model for stability and fairness, visualize metrics, and create an analysis report. We will use <code>compute_model_metrics_with_config</code> interface that will conduct the auditing pipeline for this model. For that, we will need to do next steps:</p>
+<ul>
+<li>
+<p>Initialize input variables</p>
+</li>
+<li>
+<p>Compute subgroup metrics</p>
+</li>
+<li>
+<p>Make group metrics composition</p>
+</li>
+<li>
+<p>Create metrics visualizations and an analysis report</p>
+</li>
+</ul>
+<h2 id="import-dependencies">Import dependencies<a class="headerlink" href="#import-dependencies" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+
+<span class="kn">from</span> <span class="nn">virny.user_interfaces.metrics_computation_interfaces</span> <span class="kn">import</span> <span class="n">compute_model_metrics_with_config</span>
+<span class="kn">from</span> <span class="nn">virny.utils.custom_initializers</span> <span class="kn">import</span> <span class="n">create_config_obj</span><span class="p">,</span> <span class="n">read_model_metric_dfs</span>
+<span class="kn">from</span> <span class="nn">virny.custom_classes.metrics_visualizer</span> <span class="kn">import</span> <span class="n">MetricsVisualizer</span>
+<span class="kn">from</span> <span class="nn">virny.custom_classes.metrics_composer</span> <span class="kn">import</span> <span class="n">MetricsComposer</span>
+<span class="kn">from</span> <span class="nn">virny.custom_classes.base_dataset</span> <span class="kn">import</span> <span class="n">BaseDataset</span>
+</code></pre></div>
+<h2 id="initialize-input-variables">Initialize Input Variables<a class="headerlink" href="#initialize-input-variables" title="Permanent link">&para;</a></h2>
+<p>Based on the library flow, we need to create 3 input objects for a user interface:</p>
+<ul>
+<li>
+<p>A <strong>dataset class</strong> that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseDataset class, which was created for user convenience.</p>
+</li>
+<li>
+<p>A <strong>config yaml</strong> that is a file with configuration parameters for different user interfaces for metrics computation.</p>
+</li>
+<li>
+<p>Finally, a <strong>models config</strong> that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits of multiple models for one or multiple runs and analyze different types of models.</p>
+</li>
+</ul>
+<h3 id="create-a-dataset-class">Create a Dataset class<a class="headerlink" href="#create-a-dataset-class" title="Permanent link">&para;</a></h3>
+<p>Based on the BaseDataset class, your <strong>dataset class</strong> should include the following attributes:</p>
+<ul>
+<li>
+<p><strong>Obligatory attributes</strong>: dataset, target, features, numerical_columns, categorical_columns</p>
+</li>
+<li>
+<p><strong>Optional attributes</strong>: X_data, y_data, columns_with_nulls</p>
+</li>
+</ul>
+<p>For more details, please refer to the library documentation.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CompasDataset</span><span class="p">(</span><span class="n">BaseDataset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dataset class for COMPAS dataset that contains sensitive attributes among feature columns.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset_path</span>
+<span class="sd">        Path to a dataset file</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+        <span class="n">int_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;recidivism&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;age_cat_25 - 45&#39;</span><span class="p">,</span> <span class="s1">&#39;age_cat_Greater than 45&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;age_cat_Less than 25&#39;</span><span class="p">,</span> <span class="s1">&#39;c_charge_degree_F&#39;</span><span class="p">,</span> <span class="s1">&#39;c_charge_degree_M&#39;</span><span class="p">,</span> <span class="s1">&#39;sex&#39;</span><span class="p">]</span>
+        <span class="n">int_columns_dct</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">int_columns</span><span class="p">}</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">int_columns_dct</span><span class="p">)</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;recidivism&#39;</span>
+        <span class="n">numerical_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;juv_fel_count&#39;</span><span class="p">,</span> <span class="s1">&#39;juv_misd_count&#39;</span><span class="p">,</span> <span class="s1">&#39;juv_other_count&#39;</span><span class="p">,</span> <span class="s1">&#39;priors_count&#39;</span><span class="p">]</span>
+        <span class="n">categorical_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;race&#39;</span><span class="p">,</span> <span class="s1">&#39;age_cat_25 - 45&#39;</span><span class="p">,</span> <span class="s1">&#39;age_cat_Greater than 45&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;age_cat_Less than 25&#39;</span><span class="p">,</span> <span class="s1">&#39;c_charge_degree_F&#39;</span><span class="p">,</span> <span class="s1">&#39;c_charge_degree_M&#39;</span><span class="p">,</span> <span class="s1">&#39;sex&#39;</span><span class="p">]</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">numerical_columns</span> <span class="o">+</span> <span class="n">categorical_columns</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">pandas_df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">numerical_columns</span><span class="o">=</span><span class="n">numerical_columns</span><span class="p">,</span>
+            <span class="n">categorical_columns</span><span class="o">=</span><span class="n">categorical_columns</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">dataset</span> <span class="o">=</span> <span class="n">CompasDataset</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;virny&#39;</span><span class="p">,</span> <span class="s1">&#39;datasets&#39;</span><span class="p">,</span> <span class="s1">&#39;COMPAS.csv&#39;</span><span class="p">))</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">X_data</span><span class="p">[</span><span class="n">dataset</span><span class="o">.</span><span class="n">X_data</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">5</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>age</th>
+      <th>juv_fel_count</th>
+      <th>juv_misd_count</th>
+      <th>juv_other_count</th>
+      <th>priors_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>25</td>
+      <td>0.0</td>
+      <td>-2.340451</td>
+      <td>1.0</td>
+      <td>-15.010999</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>26</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>21</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>29</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>6.000000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>40</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>7.513697</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="create-a-config-object">Create a config object<a class="headerlink" href="#create-a-config-object" title="Permanent link">&para;</a></h3>
+<p><code>compute_model_metrics_with_config</code> interface requires that your <strong>yaml file</strong> includes the following parameters:</p>
+<ul>
+<li>
+<p><strong>dataset_name</strong>: a name of your dataset; it will be used to name files with metrics.</p>
+</li>
+<li>
+<p><strong>test_set_fraction</strong>: the fraction from the whole dataset in the range [0.0 - 1.0] to create a test set.</p>
+</li>
+<li>
+<p><strong>bootstrap_fraction</strong>: the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).</p>
+</li>
+<li>
+<p><strong>n_estimators</strong>: the number of estimators for bootstrap to compute subgroup variance metrics.</p>
+</li>
+<li>
+<p><strong>sensitive_attributes_dct</strong>: a dictionary where keys are sensitive attribute names (including attribute intersections), and values are privileged values for these attributes. Currently, the library supports only intersections among two sensitive attributes. Intersectional attributes must include '&amp;' between sensitive attributes. You do not need to specify privileged values for intersectional groups since they will be derived from privileged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">ROOT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;docs&#39;</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">)</span>
+<span class="n">config_yaml_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT_DIR</span><span class="p">,</span> <span class="s1">&#39;experiment_compas_config.yaml&#39;</span><span class="p">)</span>
+<span class="n">config_yaml_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">dataset_name: COMPAS</span>
+<span class="s2">test_set_fraction: 0.2</span>
+<span class="s2">bootstrap_fraction: 0.8</span>
+<span class="s2">n_estimators: 100</span>
+<span class="s2">sensitive_attributes_dct: {&#39;sex&#39;: 0, &#39;age&#39;: 25, &#39;race&#39;: &#39;Caucasian&#39;, &#39;sex&amp;race&#39;: None}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_yaml_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">config_yaml_content</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="n">create_config_obj</span><span class="p">(</span><span class="n">config_yaml_path</span><span class="o">=</span><span class="n">config_yaml_path</span><span class="p">)</span>
+<span class="n">SAVE_RESULTS_DIR_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ROOT_DIR</span><span class="p">,</span> <span class="s1">&#39;results&#39;</span><span class="p">,</span>
+                                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">dataset_name</span><span class="si">}</span><span class="s1">_Metrics_</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">__%H%M%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="create-a-models-config">Create a models config<a class="headerlink" href="#create-a-models-config" title="Permanent link">&para;</a></h3>
+<p><strong>models_config</strong> is a Python dictionary, where keys are model names and values are initialized models for analysis</p>
+<div class="highlight"><pre><span></span><code><span class="n">models_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;DecisionTreeClassifier&#39;</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;gini&#39;</span><span class="p">,</span>
+                                                     <span class="n">max_depth</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                                                     <span class="n">max_features</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+                                                     <span class="n">min_samples_split</span><span class="o">=</span><span class="mf">0.1</span><span class="p">),</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="subgroup-metrics-computation">Subgroup Metrics Computation<a class="headerlink" href="#subgroup-metrics-computation" title="Permanent link">&para;</a></h2>
+<p>After the variables are input to a user interface, the interface creates a <strong>generic pipeline</strong> based on the input dataset class to hide preprocessing complexity and provide handy attributes and methods for different types of model analysis. Later this generic pipeline is used in subgroup analyzers that compute different sets of metrics. As for now, our library supports <strong>Subgroup Variance Analyzer</strong> and <strong>Subgroup Statistical Bias Analyzer</strong>, but it is easily extensible to any other analyzers. When the variance and bias analyzers complete metrics computation, their metrics are combined, returned in a matrix format, and stored in a file if defined.</p>
+<div class="highlight"><pre><span></span><code><span class="n">metrics_df</span> <span class="o">=</span> <span class="n">compute_model_metrics_with_config</span><span class="p">(</span><span class="n">models_config</span><span class="p">[</span><span class="s1">&#39;DecisionTreeClassifier&#39;</span><span class="p">],</span> <span class="s1">&#39;DecisionTreeClassifier&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span>
+                                               <span class="n">config</span><span class="p">,</span> <span class="n">SAVE_RESULTS_DIR_PATH</span><span class="p">,</span> <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<p>A lot of progress logs ...</p>
+<p>Look at several columns in top rows of computed metrics</p>
+<div class="highlight"><pre><span></span><code><span class="n">metrics_df</span><span class="p">[</span><span class="n">metrics_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">6</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Metric</th>
+      <th>overall</th>
+      <th>sex_priv</th>
+      <th>sex_dis</th>
+      <th>age_priv</th>
+      <th>age_dis</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Mean</td>
+      <td>0.528258</td>
+      <td>0.603018</td>
+      <td>0.510248</td>
+      <td>0.464100</td>
+      <td>0.531648</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Std</td>
+      <td>0.093973</td>
+      <td>0.109636</td>
+      <td>0.090200</td>
+      <td>0.079892</td>
+      <td>0.094717</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>IQR</td>
+      <td>0.117446</td>
+      <td>0.141692</td>
+      <td>0.111605</td>
+      <td>0.102105</td>
+      <td>0.118256</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Entropy</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.252574</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Jitter</td>
+      <td>0.159417</td>
+      <td>0.183520</td>
+      <td>0.153611</td>
+      <td>0.172838</td>
+      <td>0.158708</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>Per_Sample_Accuracy</td>
+      <td>0.667992</td>
+      <td>0.693415</td>
+      <td>0.661868</td>
+      <td>0.656604</td>
+      <td>0.668594</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>Label_Stability</td>
+      <td>0.778523</td>
+      <td>0.740390</td>
+      <td>0.787709</td>
+      <td>0.715472</td>
+      <td>0.781854</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>TPR</td>
+      <td>0.607069</td>
+      <td>0.440000</td>
+      <td>0.637931</td>
+      <td>0.548387</td>
+      <td>0.611111</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>TNR</td>
+      <td>0.739130</td>
+      <td>0.838462</td>
+      <td>0.710112</td>
+      <td>0.772727</td>
+      <td>0.737794</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>PPV</td>
+      <td>0.660633</td>
+      <td>0.611111</td>
+      <td>0.667526</td>
+      <td>0.772727</td>
+      <td>0.654762</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>FNR</td>
+      <td>0.392931</td>
+      <td>0.560000</td>
+      <td>0.362069</td>
+      <td>0.451613</td>
+      <td>0.388889</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>FPR</td>
+      <td>0.260870</td>
+      <td>0.161538</td>
+      <td>0.289888</td>
+      <td>0.227273</td>
+      <td>0.262206</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>Accuracy</td>
+      <td>0.678977</td>
+      <td>0.692683</td>
+      <td>0.675676</td>
+      <td>0.641509</td>
+      <td>0.680957</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>F1</td>
+      <td>0.632719</td>
+      <td>0.511628</td>
+      <td>0.652393</td>
+      <td>0.641509</td>
+      <td>0.632184</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>Selection-Rate</td>
+      <td>0.418561</td>
+      <td>0.263415</td>
+      <td>0.455934</td>
+      <td>0.415094</td>
+      <td>0.418744</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>Positive-Rate</td>
+      <td>0.918919</td>
+      <td>0.720000</td>
+      <td>0.955665</td>
+      <td>0.709677</td>
+      <td>0.933333</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="group-metrics-composition">Group Metrics Composition<a class="headerlink" href="#group-metrics-composition" title="Permanent link">&para;</a></h2>
+<p><strong>Metrics Composer</strong> is responsible for this second stage of the model audit. Currently, it computes our custom group statistical bias and variance metrics, but extending it for new group metrics is very simple. We noticed that more and more group metrics have appeared during the last decade, but most of them are based on the same subgroup metrics. Hence, such a separation of subgroup and group metrics computation allows one to experiment with different combinations of subgroup metrics and avoid subgroup metrics recomputation for a new set of grouped metrics.</p>
+<div class="highlight"><pre><span></span><code><span class="n">models_metrics_dct</span> <span class="o">=</span> <span class="n">read_model_metric_dfs</span><span class="p">(</span><span class="n">SAVE_RESULTS_DIR_PATH</span><span class="p">,</span> <span class="n">model_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DecisionTreeClassifier&#39;</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">metrics_composer</span> <span class="o">=</span> <span class="n">MetricsComposer</span><span class="p">(</span><span class="n">models_metrics_dct</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">sensitive_attributes_dct</span><span class="p">)</span>
+</code></pre></div>
+<p>Compute composed metrics</p>
+<div class="highlight"><pre><span></span><code><span class="n">models_composed_metrics_df</span> <span class="o">=</span> <span class="n">metrics_composer</span><span class="o">.</span><span class="n">compose_metrics</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">models_composed_metrics_df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Metric</th>
+      <th>sex</th>
+      <th>age</th>
+      <th>race</th>
+      <th>sex&amp;race</th>
+      <th>Model_Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Equalized_Odds_TPR</td>
+      <td>0.197931</td>
+      <td>0.062724</td>
+      <td>0.186038</td>
+      <td>0.349172</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Equalized_Odds_FPR</td>
+      <td>0.128349</td>
+      <td>0.034933</td>
+      <td>0.120236</td>
+      <td>0.230252</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Disparate_Impact</td>
+      <td>1.327313</td>
+      <td>1.315152</td>
+      <td>1.187412</td>
+      <td>1.730978</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Statistical_Parity_Difference</td>
+      <td>0.235665</td>
+      <td>0.223656</td>
+      <td>0.153337</td>
+      <td>0.417702</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Accuracy_Parity</td>
+      <td>-0.017007</td>
+      <td>0.039448</td>
+      <td>-0.007362</td>
+      <td>-0.029665</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>Label_Stability_Ratio</td>
+      <td>1.063910</td>
+      <td>1.092782</td>
+      <td>1.015365</td>
+      <td>1.083336</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>IQR_Parity</td>
+      <td>-0.030087</td>
+      <td>0.016152</td>
+      <td>-0.005684</td>
+      <td>-0.033944</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Std_Parity</td>
+      <td>-0.019436</td>
+      <td>0.014826</td>
+      <td>-0.005017</td>
+      <td>-0.023656</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Std_Ratio</td>
+      <td>0.822726</td>
+      <td>1.185571</td>
+      <td>0.948220</td>
+      <td>0.790095</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>Jitter_Parity</td>
+      <td>-0.029909</td>
+      <td>-0.014130</td>
+      <td>-0.006402</td>
+      <td>-0.035366</td>
+      <td>DecisionTreeClassifier</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="metrics-visualization">Metrics Visualization<a class="headerlink" href="#metrics-visualization" title="Permanent link">&para;</a></h2>
+<p><strong>Metrics Visualizer</strong> provides metrics visualization and reporting functionality. It unifies different preprocessing methods for result metrics and creates various data formats required for visualizations. Hence, users can simply call methods of the Metrics Visualizer class and get custom plots for diverse metrics analysis.</p>
+<div class="highlight"><pre><span></span><code><span class="n">visualizer</span> <span class="o">=</span> <span class="n">MetricsVisualizer</span><span class="p">(</span><span class="n">models_metrics_dct</span><span class="p">,</span> <span class="n">models_composed_metrics_df</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">,</span>
+                               <span class="n">model_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DecisionTreeClassifier&#39;</span><span class="p">],</span>
+                               <span class="n">sensitive_attributes_dct</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">sensitive_attributes_dct</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">visualizer</span><span class="o">.</span><span class="n">create_overall_metrics_bar_char</span><span class="p">(</span>
+    <span class="n">metrics_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TPR&#39;</span><span class="p">,</span> <span class="s1">&#39;PPV&#39;</span><span class="p">,</span> <span class="s1">&#39;Accuracy&#39;</span><span class="p">,</span> <span class="s1">&#39;F1&#39;</span><span class="p">,</span> <span class="s1">&#39;Selection-Rate&#39;</span><span class="p">,</span> <span class="s1">&#39;Positive-Rate&#39;</span><span class="p">],</span>
+    <span class="n">metrics_title</span><span class="o">=</span><span class="s2">&quot;Bias Metrics&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<div id="altair-viz-700c5ea7038849069a023253a2ef717c"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-700c5ea7038849069a023253a2ef717c") {
+      outputDiv = document.getElementById("altair-viz-700c5ea7038849069a023253a2ef717c");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.17.0?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "4.17.0"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-16219b4152ce0a8377e649d7a3ed1f91"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Bias Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-16219b4152ce0a8377e649d7a3ed1f91": [{"overall": 0.6789772727272727, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6327193932827736, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6606334841628959, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.918918918918919, "metric": "Positive-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4185606060606061, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6070686070686071, "metric": "TPR", "model_name": "DecisionTreeClassifier"}]}}, {"mode": "vega-lite"});
+</script>
+
+<div class="highlight"><pre><span></span><code><span class="n">visualizer</span><span class="o">.</span><span class="n">create_overall_metrics_bar_char</span><span class="p">(</span>
+    <span class="n">metrics_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Label_Stability&#39;</span><span class="p">],</span>
+    <span class="n">reversed_metrics_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Std&#39;</span><span class="p">,</span> <span class="s1">&#39;IQR&#39;</span><span class="p">,</span> <span class="s1">&#39;Jitter&#39;</span><span class="p">],</span>
+    <span class="n">metrics_title</span><span class="o">=</span><span class="s2">&quot;Variance Metrics&quot;</span>
+<span class="p">)</span>
+</code></pre></div>
+<div id="altair-viz-b977dd0dc13d463990210dacff0fce6c"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-b977dd0dc13d463990210dacff0fce6c") {
+      outputDiv = document.getElementById("altair-viz-b977dd0dc13d463990210dacff0fce6c");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.17.0?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "4.17.0"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-2bdca5438465147db1f00c21f79ff68c"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Variance Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-2bdca5438465147db1f00c21f79ff68c": [{"overall": 0.8825543491634812, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8405827211509027, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.7785227272727273, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9060266424497246, "metric": "Std", "model_name": "DecisionTreeClassifier"}]}}, {"mode": "vega-lite"});
+</script>
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        
+
+<!-- Application footer -->
+<footer class="md-footer">
+
+  <!-- Further information -->
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+
+      <!-- Copyright and theme information -->
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2023
+          </div>
+        
+        Made with
+        <a
+          href="https://squidfunk.github.io/mkdocs-material/"
+          target="_blank" rel="noopener"
+        >
+          Material for MkDocs
+        </a>
+      </div>
+
+      <!-- Social links -->
+      <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/DataResponsibly/Virny" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+    </a>
+  
+</div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.instant", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.db81ec45.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6df46069.min.js"></script>
+      
+        <script src="../../javascripts/config.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
