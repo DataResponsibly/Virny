@@ -64,9 +64,10 @@ setup(
                     "pytest~=7.2.1",
                 ],
         "docs": [
-                    "numpy>=1.23",
+                    "scikit-learn",
+                    "numpy",
                     "scipy",
-                    "pandas>=1.5",
+                    "pandas",
                     "dominate",
                     "flask",
                     "ipykernel",
@@ -79,7 +80,6 @@ setup(
                     "nbconvert",
                     "python-slugify",
                     "spacy",
-                    "watermark",
                 ],
     },
 )
