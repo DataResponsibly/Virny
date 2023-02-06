@@ -1,6 +1,5 @@
 # Virny Software Library
 
-
 <p align="left">
   <!-- Tests -->
   <a href="https://github.com/DataResponsibly/Virny/actions/workflows/ci.yml">
