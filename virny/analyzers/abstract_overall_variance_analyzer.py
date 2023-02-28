@@ -205,6 +205,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         metrics_to_report['Jitter'] = [self.jitter]
         metrics_to_report['Per_Sample_Accuracy'] = [self.per_sample_accuracy]
         metrics_to_report['Label_Stability'] = [self.label_stability]
+
         metrics_df = pd.DataFrame(metrics_to_report)
 
         dir_path = os.path.join('..', '..', 'results', 'models_stability_metrics')
