@@ -1,6 +1,6 @@
 wheel~=0.38.4
 twine~=4.0.2
-numpy~=1.23.5
+numpy~=1.24.2
 datapane~=0.15.5
 matplotlib~=3.6.2
 pandas~=1.5.2
@@ -13,3 +13,4 @@ folktables~=0.0.11
 xgboost~=1.7.2
 munch~=2.5.0
 PyYAML~=6.0
+river==0.15.0

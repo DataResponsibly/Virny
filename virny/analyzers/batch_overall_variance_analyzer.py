@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from virny.analyzers.abstract_overall_variance_analyzer import AbstractOverallVarianceAnalyzer
@@ -38,9 +39,9 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
                          X_train, y_train, X_test, y_test, dataset_name, n_estimators)
         self.target_column = target_column
 
-    def _fit_model(self, classifier, X_train: pd.DataFrame, y_train: pd.DataFrame):
+    def _fit_model(self, classifier, X_train: np.ndarray, y_train: np.ndarray):
         """
-        Fit a classifier that is an instance of self.base_model.
+        Fit a classifier that is an instance of self.base_model
         """
         return classifier.fit(X_train, y_train)
 
