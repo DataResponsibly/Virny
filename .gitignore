@@ -1,4 +1,5 @@
 *_venv
+notebooks
 .DS_Store
 .ipynb_checkpoints
 
