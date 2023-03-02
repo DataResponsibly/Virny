@@ -166,7 +166,6 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
 def confusion_matrix_metrics(y_true, y_preds):
     metrics = {}
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
-    print('TN, FP, FN, TP -- ', TN, FP, FN, TP)
     metrics['TPR'] = TP/(TP+FN)
     metrics['TNR'] = TN/(TN+FP)
     metrics['PPV'] = TP/(TP+FP)

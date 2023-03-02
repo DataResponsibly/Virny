@@ -43,7 +43,11 @@ def iter_pd_dataset(
         # Cast the values to the given types
         if converters is not None:
             for i, t in converters.items():
-                x[i] = t(x[i])
+                if str(t) == "<class 'int'>":
+                    # Fix an issue with converting '1.0' to an int type
+                    x[i] = int(float(x[i]))
+                else:
+                    x[i] = t(x[i])
 
         # Drop Nones
         if drop_nones:

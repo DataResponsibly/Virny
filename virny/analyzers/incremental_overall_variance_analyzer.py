@@ -41,15 +41,21 @@ class IncrementalOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         self.target_column = target_column
         self.dataset_reader = IncrementalPandasDataset
 
+        # Create converters for the train set to apply them for train incremental datasets
+        train_df_for_types = X_train.astype('object')
+        train_converters = {str(col): type(train_df_for_types.loc[train_df_for_types.index[0], col])
+                                 for col in train_df_for_types}
+        train_converters[self.target_column] = type(y_train.astype('object')[y_train.index[0]])
+        self.train_converters = train_converters
+
     def _fit_model(self, classifier, X_train: np.ndarray, y_train: np.ndarray):
         """
         Fit an incremental classifier that is an instance of self.base_model
         """
-        train_df = pd.DataFrame(X_train)
+        train_df = pd.DataFrame(X_train, columns=[key for key in self.train_converters.keys()
+                                                  if key != self.target_column])
         train_df[self.target_column] = y_train
-        train_df_for_types = train_df.astype('object')
-        converters = {str(col): type(train_df_for_types.loc[0, col]) for col in train_df_for_types}
-        train_dataset = self.dataset_reader(pd_dataset=train_df, target=self.target_column, converters=converters)
+        train_dataset = self.dataset_reader(pd_dataset=train_df, target=self.target_column, converters=self.train_converters)
         for x, y_true in train_dataset:
             classifier.learn_one(x=x, y=y_true)
 
@@ -62,7 +68,7 @@ class IncrementalOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         """
         predictions = []
         test_df_for_types = X_test.astype('object')
-        converters = {col: type(test_df_for_types.loc[0, col]) for col in test_df_for_types}
+        converters = {col: type(test_df_for_types.loc[test_df_for_types.index[0], col]) for col in test_df_for_types}
         test_dataset = self.dataset_reader(pd_dataset=X_test, target=None, converters=converters)
         for x, _ in test_dataset:
             y_pred = classifier.predict_one(x)
@@ -75,12 +81,15 @@ class IncrementalOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         Predict with the incremental classifier for X_test set.
         Return predicted probabilities for each class for each test point.
         """
-        predictions = []
+        # Create converters for the test set to apply them for an incremental dataset
         test_df_for_types = X_test.astype('object')
-        converters = {col: type(test_df_for_types.loc[0, col]) for col in test_df_for_types}
+        converters = {col: type(test_df_for_types.loc[test_df_for_types.index[0], col]) for col in test_df_for_types}
+
+        predictions = []
         test_dataset = self.dataset_reader(pd_dataset=X_test, target=None, converters=converters)
         for x, _ in test_dataset:
-            y_pred = classifier.predict_proba_one(x)[0]
+            predict_proba = classifier.predict_proba_one(x)
+            y_pred = predict_proba[0]
             predictions.append(y_pred)
 
         return predictions
