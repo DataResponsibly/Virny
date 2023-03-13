@@ -100,7 +100,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
         [Optional] Enable or disable extra logs
 
     """
-    model_setting = ModelSetting.BATCH if model_seed is None else ModelSetting[model_setting.upper()]
+    model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
     base_model = reset_model_seed(base_model, model_seed)
     base_pipeline = create_base_pipeline(dataset, sensitive_attributes_dct, model_seed, test_set_fraction)
@@ -317,3 +317,76 @@ def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: d
             multiple_runs_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
 
     return multiple_runs_metrics_dct
+
+
+def compute_metrics_multiple_runs_with_db_writer(dataset: BaseDataset, config, models_config: dict,
+                                                 custom_tbl_fields_dct: dict, debug_mode=False) -> dict:
+    """
+    Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
+    Save results in `save_results_dir_path` folder.
+
+    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+
+    Parameters
+    ----------
+    dataset
+        BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
+    config
+        Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
+         n_estimators, sensitive_attributes_dct attributes
+    models_config
+        Dictionary where keys are model names, and values are initialized models
+    save_results_dir_path
+        Location where to save result files with metrics
+    debug_mode
+        [Optional] Enable or disable extra logs
+
+    """
+    multiple_runs_metrics_dct = dict()
+    for run_num, run_seed in tqdm(enumerate(config.runs_seed_lst),
+                                  total=len(config.runs_seed_lst),
+                                  desc="Multiple runs progress",
+                                  colour="green"):
+        run_models_metrics_df = pd.DataFrame()
+        models_metrics_dct = run_metrics_computation(dataset=dataset,
+                                                     test_set_fraction=config.test_set_fraction,
+                                                     bootstrap_fraction=config.bootstrap_fraction,
+                                                     dataset_name=config.dataset_name,
+                                                     models_config=models_config,
+                                                     n_estimators=config.n_estimators,
+                                                     sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                     model_setting=config.model_setting,
+                                                     model_seed=run_seed,
+                                                     save_results=False,
+                                                     debug_mode=debug_mode)
+
+        # Concatenate with previous results and save them in an overwrite mode each time for backups
+        for model_name in models_metrics_dct.keys():
+            model_metrics_df = models_metrics_dct[model_name]
+            model_metrics_df['Run_Number'] = f'Run_{run_num + 1}'
+            model_metrics_df['Dataset_Name'] = config.dataset_name
+
+            if multiple_runs_metrics_dct.get(model_name) is None:
+                multiple_runs_metrics_dct[model_name] = model_metrics_df
+            else:
+                multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df])
+
+            model_metrics_df['Model_Name'] = model_name
+            model_metrics_df['Num_Estimators'] = config.n_estimators
+            model_metrics_df['Tag'] = 'OK'
+            model_metrics_df['Record_Create_Date_Time'] = datetime.now()
+            for column, value in custom_tbl_fields_dct.items():
+                model_metrics_df[column] = value
+
+            subgroup_names = [col for col in model_metrics_df.columns if '_priv' in col or '_dis' in col] + ['overall']
+            melted_model_metrics_df = model_metrics_df.melt(id_vars=[col for col in model_metrics_df.columns if col not in subgroup_names],
+                                                            value_vars=subgroup_names,
+                                                            var_name="Subgroup",
+                                                            value_name="Metric_Value")
+            run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
+
+            # result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
+            # multiple_runs_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
+
+    # return multiple_runs_metrics_dct
+    return run_models_metrics_df
