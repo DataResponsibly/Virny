@@ -1,5 +1,6 @@
 import os
 import random
+import traceback
 import pandas as pd
 from tqdm.notebook import tqdm
 from datetime import datetime, timezone
@@ -46,9 +47,12 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
     if model_seed is None:
         model_seed = random.randint(1, 1000)
 
-    return compute_model_metrics(base_model, config.n_estimators,
-                                 dataset, config.test_set_fraction,
-                                 config.bootstrap_fraction, config.sensitive_attributes_dct,
+    return compute_model_metrics(base_model=base_model,
+                                 n_estimators=config.n_estimators,
+                                 dataset=dataset,
+                                 test_set_fraction=config.test_set_fraction,
+                                 bootstrap_fraction=config.bootstrap_fraction,
+                                 sensitive_attributes_dct=config.sensitive_attributes_dct,
                                  model_seed=model_seed,
                                  dataset_name=config.dataset_name,
                                  base_model_name=model_name,
@@ -59,7 +63,8 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
 
 def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, test_set_fraction: float, bootstrap_fraction: float,
                           sensitive_attributes_dct: dict, model_seed: int, dataset_name: str, base_model_name: str,
-                          save_results: bool = True, save_results_dir_path: str = None, debug_mode: bool = False):
+                          model_setting: str = ModelSetting.BATCH.value, save_results: bool = True,
+                          save_results_dir_path: str = None, debug_mode: bool = False):
     """
     Compute subgroup metrics for the base model.
     Save results in `save_results_dir_path` folder.
@@ -95,9 +100,9 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
         [Optional] Enable or disable extra logs
 
     """
-    base_model = reset_model_seed(base_model, model_seed)
-    print('Model random_state: ', base_model.get_params().get('random_state', None))
+    model_setting = ModelSetting.BATCH if model_seed is None else ModelSetting[model_setting.upper()]
 
+    base_model = reset_model_seed(base_model, model_seed)
     base_pipeline = create_base_pipeline(dataset, sensitive_attributes_dct, model_seed, test_set_fraction)
     if debug_mode:
         print('\nProtected groups splits:')
@@ -108,9 +113,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
         display(base_pipeline.X_train_val.head(10))
 
     # Compute variance metrics for subgroups
-    subgroup_variance_analyzer = SubgroupVarianceAnalyzer(ModelSetting.BATCH, n_estimators, base_model, base_model_name,
+    subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting, n_estimators, base_model, base_model_name,
                                                           bootstrap_fraction, base_pipeline, dataset_name)
-
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
                                                                               save_dir_path=None,
@@ -169,9 +173,14 @@ def run_metrics_computation_with_config(dataset: BaseDataset, config, models_con
     # Create a directory for results if not exists
     os.makedirs(save_results_dir_path, exist_ok=True)
     # Parse config and execute the main run_metrics_computation function
-    return run_metrics_computation(dataset, config.test_set_fraction, config.bootstrap_fraction,
-                                   config.dataset_name, models_config, config.n_estimators,
-                                   config.sensitive_attributes_dct,
+    return run_metrics_computation(dataset=dataset,
+                                   test_set_fraction=config.test_set_fraction,
+                                   bootstrap_fraction=config.bootstrap_fraction,
+                                   dataset_name=config.dataset_name,
+                                   models_config=models_config,
+                                   n_estimators=config.n_estimators,
+                                   sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                   model_setting=config.model_setting,
                                    model_seed=run_seed,
                                    save_results_dir_path=save_results_dir_path,
                                    save_results=True,
@@ -179,7 +188,8 @@ def run_metrics_computation_with_config(dataset: BaseDataset, config, models_con
 
 
 def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, bootstrap_fraction: float, dataset_name: str,
-                            models_config: dict, n_estimators: int, sensitive_attributes_dct: dict, model_seed: int = None,
+                            models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
+                            model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
                             save_results: bool = True, save_results_dir_path: str = None, debug_mode: bool = False) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config.
@@ -224,8 +234,13 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
         model_seed += 1
         try:
             base_model = models_config[model_name]
-            model_metrics_df = compute_model_metrics(base_model, n_estimators, dataset, test_set_fraction,
-                                                     bootstrap_fraction, sensitive_attributes_dct,
+            model_metrics_df = compute_model_metrics(base_model=base_model,
+                                                     n_estimators=n_estimators,
+                                                     dataset=dataset,
+                                                     test_set_fraction=test_set_fraction,
+                                                     bootstrap_fraction=bootstrap_fraction,
+                                                     sensitive_attributes_dct=sensitive_attributes_dct,
+                                                     model_setting=model_setting,
                                                      model_seed=model_seed,
                                                      dataset_name=dataset_name,
                                                      base_model_name=model_name,
@@ -237,7 +252,8 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
                 print(f'\n[{model_name}] Metrics matrix:')
                 display(model_metrics_df)
         except Exception as err:
-            print(f'ERROR with {model_name}: ', err)
+            print('#' * 20, f'ERROR with {model_name}', '#' * 20)
+            traceback.print_exc()
 
         print('\n\n\n')
 
@@ -275,10 +291,17 @@ def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: d
                                   total=len(config.runs_seed_lst),
                                   desc="Multiple runs progress",
                                   colour="green"):
-        models_metrics_dct = run_metrics_computation(dataset, config.test_set_fraction, config.bootstrap_fraction,
-                                                     config.dataset_name, models_config, config.n_estimators,
-                                                     config.sensitive_attributes_dct, run_seed,
-                                                     save_results=False, debug_mode=debug_mode)
+        models_metrics_dct = run_metrics_computation(dataset=dataset,
+                                                     test_set_fraction=config.test_set_fraction,
+                                                     bootstrap_fraction=config.bootstrap_fraction,
+                                                     dataset_name=config.dataset_name,
+                                                     models_config=models_config,
+                                                     n_estimators=config.n_estimators,
+                                                     sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                     model_setting=config.model_setting,
+                                                     model_seed=run_seed,
+                                                     save_results=False,
+                                                     debug_mode=debug_mode)
 
         # Concatenate with previous results and save them in an overwrite mode each time for backups
         for model_name in models_metrics_dct.keys():

@@ -1,9 +1,11 @@
 import os
 import pandas as pd
+
 from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
+from river import base, compat
 
-from virny.configs.constants import INTERSECTION_SIGN
+from virny.configs.constants import INTERSECTION_SIGN, ModelSetting
 
 
 def validate_config(config_obj):
@@ -16,6 +18,7 @@ def validate_config(config_obj):
         Object with parameters defined in a yaml file
 
     """
+    # ================== Required parameters ==================
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
 
@@ -31,9 +34,6 @@ def validate_config(config_obj):
 
     elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
         raise ValueError('n_estimators must be integer greater than 1')
-
-    elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
-        raise ValueError('runs_seed_lst must be python list')
 
     elif not isinstance(config_obj.sensitive_attributes_dct, dict):
         raise ValueError('sensitive_attributes_dct must be python dictionary')
@@ -51,12 +51,28 @@ def validate_config(config_obj):
                 attr2 not in config_obj.sensitive_attributes_dct.keys():
                 raise ValueError('intersectional attributes in sensitive_attributes_dct must contain '
                                  'sensitive attributes that also exist in sensitive_attributes_dct')
+
+    # ================== Optional parameters ==================
+    elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
+        raise ValueError('runs_seed_lst must be python list')
+
+    elif config_obj.model_setting is not None \
+            and not isinstance(config_obj.model_setting, str) \
+            and config_obj.model_setting not in ModelSetting:
+        raise ValueError('model_setting must be a string that is included in the ModelSetting enum. '
+                         'Refer to this function documentation for more details!')
+
     return True
 
 
 def reset_model_seed(model, new_seed):
-    if 'random_state' in model.get_params():
+    if isinstance(model, base.Classifier): # For incremental models
+        model.seed = new_seed
+        print('Model seed: ', model.seed)
+    elif 'random_state' in model.get_params():
         model.set_params(random_state=new_seed)
+        print('Model seed: ', model.get_params().get('random_state', None))
+
     return model
 
 
