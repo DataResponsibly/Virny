@@ -1,5 +1,6 @@
 *_venv
 notebooks
+*.env
 .DS_Store
 .ipynb_checkpoints
 docs/examples/test.py

@@ -28,11 +28,11 @@ about: dict = {}
 with open(os.path.join(HERE, NAME, "__version__.py")) as f:
     exec(f.read(), about)
 
-with pathlib.Path('requirements.txt').open() as requirements_txt:
+with pathlib.Path('lib_base_packages.txt').open() as lib_base_packages_txt:
     base_packages = [
         str(requirement)
         for requirement
-        in pkg_resources.parse_requirements(requirements_txt)
+        in pkg_resources.parse_requirements(lib_base_packages_txt)
     ]
 
 # This call to setup() does all the work
