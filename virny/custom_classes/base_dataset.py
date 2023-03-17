@@ -55,6 +55,8 @@ class CustomSplitsDataset(BaseDataset):
 
     Parameters
     ----------
+    full_features_df
+        Full train + test dataset of features without the target column. It is used for creating test groups.
     X_train_val
         Train dataframe of features
     X_test
@@ -71,12 +73,13 @@ class CustomSplitsDataset(BaseDataset):
         List of categorical column names
 
     """
-    def __init__(self, X_train_val: pd.DataFrame, X_test: pd.DataFrame, y_train_val: pd.DataFrame, y_test: pd.DataFrame,
+    def __init__(self, full_features_df: pd.DataFrame, X_train_val: pd.DataFrame, X_test: pd.DataFrame,
+                 y_train_val: pd.DataFrame, y_test: pd.DataFrame,
                  target: str, numerical_columns: list, categorical_columns: list):
         features = numerical_columns + categorical_columns
 
         super().__init__(
-            pandas_df=pd.DataFrame(),
+            pandas_df=full_features_df,
             X_data=pd.DataFrame(),
             y_data=pd.DataFrame(),
             features=features,

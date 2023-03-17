@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
 from river import base, compat
 
-from virny.configs.constants import INTERSECTION_SIGN, ModelSetting
+from virny.configs.constants import INTERSECTION_SIGN, ModelSetting, CUSTOM_SPLITS_MODE
 
 
 def validate_config(config_obj):
@@ -22,10 +22,11 @@ def validate_config(config_obj):
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
 
-    elif not isinstance(config_obj.test_set_fraction, float) \
-            or config_obj.test_set_fraction < 0.0 \
-            or config_obj.test_set_fraction > 1.0:
-        raise ValueError('test_set_fraction must be float in [0.0, 1.0] range')
+    elif config_obj.test_set_fraction != CUSTOM_SPLITS_MODE and (
+            not isinstance(config_obj.test_set_fraction, float)
+            or config_obj.test_set_fraction < 0.0
+            or config_obj.test_set_fraction > 1.0):
+        raise ValueError(f'test_set_fraction must be float in [0.0, 1.0] range or equal to "{CUSTOM_SPLITS_MODE}"')
 
     elif not isinstance(config_obj.bootstrap_fraction, float) \
             or config_obj.bootstrap_fraction < 0.0 \
@@ -131,8 +132,7 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
         X_test_with_sensitive_attrs = X_test
     else:
         plain_sensitive_attributes = [attr for attr in sensitive_attributes_dct.keys() if INTERSECTION_SIGN not in attr]
-        cols_with_sensitive_attrs = set(list(X_test.columns) + plain_sensitive_attributes)
-        X_test_with_sensitive_attrs = full_df[cols_with_sensitive_attrs].loc[X_test.index]
+        X_test_with_sensitive_attrs = full_df[plain_sensitive_attributes].loc[X_test.index]
 
     groups = dict()
     for attr in sensitive_attributes_dct.keys():
