@@ -39,3 +39,54 @@ class BaseDataset:
         self.y_data = self.dataset[target] if y_data is None else y_data
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list() \
             if columns_with_nulls is None else columns_with_nulls
+
+        # By default, dataset splits should be None for BaseDataset.
+        # If you want to define them, please use CustomSplitsDataset.
+        self.X_train_val = None
+        self.X_test = None
+        self.y_train_val = None
+        self.y_test = None
+
+
+class CustomSplitsDataset(BaseDataset):
+    """
+    Dataset class with custom train and test splits that is used as input for user interfaces.
+    Inherit from it if you want to use your custom dataset train and test splits.
+
+    Parameters
+    ----------
+    X_train_val
+        Train dataframe of features
+    X_test
+        Test dataframe of features
+    y_train_val
+        Train dataframe with a target column
+    y_test
+        Test dataframe with a target column
+    target
+        Name of the target column name
+    numerical_columns
+        List of numerical column names
+    categorical_columns
+        List of categorical column names
+
+    """
+    def __init__(self, X_train_val: pd.DataFrame, X_test: pd.DataFrame, y_train_val: pd.DataFrame, y_test: pd.DataFrame,
+                 target: str, numerical_columns: list, categorical_columns: list):
+        features = numerical_columns + categorical_columns
+
+        super().__init__(
+            pandas_df=pd.DataFrame(),
+            X_data=pd.DataFrame(),
+            y_data=pd.DataFrame(),
+            features=features,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+            columns_with_nulls=[]
+        )
+
+        self.X_train_val = X_train_val
+        self.X_test = X_test
+        self.y_train_val = y_train_val
+        self.y_test = y_test
