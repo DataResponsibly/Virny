@@ -17,7 +17,7 @@ class CompasDataset(BaseDataset):
         Path to a dataset file
 
     """
-    def __init__(self, dataset_path: str = os.path.join('virny', 'data', 'COMPAS.csv')):
+    def __init__(self, dataset_path: str = os.path.join('virny', 'datasets', 'COMPAS.csv')):
         df = pd.read_csv(dataset_path)
 
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -51,7 +51,7 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataset):
         Path to a dataset file
 
     """
-    def __init__(self, dataset_path = os.path.join('virny', 'data', 'COMPAS.csv')):
+    def __init__(self, dataset_path = os.path.join('virny', 'datasets', 'COMPAS.csv')):
         # Read a dataset
         df = pd.read_csv(dataset_path)
 
@@ -78,8 +78,7 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataset):
 
 
 class ACSEmploymentDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'),
-                 with_nulls=False, optimize=True, subsample=None):
+    def __init__(self, state, year, root_dir=os.getcwd(), with_nulls=False, optimize=True, subsample=None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
         We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
@@ -137,7 +136,7 @@ class ACSEmploymentDataset(BaseDataset):
 
 
 class ACSMobilityDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'), with_nulls=False):
+    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
@@ -183,7 +182,7 @@ class ACSMobilityDataset(BaseDataset):
 
 
 class ACSPublicCoverageDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'), with_nulls=False):
+    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
@@ -228,7 +227,7 @@ class ACSPublicCoverageDataset(BaseDataset):
 
 
 class ACSTravelTimeDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'), with_nulls=False):
+    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
@@ -273,7 +272,7 @@ class ACSTravelTimeDataset(BaseDataset):
     
 
 class ACSIncomeDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'), with_nulls=False):
+    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
@@ -319,7 +318,7 @@ class ACSIncomeDataset(BaseDataset):
 
 class ACSDataset_from_demodq(BaseDataset):
     """ Following https://github.com/schelterlabs/demographic-data-quality """
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'data'), with_nulls=False, optimize=True):
+    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False, optimize=True):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
         We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
