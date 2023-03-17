@@ -1,7 +1,6 @@
 dataset_name: COMPAS_Without_Sensitive_Attributes
-test_set_fraction: 0.2
+test_set_fraction: 'custom_splits'
 bootstrap_fraction: 0.8
 n_estimators: 10  # Better to input the higher number of estimators than 100; this is only for this use case example
-runs_seed_lst: [100]
-# runs_seed_lst: [100, 200, 300, 400, 500]
+runs_seed_lst: [100, 200, 300]
 sensitive_attributes_dct: {'sex': 0, 'race': 'Caucasian', 'sex&race': None}

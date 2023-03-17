@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 
+from virny.configs.constants import CUSTOM_SPLITS_MODE
 from virny.custom_classes.base_dataset import BaseDataset
 from virny.preprocessing.basic_preprocessing import make_features_dfs
 from virny.utils.common_helpers import create_test_protected_groups
@@ -54,18 +55,28 @@ class GenericPipeline:
         self.test_protected_groups = None
 
     def create_preprocessed_train_test_split(self, dataset, test_set_fraction, seed):
-        X_train, X_test, y_train, y_test = train_test_split(self.X_data, self.y_data,
-                                                            test_size=test_set_fraction,
-                                                            random_state=seed)
-        print("Baseline X_train shape: ", X_train.shape)
-        print("Baseline X_test shape: ", X_test.shape)
+        # In case of custom splits, we do not need to split the dataset,
+        # but we need to use defined custom train and test dataset splits
+        if test_set_fraction == CUSTOM_SPLITS_MODE:
+            self.X_train_val = dataset.X_train_val
+            self.X_test = dataset.X_test
+            self.y_train_val = dataset.y_train_val
+            self.y_test = dataset.y_test
+            self.test_protected_groups = create_test_protected_groups(self.X_test, self.full_df, self.sensitive_attributes_dct)
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(self.X_data, self.y_data,
+                                                                test_size=test_set_fraction,
+                                                                random_state=seed)
+            self.test_protected_groups = create_test_protected_groups(X_test, self.full_df, self.sensitive_attributes_dct)
+            X_train_features, X_test_features = make_features_dfs(X_train, X_test, dataset)
 
-        X_train_features, X_test_features = make_features_dfs(X_train, X_test, dataset)
-        self.X_train_val = X_train_features
-        self.X_test = X_test_features
-        self.y_train_val = y_train
-        self.y_test = y_test
-        self.test_protected_groups = create_test_protected_groups(X_test, self.full_df, self.sensitive_attributes_dct)
+            self.X_train_val = X_train_features
+            self.X_test = X_test_features
+            self.y_train_val = y_train
+            self.y_test = y_test
+
+        print("Baseline X_train_val shape: ", self.X_train_val.shape)
+        print("Baseline X_test shape: ", self.X_test.shape)
 
         return self.X_train_val, self.y_train_val, self.X_test, self.y_test
 
