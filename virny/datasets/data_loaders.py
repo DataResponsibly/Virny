@@ -1,4 +1,5 @@
 import os
+import pathlib
 import pandas as pd
 import numpy as np
 
@@ -78,18 +79,19 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataset):
 
 
 class ACSEmploymentDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.getcwd(), with_nulls=False, optimize=True, subsample=None):
+    def __init__(self, state, year, root_dir=None, with_nulls=False, optimize=True, subsample=None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
         We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
         Alternatively, we could have altered the configuration from here:
         https://github.com/zykls/folktables/blob/main/folktables/acs.py
         """
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         if subsample is not None:
@@ -136,12 +138,13 @@ class ACSEmploymentDataset(BaseDataset):
 
 
 class ACSMobilityDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
+    def __init__(self, state, year, root_dir=None, with_nulls=False):
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSMobility.features
@@ -182,12 +185,13 @@ class ACSMobilityDataset(BaseDataset):
 
 
 class ACSPublicCoverageDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
+    def __init__(self, state, year, root_dir=None, with_nulls=False):
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSPublicCoverage.features
@@ -227,12 +231,13 @@ class ACSPublicCoverageDataset(BaseDataset):
 
 
 class ACSTravelTimeDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
+    def __init__(self, state, year, root_dir=None, with_nulls=False):
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSTravelTime.features
@@ -272,12 +277,13 @@ class ACSTravelTimeDataset(BaseDataset):
     
 
 class ACSIncomeDataset(BaseDataset):
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False):
+    def __init__(self, state, year, root_dir=None, with_nulls=False):
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSIncome.features
@@ -318,18 +324,19 @@ class ACSIncomeDataset(BaseDataset):
 
 class ACSDataset_from_demodq(BaseDataset):
     """ Following https://github.com/schelterlabs/demographic-data-quality """
-    def __init__(self, state, year, root_dir=os.path.join('virny', 'datasets'), with_nulls=False, optimize=True):
+    def __init__(self, state, year, root_dir=None, with_nulls=False, optimize=True):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
         We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
         Alternatively, we could have altered the configuration from here:
         https://github.com/zykls/folktables/blob/main/folktables/acs.py
         """
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
             horizon='1-Year',
             survey='person',
-            root_dir=root_dir
+            root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
         features =  ['AGEP', 'COW', 'SCHL', 'MAR', 'OCCP', 'POBP', 'RELP', 'WKHP', 'SEX', 'RAC1P']
