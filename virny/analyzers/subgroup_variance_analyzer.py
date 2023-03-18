@@ -1,7 +1,7 @@
 import pandas as pd
 
 from virny.configs.constants import ModelSetting
-from virny.custom_classes.generic_pipeline import GenericPipeline
+from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
 from virny.analyzers.incremental_overall_variance_analyzer import IncrementalOverallVarianceAnalyzer
@@ -23,35 +23,36 @@ class SubgroupVarianceAnalyzer:
         Model name
     bootstrap_fraction
         [0-1], fraction from train_pd_dataset for fitting an ensemble of base models
-    base_pipeline
+    dataset
         Initialized object of GenericPipeline class
     dataset_name
         Name of dataset, used for correct results naming
 
     """
     def __init__(self, model_setting: ModelSetting, n_estimators: int, base_model, base_model_name: str,
-                 bootstrap_fraction: float, base_pipeline: GenericPipeline, dataset_name: str):
+                 bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
+                 sensitive_attributes_dct: dict, test_protected_groups: dict):
         if model_setting == ModelSetting.BATCH:
             overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
                                                                      base_model_name=base_model_name,
                                                                      bootstrap_fraction=bootstrap_fraction,
-                                                                     X_train=base_pipeline.X_train_val,
-                                                                     y_train=base_pipeline.y_train_val,
-                                                                     X_test=base_pipeline.X_test,
-                                                                     y_test=base_pipeline.y_test,
+                                                                     X_train=dataset.X_train_val,
+                                                                     y_train=dataset.y_train_val,
+                                                                     X_test=dataset.X_test,
+                                                                     y_test=dataset.y_test,
                                                                      dataset_name=dataset_name,
-                                                                     target_column=base_pipeline.target,
+                                                                     target_column=dataset.target,
                                                                      n_estimators=n_estimators)
         elif model_setting == ModelSetting.INCREMENTAL:
             overall_variance_analyzer = IncrementalOverallVarianceAnalyzer(base_model=base_model,
                                                                            base_model_name=base_model_name,
                                                                            bootstrap_fraction=bootstrap_fraction,
-                                                                           X_train=base_pipeline.X_train_val,
-                                                                           y_train=base_pipeline.y_train_val,
-                                                                           X_test=base_pipeline.X_test,
-                                                                           y_test=base_pipeline.y_test,
+                                                                           X_train=dataset.X_train_val,
+                                                                           y_train=dataset.y_train_val,
+                                                                           X_test=dataset.X_test,
+                                                                           y_test=dataset.y_test,
                                                                            dataset_name=dataset_name,
-                                                                           target_column=base_pipeline.target,
+                                                                           target_column=dataset.target,
                                                                            n_estimators=n_estimators)
         else:
             raise ValueError('model_setting is incorrect or not supported')
@@ -61,9 +62,9 @@ class SubgroupVarianceAnalyzer:
         self.base_model_name = overall_variance_analyzer.base_model_name
 
         self.__overall_variance_analyzer = overall_variance_analyzer
-        self.__subgroup_variance_calculator = SubgroupVarianceCalculator(base_pipeline.X_test, base_pipeline.y_test,
-                                                                         base_pipeline.sensitive_attributes_dct,
-                                                                         base_pipeline.test_protected_groups)
+        self.__subgroup_variance_calculator = SubgroupVarianceCalculator(dataset.X_test, dataset.y_test,
+                                                                         sensitive_attributes_dct,
+                                                                         test_protected_groups)
         self.overall_variance_metrics_dct = dict()
         self.subgroup_variance_metrics_dct = dict()
 

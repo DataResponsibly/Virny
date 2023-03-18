@@ -22,12 +22,6 @@ def validate_config(config_obj):
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
 
-    elif config_obj.test_set_fraction != CUSTOM_SPLITS_MODE and (
-            not isinstance(config_obj.test_set_fraction, float)
-            or config_obj.test_set_fraction < 0.0
-            or config_obj.test_set_fraction > 1.0):
-        raise ValueError(f'test_set_fraction must be float in [0.0, 1.0] range or equal to "{CUSTOM_SPLITS_MODE}"')
-
     elif not isinstance(config_obj.bootstrap_fraction, float) \
             or config_obj.bootstrap_fraction < 0.0 \
             or config_obj.bootstrap_fraction > 1.0:
@@ -108,7 +102,7 @@ def check_sensitive_attrs_in_columns(df_columns, sensitive_attributes_dct):
     return True
 
 
-def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, sensitive_attributes_dct: dict):
+def create_test_protected_groups(X_test: pd.DataFrame, init_features_df: pd.DataFrame, sensitive_attributes_dct: dict):
     """
     Create protected groups based on a test feature set.
 
@@ -118,21 +112,20 @@ def create_test_protected_groups(X_test: pd.DataFrame, full_df: pd.DataFrame, se
     ----------
     X_test
         Test feature set
-    full_df
-        Full dataset
+    init_features_df
+        Initial full dataset without preprocessing
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
 
     """
-
     # Check if input sensitive attributes are in X_test.columns.
     # If no, add them only to create test groups
     if check_sensitive_attrs_in_columns(X_test.columns, sensitive_attributes_dct):
         X_test_with_sensitive_attrs = X_test
     else:
         plain_sensitive_attributes = [attr for attr in sensitive_attributes_dct.keys() if INTERSECTION_SIGN not in attr]
-        X_test_with_sensitive_attrs = full_df[plain_sensitive_attributes].loc[X_test.index]
+        X_test_with_sensitive_attrs = init_features_df[plain_sensitive_attributes].loc[X_test.index]
 
     groups = dict()
     for attr in sensitive_attributes_dct.keys():

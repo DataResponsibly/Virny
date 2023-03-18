@@ -7,15 +7,14 @@ from datetime import datetime, timezone
 from IPython.display import display
 
 from virny.configs.constants import ModelSetting
-from virny.utils.common_helpers import reset_model_seed
-from virny.utils.custom_initializers import create_base_pipeline
-from virny.custom_classes.base_dataset import BaseDataset
+from virny.utils.common_helpers import reset_model_seed, create_test_protected_groups
+from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
 from virny.utils.common_helpers import save_metrics_to_file
 from virny.analyzers.subgroup_statistical_bias_analyzer import SubgroupStatisticalBiasAnalyzer
 
 
-def compute_model_metrics_with_config(base_model, model_name: str, dataset: BaseDataset, config, save_results_dir_path: str,
+def compute_model_metrics_with_config(base_model, model_name: str, dataset: BaseFlowDataset, config, save_results_dir_path: str,
                                       model_seed: int = None, save_results: bool = True, debug_mode: bool = False) -> pd.DataFrame:
     """
     Compute subgroup metrics for the base model. Arguments are defined as an input config object.
@@ -30,7 +29,7 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
     model_name
         Model name to name a result file with metrics
     dataset
-        BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
+        BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
         Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
          n_estimators, sensitive_attributes_dct attributes
@@ -50,7 +49,6 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
     return compute_model_metrics(base_model=base_model,
                                  n_estimators=config.n_estimators,
                                  dataset=dataset,
-                                 test_set_fraction=config.test_set_fraction,
                                  bootstrap_fraction=config.bootstrap_fraction,
                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                  model_seed=model_seed,
@@ -61,7 +59,7 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
                                  debug_mode=debug_mode)
 
 
-def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, test_set_fraction: float, bootstrap_fraction: float,
+def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                           sensitive_attributes_dct: dict, model_seed: int, dataset_name: str, base_model_name: str,
                           model_setting: str = ModelSetting.BATCH.value, save_results: bool = True,
                           save_results_dir_path: str = None, debug_mode: bool = False):
@@ -78,9 +76,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
     n_estimators
         Number of estimators for bootstrap to compute subgroup variance metrics
     dataset
-        BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
-    test_set_fraction
-        Fraction of the whole dataset in range [0.0 - 1.0] to create a test set
+        BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     bootstrap_fraction
         Fraction of a train set in range [0.0 - 1.0] to fit models in bootstrap
     sensitive_attributes_dct
@@ -103,26 +99,30 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
     base_model = reset_model_seed(base_model, model_seed)
-    base_pipeline = create_base_pipeline(dataset, sensitive_attributes_dct, model_seed, test_set_fraction)
+    test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_features_df, sensitive_attributes_dct)
     if debug_mode:
         print('\nProtected groups splits:')
-        for g in base_pipeline.test_protected_groups.keys():
-            print(g, base_pipeline.test_protected_groups[g].shape)
-
-        print('\n\nTop rows of processed X train + validation set: ')
-        display(base_pipeline.X_train_val.head(10))
+        for g in test_protected_groups.keys():
+            print(g, test_protected_groups[g].shape)
 
     # Compute variance metrics for subgroups
-    subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting, n_estimators, base_model, base_model_name,
-                                                          bootstrap_fraction, base_pipeline, dataset_name)
+    subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
+                                                          n_estimators=n_estimators,
+                                                          base_model=base_model,
+                                                          base_model_name=base_model_name,
+                                                          bootstrap_fraction=bootstrap_fraction,
+                                                          dataset=dataset,
+                                                          dataset_name=dataset_name,
+                                                          sensitive_attributes_dct=sensitive_attributes_dct,
+                                                          test_protected_groups=test_protected_groups)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
                                                                               save_dir_path=None,
                                                                               make_plots=False)
 
     # Compute bias metrics for subgroups
-    bias_analyzer = SubgroupStatisticalBiasAnalyzer(base_pipeline.X_test, base_pipeline.y_test,
-                                                    base_pipeline.sensitive_attributes_dct, base_pipeline.test_protected_groups)
+    bias_analyzer = SubgroupStatisticalBiasAnalyzer(dataset.X_test, dataset.y_test,
+                                                    sensitive_attributes_dct, test_protected_groups)
     dtc_res = bias_analyzer.compute_subgroup_metrics(y_preds,
                                                      save_results=False,
                                                      result_filename=None,
@@ -143,7 +143,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseDataset, t
     return metrics_df
 
 
-def run_metrics_computation_with_config(dataset: BaseDataset, config, models_config: dict, save_results_dir_path: str,
+def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
                                         run_seed: int = None, debug_mode: bool = False) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config.
@@ -174,7 +174,6 @@ def run_metrics_computation_with_config(dataset: BaseDataset, config, models_con
     os.makedirs(save_results_dir_path, exist_ok=True)
     # Parse config and execute the main run_metrics_computation function
     return run_metrics_computation(dataset=dataset,
-                                   test_set_fraction=config.test_set_fraction,
                                    bootstrap_fraction=config.bootstrap_fraction,
                                    dataset_name=config.dataset_name,
                                    models_config=models_config,
@@ -187,7 +186,7 @@ def run_metrics_computation_with_config(dataset: BaseDataset, config, models_con
                                    debug_mode=debug_mode)
 
 
-def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, bootstrap_fraction: float, dataset_name: str,
+def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
                             save_results: bool = True, save_results_dir_path: str = None, debug_mode: bool = False) -> dict:
@@ -201,8 +200,6 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
     ----------
     dataset
         Dataset object that contains all needed attributes like target, features, numerical_columns etc.
-    test_set_fraction
-        Fraction of the whole dataset in range [0.0 - 1.0] to create a test set
     bootstrap_fraction
         Fraction of a train set in range [0.0 - 1.0] to fit models in bootstrap
     dataset_name
@@ -237,7 +234,6 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
             model_metrics_df = compute_model_metrics(base_model=base_model,
                                                      n_estimators=n_estimators,
                                                      dataset=dataset,
-                                                     test_set_fraction=test_set_fraction,
                                                      bootstrap_fraction=bootstrap_fraction,
                                                      sensitive_attributes_dct=sensitive_attributes_dct,
                                                      model_setting=model_setting,
@@ -260,7 +256,7 @@ def run_metrics_computation(dataset: BaseDataset, test_set_fraction: float, boot
     return models_metrics_dct
 
 
-def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: dict,
+def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
                                   save_results_dir_path: str, debug_mode=False) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
@@ -271,7 +267,7 @@ def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: d
     Parameters
     ----------
     dataset
-        BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
+        BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
         Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
          n_estimators, sensitive_attributes_dct attributes
@@ -292,7 +288,6 @@ def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: d
                                   desc="Multiple runs progress",
                                   colour="green"):
         models_metrics_dct = run_metrics_computation(dataset=dataset,
-                                                     test_set_fraction=config.test_set_fraction,
                                                      bootstrap_fraction=config.bootstrap_fraction,
                                                      dataset_name=config.dataset_name,
                                                      models_config=models_config,
@@ -319,7 +314,7 @@ def compute_metrics_multiple_runs(dataset: BaseDataset, config, models_config: d
     return multiple_runs_metrics_dct
 
 
-def compute_metrics_multiple_runs_with_db_writer(dataset: BaseDataset, config, models_config: dict,
+def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
                                                  custom_tbl_fields_dct: dict, db_writer_func, debug_mode=False) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
@@ -330,7 +325,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseDataset, config, m
     Parameters
     ----------
     dataset
-        BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
+        BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
         Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
          n_estimators, sensitive_attributes_dct attributes
@@ -351,7 +346,6 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseDataset, config, m
                                   colour="green"):
         run_models_metrics_df = pd.DataFrame()
         models_metrics_dct = run_metrics_computation(dataset=dataset,
-                                                     test_set_fraction=config.test_set_fraction,
                                                      bootstrap_fraction=config.bootstrap_fraction,
                                                      dataset_name=config.dataset_name,
                                                      models_config=models_config,
