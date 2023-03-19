@@ -31,7 +31,7 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
     X_train_features = pd.DataFrame(X_train_features_np_arr, columns=feature_names, index=X_train_val.index)
     X_test_features = pd.DataFrame(X_test_features_np_arr, columns=feature_names, index=X_test.index)
 
-    return BaseFlowDataset(init_features_df=data_loader.full_df.drop(data_loader.target, axis=1),
+    return BaseFlowDataset(init_features_df=data_loader.full_df.drop(data_loader.target, axis=1, errors='ignore'),
                            X_train_val=X_train_features,
                            X_test=X_test_features,
                            y_train_val=y_train_val,

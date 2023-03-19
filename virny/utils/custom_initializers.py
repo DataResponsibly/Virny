@@ -4,6 +4,7 @@ import pandas as pd
 from munch import DefaultMunch
 
 from virny.utils.common_helpers import validate_config
+from virny.configs.constants import INTERSECTION_SIGN
 
 
 def create_config_obj(config_yaml_path: str):
@@ -21,6 +22,16 @@ def create_config_obj(config_yaml_path: str):
 
     config_obj = DefaultMunch.fromDict(config_dct)
     validate_config(config_obj)
+
+    # Fix formatting
+    sensitive_attributes_dct_keys = list(config_obj.sensitive_attributes_dct.keys())
+    for attr in sensitive_attributes_dct_keys:
+        if INTERSECTION_SIGN in attr:
+            attrs = attr.strip().split(INTERSECTION_SIGN)
+            cleaned_attr = INTERSECTION_SIGN.join(attr.strip() for attr in attrs)
+            config_obj.sensitive_attributes_dct[cleaned_attr] = config_obj.sensitive_attributes_dct[attr]
+
+            del config_obj.sensitive_attributes_dct[attr]
 
     return config_obj
 

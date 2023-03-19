@@ -7,7 +7,8 @@ from datetime import datetime, timezone
 from IPython.display import display
 
 from virny.configs.constants import ModelSetting
-from virny.utils.common_helpers import reset_model_seed, create_test_protected_groups
+from virny.utils.common_helpers import reset_model_seed
+from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
 from virny.utils.common_helpers import save_metrics_to_file
@@ -31,8 +32,7 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
-        Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
-         n_estimators, sensitive_attributes_dct attributes
+        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
     save_results_dir_path
         Location where to save result files with metrics
     model_seed
@@ -156,8 +156,7 @@ def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models
     dataset
         Dataset object that contains all needed attributes like target, features, numerical_columns etc
     config
-        Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
-         n_estimators, sensitive_attributes_dct attributes
+        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
     models_config
         Dictionary where keys are model names, and values are initialized models
     save_results_dir_path
@@ -269,8 +268,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
-        Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
-         n_estimators, sensitive_attributes_dct attributes
+        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
     models_config
         Dictionary where keys are model names, and values are initialized models
     save_results_dir_path
@@ -327,8 +325,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     config
-        Object that contains test_set_fraction, bootstrap_fraction, dataset_name,
-         n_estimators, sensitive_attributes_dct attributes
+        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
     models_config
         Dictionary where keys are model names, and values are initialized models
     custom_tbl_fields_dct

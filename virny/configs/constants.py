@@ -24,7 +24,6 @@ class ReportType(Enum):
     ONE_RUN_ONE_MODEL = "one_run_one_model"
 
 
-CUSTOM_SPLITS_MODE = 'custom_splits'
 INTERSECTION_SIGN = '&'
 MODELS_TUNING_SEED = 42
 NULL_PREDICTOR_SEED = 42
