@@ -1,14 +1,30 @@
-from null_helpers import find_column_mode, find_column_mean, find_column_median
+from sklearn.base import BaseEstimator, TransformerMixin
+from virny.preprocessing.null_helpers import find_column_mode, find_column_mean, find_column_median
 
 
-# TODO: Handle mode or mean/median implicitly based on null column type.
-#  For special, decide which value to impute based on whether the column is categorical or numerical.
-class NullImputer:
-    def __init__(self, target_columns, how="mean", trimmed=0, conditional_column=None, special_value=None):
+class NullImputer(BaseEstimator, TransformerMixin):
+    """
+    Null imputer that has ["mean", "median", "mode", "special"] strategies.
+
+    Parameters
+    ----------
+    target_columns
+        List of column names to impute
+    how
+
+    trimmed
+
+    conditional_column
+
+    special_value
+
+    """
+    def __init__(self, target_columns: list, how="mean", trimmed=0, conditional_column=None, special_value=None):
         self.how = how
         self.target_columns = target_columns
         self.conditional_column = conditional_column
         self.trimmed = trimmed
+        self.special_value = special_value
         self.mask = None
         values_to_impute = {}
         for col in self.target_columns:
@@ -60,7 +76,7 @@ class NullImputer:
                 values_to_impute[col] = mapping_dict
 
         self.values_to_impute = values_to_impute
-        return
+        return self
 
     def transform(self, X, y=None):
         data = X.copy(deep=True)
@@ -79,6 +95,6 @@ class NullImputer:
 
         return data
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X, y=None, **fit_params):
         self.fit(X)
         return self.transform(X)

@@ -2,7 +2,7 @@ import os
 
 from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
-from river import base, compat
+from river import base
 
 from virny.configs.constants import INTERSECTION_SIGN, ModelSetting
 
@@ -84,6 +84,7 @@ def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
 def confusion_matrix_metrics(y_true, y_preds):
     metrics = {}
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
+
     metrics['TPR'] = TP/(TP+FN)
     metrics['TNR'] = TN/(TN+FP)
     metrics['PPV'] = TP/(TP+FP)

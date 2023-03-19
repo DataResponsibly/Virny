@@ -3,6 +3,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.model_selection import train_test_split
 
+from virny.utils.validation import check_is_fitted
 from virny.datasets.data_loaders import BaseDataLoader
 from virny.custom_classes.base_dataset import BaseFlowDataset
 
@@ -21,13 +22,15 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
 
     # Get pipeline column names
     transformers_vars = column_transformer.get_params()['transformers']
-    feature_names = []
+    feature_names = set()
     for name, _, features in transformers_vars:
-        if isinstance(column_transformer.named_transformers_[name], OneHotEncoder):
-            feature_names += column_transformer.named_transformers_[name].get_feature_names_out().tolist()
+        encoder = column_transformer.named_transformers_[name]
+        if isinstance(encoder, OneHotEncoder) and check_is_fitted(encoder):
+            feature_names = feature_names.union(column_transformer.named_transformers_[name].get_feature_names_out().tolist())
         else:
-            feature_names += features
+            feature_names = feature_names.union(features)
 
+    feature_names = list(feature_names)
     X_train_features = pd.DataFrame(X_train_features_np_arr, columns=feature_names, index=X_train_val.index)
     X_test_features = pd.DataFrame(X_test_features_np_arr, columns=feature_names, index=X_test.index)
 

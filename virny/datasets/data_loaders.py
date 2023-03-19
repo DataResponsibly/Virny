@@ -1,4 +1,3 @@
-import os
 import pathlib
 import pandas as pd
 import numpy as np
@@ -8,6 +7,16 @@ from virny.datasets.base import BaseDataLoader
 
 
 class CreditDataset(BaseDataLoader):
+    """
+    Dataset class for Credit dataset that contains sensitive attributes among feature columns.
+    Source: https://www.kaggle.com/competitions/GiveMeSomeCredit/overview
+
+    Parameters
+    ----------
+    subsample_size
+        Subsample size to create based on the input dataset
+
+    """
     def __init__(self, subsample_size=None):
         filename = 'givemesomecredit.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
@@ -36,8 +45,8 @@ class CompasDataset(BaseDataLoader):
 
     Parameters
     ----------
-    dataset_path
-        Path to a dataset file
+    subsample_size
+        Subsample size to create based on the input dataset
 
     """
     def __init__(self, subsample_size=None):
@@ -146,7 +155,7 @@ class ACSEmploymentDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            full_df=dataset,
+            full_df=optimized_X_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
