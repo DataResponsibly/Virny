@@ -3,16 +3,20 @@ import pandas as pd
 
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error, accuracy_score, f1_score
 
 
-class NullPredictor:
+class NullPredictor(BaseEstimator, TransformerMixin):
     def __init__(self, base_classifier, input_columns, target_columns, categorical_columns, numerical_columns):
+        self.base_classifier = base_classifier
         self.input_columns = input_columns
         self.target_columns = target_columns
-        self.categorical_columns = [x for x in categorical_columns if x in self.input_columns]
-        self.numerical_columns = [x for x in numerical_columns if x in self.input_columns]
+        categorical_columns = [x for x in categorical_columns if x in self.input_columns]
+        numerical_columns = [x for x in numerical_columns if x in self.input_columns]
+        self.categorical_columns = categorical_columns
+        self.numerical_columns = numerical_columns
 
         self.target_transformer = dict()
         self.target_column_types = dict()
@@ -46,10 +50,13 @@ class NullPredictor:
             ])
             pipeline = Pipeline([('features', encoder), ('learner', self.base_model[col])])
 
-            print('Train set shape: ', X.shape)
+            print('Train X set shape: ', X.shape)
+
             model = pipeline.fit(X, y)
             print("Fit score: ", pipeline.score(X, y))
             self.fitted_model[col] = model
+
+        return self
 
     def evaluate_prediction(self, target_column, X_test, actual, predicted):
         print("Model prediction score: ", self.fitted_model[target_column].score(X_test, actual))
@@ -78,18 +85,18 @@ class NullPredictor:
                 predicted = self.target_transformer[col].inverse_transform(predicted)
                 print('Predicted values were inversely transformed')
 
-            # Evaluate model prediction
-            if isinstance(y, pd.Series):
-                try:
-                    self.evaluate_prediction(col, X_test, y, predicted)
-                except Exception as err:
-                    print("Error during prediction evaluation: ", err)
+            # # Evaluate model prediction
+            # if isinstance(y, pd.Series):
+            #     try:
+            #         self.evaluate_prediction(col, X_test, y, predicted)
+            #     except Exception as err:
+            #         print("Error during prediction evaluation: ", err)
 
             data[col].iloc[null_idx] = predicted.round()
             data[col] = data[col].astype(int)
 
         return data
 
-    def fit_transform(self, data, y=None):
+    def fit_transform(self, data, y=None, **fit_params):
         self.fit(data)
         return self.transform(data)

@@ -1,5 +1,6 @@
 
-dataset_name: COMPAS
+dataset_name: Credit
 bootstrap_fraction: 0.8
-n_estimators: 100
-sensitive_attributes_dct: {'sex': 0, 'age': 25, 'race': 'Caucasian', 'sex&race': None}
+n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
+runs_seed_lst: [100]
+sensitive_attributes_dct: {'age': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]}
