@@ -27,9 +27,15 @@ class BaseFlowDataset:
         List of categorical column names
 
     """
+
     def __init__(self, init_features_df: pd.DataFrame, X_train_val: pd.DataFrame, X_test: pd.DataFrame,
                  y_train_val: pd.DataFrame, y_test: pd.DataFrame,
                  target: str, numerical_columns: list, categorical_columns: list):
+        # Validate input sets
+        if not isinstance(init_features_df, pd.DataFrame) or not isinstance(X_train_val, pd.DataFrame) \
+                or not isinstance(X_test, pd.DataFrame):
+            raise ValueError("Input feature sets must be in a pd.DataFrame format")
+
         self.init_features_df = init_features_df
         self.X_train_val = X_train_val
         self.X_test = X_test

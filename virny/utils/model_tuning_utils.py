@@ -107,7 +107,7 @@ def tune_ML_models(models_params_for_tuning: dict, base_flow_dataset: BaseFlowDa
                                                                                model_params['params'],
                                                                                n_folds, samples_per_fold)
             print(f'{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}: Tuning for {model_name} is finished '
-                  f'[F1 score = {cur_f1_score}, Accuracy = {cur_accuracy}]')
+                  f'[F1 score = {cur_f1_score}, Accuracy = {cur_accuracy}]\n')
 
         except Exception as err:
             print(f"ERROR with {model_name}: ", err)
