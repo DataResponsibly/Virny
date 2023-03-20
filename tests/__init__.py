@@ -6,7 +6,7 @@ from munch import DefaultMunch
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 
-from virny.custom_classes.base_dataset import BaseDataset
+from virny.datasets.base import BaseDataLoader
 
 
 def get_root_dir():
@@ -68,13 +68,11 @@ def compas_dataset_class():
     numerical_columns = ['age', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count']
     categorical_columns = ['race', 'age_cat_25 - 45', 'age_cat_Greater than 45',
                            'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
-    features = numerical_columns + categorical_columns
 
-    return BaseDataset(pandas_df=df,
-                       features=features,
-                       target=target,
-                       numerical_columns=numerical_columns,
-                       categorical_columns=categorical_columns)
+    return BaseDataLoader(full_df=df,
+                          target=target,
+                          numerical_columns=numerical_columns,
+                          categorical_columns=categorical_columns)
 
 
 @pytest.fixture(scope='package')
@@ -91,10 +89,8 @@ def compas_without_sensitive_attrs_dataset_class():
     numerical_columns = ['juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count']
     categorical_columns = ['age_cat_25 - 45', 'age_cat_Greater than 45',
                            'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M']
-    features = numerical_columns + categorical_columns
 
-    return BaseDataset(pandas_df=df,
-                       features=features,
-                       target=target,
-                       numerical_columns=numerical_columns,
-                       categorical_columns=categorical_columns)
+    return BaseDataLoader(full_df=df,
+                          target=target,
+                          numerical_columns=numerical_columns,
+                          categorical_columns=categorical_columns)

@@ -1,7 +1,47 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.model_selection import train_test_split
 
-from virny.custom_classes.base_dataset import BaseDataset
+from virny.utils.validation import check_is_fitted
+from virny.datasets.data_loaders import BaseDataLoader
+from virny.custom_classes.base_dataset import BaseFlowDataset
+
+
+def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTransformer,
+                       test_set_fraction: float, dataset_split_seed: int) -> BaseFlowDataset:
+    if test_set_fraction < 0.0 or test_set_fraction > 1.0:
+        raise ValueError("test_set_fraction must be a float in the [0.0-1.0] range")
+
+    # Split and preprocess the dataset
+    X_train_val, X_test, y_train_val, y_test = train_test_split(data_loader.X_data, data_loader.y_data,
+                                                                test_size=test_set_fraction,
+                                                                random_state=dataset_split_seed)
+    X_train_features_np_arr = column_transformer.fit_transform(X_train_val)
+    X_test_features_np_arr = column_transformer.transform(X_test)
+
+    # Get pipeline column names
+    transformers_vars = column_transformer.get_params()['transformers']
+    feature_names = set()
+    for name, _, features in transformers_vars:
+        encoder = column_transformer.named_transformers_[name]
+        if isinstance(encoder, OneHotEncoder) and check_is_fitted(encoder):
+            feature_names = feature_names.union(column_transformer.named_transformers_[name].get_feature_names_out().tolist())
+        else:
+            feature_names = feature_names.union(features)
+
+    feature_names = list(feature_names)
+    X_train_features = pd.DataFrame(X_train_features_np_arr, columns=feature_names, index=X_train_val.index)
+    X_test_features = pd.DataFrame(X_test_features_np_arr, columns=feature_names, index=X_test.index)
+
+    return BaseFlowDataset(init_features_df=data_loader.full_df.drop(data_loader.target, axis=1, errors='ignore'),
+                           X_train_val=X_train_features,
+                           X_test=X_test_features,
+                           y_train_val=y_train_val,
+                           y_test=y_test,
+                           target=data_loader.target,
+                           numerical_columns=data_loader.numerical_columns,
+                           categorical_columns=data_loader.categorical_columns)
 
 
 def get_dummies(data: pd.DataFrame, categorical_columns: list, numerical_columns: list):
@@ -25,7 +65,7 @@ def get_dummies(data: pd.DataFrame, categorical_columns: list, numerical_columns
     return feature_df
 
 
-def make_features_dfs(X_train: pd.DataFrame, X_test: pd.DataFrame, dataset: BaseDataset):
+def make_features_dfs(X_train: pd.DataFrame, X_test: pd.DataFrame, dataset: BaseFlowDataset):
     """
     Return preprocessed train and test feature dataframes after one-hot encoding and standard scaling.
 

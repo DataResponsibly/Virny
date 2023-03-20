@@ -10,5 +10,8 @@ doc:
 livedoc: doc
 	mkdocs serve
 
+test:
+	python -m pytest tests
+
 develop:
 	python ./setup.py develop

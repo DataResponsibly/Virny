@@ -7,13 +7,11 @@ from pprint import pprint
 from copy import deepcopy
 from datetime import datetime
 
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, accuracy_score, f1_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 
-from virny.configs.constants import MODELS_TUNING_TEST_SET_FRACTION, MODELS_TUNING_SEED
-from virny.preprocessing.basic_preprocessing import make_features_dfs
+from virny.custom_classes.base_dataset import BaseFlowDataset
 
 
 def folds_iterator(n_folds, samples_per_fold, size):
@@ -28,50 +26,9 @@ def folds_iterator(n_folds, samples_per_fold, size):
               np.arange(size - samples_per_fold * (i + 1), size - samples_per_fold * i)
 
 
-def test_baseline_models(models_config, dataset, dataset_name, n_folds = 3):
-    """
-    Prepare datasets and find the best model for an original baseline dataset without nulls.
-
-    :return: a dataframe of metrics, measured for each model and its best parameters
-    """
-    X_train, X_test, y_train, y_test = train_test_split(dataset.X_data, dataset.y_data,
-                                                        test_size=MODELS_TUNING_TEST_SET_FRACTION,
-                                                        random_state=MODELS_TUNING_SEED)
-    print("Baseline X_train shape: ", X_train.shape)
-    print("Baseline X_test shape: ", X_test.shape)
-
-    X_train_features, X_test_features = make_features_dfs(X_train, X_test, dataset)
-    print('X_train_features.columns: ', X_train_features.columns)
-
-    samples_per_fold = len(y_test)
-    best_results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
-                                            'Accuracy_Score',
-                                            'Model_Best_Params', 'Model_Pred'))
-    ML_results_df = test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
-                                   X_train_features, y_train, X_test_features, y_test, dataset_name,
-                                   show_plots=True, debug_mode=True)
-    return ML_results_df
-
-
-def test_models(models_config, X_train_features, y_train, X_test_features, y_test, n_folds = 3):
-    """
-    Find the best model for a non-baseline dataset without nulls.
-
-    :return: a dataframe of metrics, measured for each model and its best parameters
-    """
-    samples_per_fold = len(y_test)
-    best_results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
-                                            'Accuracy_Score',
-                                            'Model_Best_Params', 'Model_Pred'))
-    ML_results_df = test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
-                                   X_train_features, y_train, X_test_features, y_test, "Folktables [NY 2018]",
-                                   show_plots=True, debug_mode=True)
-    return ML_results_df
-
-
 def validate_model(model, x, y, params, n_folds, samples_per_fold):
     """
-    Use GridSearchCV for a special model to find the best hyper-parameters based on validation set
+    Use GridSearchCV for a special model to find the best hyperparameters based on validation set
     """
     grid_search = GridSearchCV(estimator=model,
                                param_grid=params,
@@ -122,20 +79,58 @@ def test_evaluation(cur_best_model, model_name, cur_best_params,
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Employed", "Not Employed"])
         disp.plot()
         plt.show()
+
     return test_f1_score, test_accuracy, cur_model_pred
 
 
-def test_ML_models(best_results_df, models_config, n_folds, samples_per_fold,
-                   X_train, y_train, X_test, y_test, dataset_title, show_plots, debug_mode):
+def tune_ML_models(models_params_for_tuning: dict, base_flow_dataset: BaseFlowDataset,
+                   dataset_name: str, n_folds: int = 3, samples_per_fold: int = None):
+    """
+    Tune each model on a validation set with GridSearchCV.
+
+    Return each model with its best hyperparameters that have the highest F1 score and Accuracy.
+     results_df is a dataframe with metrics and tuned parameters;
+     models_config is a dict with model tuned params for the metrics computation stage
+    """
+    if samples_per_fold is None:
+        samples_per_fold = len(base_flow_dataset.y_test)
+
+    models_config = dict()
+    tuned_params_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score', 'Accuracy_Score', 'Model_Best_Params'))
+    # Find the most optimal hyperparameters based on accuracy and F1-score for each model in models_config
+    for model_idx, (model_name, model_params) in enumerate(models_params_for_tuning.items()):
+        try:
+            print(f"{datetime.now().strftime('%Y/%m/%d, %H:%M:%S')}: Tuning {model_name}...")
+            cur_model, cur_f1_score, cur_accuracy, cur_params = validate_model(deepcopy(model_params['model']),
+                                                                               base_flow_dataset.X_train_val,
+                                                                               base_flow_dataset.y_train_val,
+                                                                               model_params['params'],
+                                                                               n_folds, samples_per_fold)
+            print(f'{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}: Tuning for {model_name} is finished '
+                  f'[F1 score = {cur_f1_score}, Accuracy = {cur_accuracy}]\n')
+
+        except Exception as err:
+            print(f"ERROR with {model_name}: ", err)
+            continue
+
+        # Save test results of each model in dataframe
+        tuned_params_df.loc[model_idx] = [dataset_name, model_name, cur_f1_score, cur_accuracy, cur_params]
+        models_config[model_name] = model_params['model'].set_params(**cur_params)
+
+    return tuned_params_df, models_config
+
+
+def test_ML_models(best_results_df, models_config, n_folds, X_train, y_train, X_test, y_test,
+                   dataset_title, show_plots, debug_mode):
     """
     Find the best model from defined list.
     Tune each model on a validation set with GridSearchCV and
-    return best_model with its hyper-parameters, which has the highest F1 score
+    return best_model with its hyperparameters, which has the highest F1 score
     """
     results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
                                        'Accuracy_Score',
                                        'Model_Best_Params'))
-
+    samples_per_fold = len(y_test)
     best_f1_score = -np.Inf
     best_accuracy = -np.Inf
     best_model_pred = []

@@ -1,25 +1,61 @@
-import os
 import pathlib
 import pandas as pd
 import numpy as np
 
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility
+from virny.datasets.base import BaseDataLoader
 
-from virny.custom_classes.base_dataset import BaseDataset
+
+class CreditDataset(BaseDataLoader):
+    """
+    Dataset class for Credit dataset that contains sensitive attributes among feature columns.
+    Source: https://www.kaggle.com/competitions/GiveMeSomeCredit/overview
+
+    Parameters
+    ----------
+    subsample_size
+        Subsample size to create based on the input dataset
+
+    """
+    def __init__(self, subsample_size=None):
+        filename = 'givemesomecredit.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
+        df = pd.read_csv(dataset_path, index_col=0)
+        if subsample_size:
+            df = df.sample(subsample_size)
+
+        target = 'SeriousDlqin2yrs'
+        numerical_columns = ['RevolvingUtilizationOfUnsecuredLines', 'age', 'NumberOfTime30-59DaysPastDueNotWorse',
+                             'DebtRatio', 'MonthlyIncome', 'NumberOfOpenCreditLinesAndLoans',
+                             'NumberOfTimes90DaysLate', 'NumberRealEstateLoansOrLines']
+        categorical_columns = []
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
 
 
-class CompasDataset(BaseDataset):
+class CompasDataset(BaseDataLoader):
     """
     Dataset class for COMPAS dataset that contains sensitive attributes among feature columns.
 
     Parameters
     ----------
-    dataset_path
-        Path to a dataset file
+    subsample_size
+        Subsample size to create based on the input dataset
 
     """
-    def __init__(self, dataset_path: str = os.path.join('virny', 'datasets', 'COMPAS.csv')):
+    def __init__(self, subsample_size=None):
+        filename = 'COMPAS.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
         df = pd.read_csv(dataset_path)
+        if subsample_size:
+            df = df.sample(subsample_size)
 
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
                        'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
@@ -30,31 +66,33 @@ class CompasDataset(BaseDataset):
         numerical_columns = ['age', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count']
         categorical_columns = ['race', 'age_cat_25 - 45', 'age_cat_Greater than 45',
                                'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
-        features = numerical_columns + categorical_columns
 
         super().__init__(
-            pandas_df=df,
-            features=features,
+            full_df=df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
         )
 
 
-class CompasWithoutSensitiveAttrsDataset(BaseDataset):
+class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
     """
     Dataset class for COMPAS dataset that does not contain sensitive attributes among feature columns
      to test blind classifiers
 
     Parameters
     ----------
-    dataset_path
-        Path to a dataset file
+    subsample_size
+        Subsample size to create based on the input dataset
 
     """
-    def __init__(self, dataset_path = os.path.join('virny', 'datasets', 'COMPAS.csv')):
-        # Read a dataset
+    def __init__(self, subsample_size: int = None):
+        filename = 'COMPAS.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
         df = pd.read_csv(dataset_path)
+        if subsample_size:
+            df = df.sample(subsample_size)
 
         # Initial data types transformation
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -66,19 +104,17 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataset):
         target = 'recidivism'
         numerical_columns = ['juv_fel_count', 'juv_misd_count', 'juv_other_count','priors_count']
         categorical_columns = ['age_cat_25 - 45', 'age_cat_Greater than 45','age_cat_Less than 25',
-                                    'c_charge_degree_F', 'c_charge_degree_M']
-        features = numerical_columns + categorical_columns
+                               'c_charge_degree_F', 'c_charge_degree_M']
 
         super().__init__(
-            pandas_df=df,
-            features=features,
+            full_df=df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns
         )
 
 
-class ACSEmploymentDataset(BaseDataset):
+class ACSEmploymentDataset(BaseDataLoader):
     def __init__(self, state, year, root_dir=None, with_nulls=False, optimize=True, subsample=None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
@@ -119,8 +155,7 @@ class ACSEmploymentDataset(BaseDataset):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=dataset,
-            features=features,
+            full_df=optimized_X_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
@@ -137,7 +172,7 @@ class ACSEmploymentDataset(BaseDataset):
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
 
 
-class ACSMobilityDataset(BaseDataset):
+class ACSMobilityDataset(BaseDataLoader):
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -166,8 +201,7 @@ class ACSMobilityDataset(BaseDataset):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=acs_data,
-            features=features,
+            full_df=acs_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
@@ -184,7 +218,7 @@ class ACSMobilityDataset(BaseDataset):
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
 
 
-class ACSPublicCoverageDataset(BaseDataset):
+class ACSPublicCoverageDataset(BaseDataLoader):
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -212,8 +246,7 @@ class ACSPublicCoverageDataset(BaseDataset):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=acs_data,
-            features=features,
+            full_df=acs_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
@@ -230,7 +263,7 @@ class ACSPublicCoverageDataset(BaseDataset):
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
 
 
-class ACSTravelTimeDataset(BaseDataset):
+class ACSTravelTimeDataset(BaseDataLoader):
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -258,8 +291,7 @@ class ACSTravelTimeDataset(BaseDataset):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=acs_data,
-            features=features,
+            full_df=acs_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
@@ -276,7 +308,7 @@ class ACSTravelTimeDataset(BaseDataset):
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
     
 
-class ACSIncomeDataset(BaseDataset):
+class ACSIncomeDataset(BaseDataLoader):
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -304,8 +336,7 @@ class ACSIncomeDataset(BaseDataset):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=acs_data,
-            features=features,
+            full_df=acs_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
@@ -322,7 +353,7 @@ class ACSIncomeDataset(BaseDataset):
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
 
 
-class ACSDataset_from_demodq(BaseDataset):
+class ACSDataset_from_demodq(BaseDataLoader):
     """ Following https://github.com/schelterlabs/demographic-data-quality """
     def __init__(self, state, year, root_dir=None, with_nulls=False, optimize=True):
         """
@@ -357,8 +388,7 @@ class ACSDataset_from_demodq(BaseDataset):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            pandas_df=acs_data,
-            features=features,
+            full_df=acs_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
