@@ -29,9 +29,8 @@ def create_config_obj(config_yaml_path: str):
         if INTERSECTION_SIGN in attr:
             attrs = attr.strip().split(INTERSECTION_SIGN)
             cleaned_attr = INTERSECTION_SIGN.join(attr.strip() for attr in attrs)
-            config_obj.sensitive_attributes_dct[cleaned_attr] = config_obj.sensitive_attributes_dct[attr]
-
-            del config_obj.sensitive_attributes_dct[attr]
+            if cleaned_attr != attr:
+                config_obj.sensitive_attributes_dct[cleaned_attr] = config_obj.sensitive_attributes_dct.pop(attr)
 
     return config_obj
 
@@ -45,6 +44,31 @@ def read_model_metric_dfs(metrics_path, model_names):
             if model_name in filename:
                 models_metrics_dct[model_name] = pd.read_csv(f'{metrics_path}/{filename}')
                 break
+
+    return models_metrics_dct
+
+
+def create_models_metrics_dct_from_database_df(model_metric_dfs):
+    """
+    Create a models_metrics_dct from a metrics dataframe written to a database.
+    Return the models_metrics_dct where a key is a model name and a value is a metrics dataframe for the model.
+
+    Parameters
+    ----------
+    model_metric_dfs
+        Path to a config yaml file
+
+    """
+    # Create columns based on values in the Subgroup column
+    pivoted_model_metric_dfs = model_metric_dfs.pivot(columns='Subgroup', values='Metric_Value',
+                                                      index=[col for col in model_metric_dfs.columns
+                                                             if col not in ('Subgroup', 'Metric_Value')]).reset_index()
+    pivoted_model_metric_dfs = pivoted_model_metric_dfs.rename_axis(None, axis=1)
+
+    # Create a dict of metrics for each model
+    models_metrics_dct = dict()
+    for model_name in pivoted_model_metric_dfs['Model_Name'].unique():
+        models_metrics_dct[model_name] = pivoted_model_metric_dfs[pivoted_model_metric_dfs['Model_Name'] == model_name]
 
     return models_metrics_dct
 
