@@ -134,6 +134,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Seed'] = model_seed
     metrics_df['Model_Name'] = base_model_name
+    metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics
@@ -353,14 +354,15 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                      save_results=False,
                                                      debug_mode=debug_mode)
 
-        # Concatenate current run metrics with previous results and create melted_model_metrics_df to save it in a database
+        # Concatenate current run metrics with previous results and
+        # create melted_model_metrics_df to save it in a database
         for model_name in models_metrics_dct.keys():
             model_metrics_df = models_metrics_dct[model_name]
             model_metrics_df['Run_Number'] = f'Run_{run_num + 1}'
             model_metrics_df['Dataset_Name'] = config.dataset_name
             model_metrics_df['Num_Estimators'] = config.n_estimators
 
-            model_metrics_df_copy = model_metrics_df.copy(deep=True) # Version copy for multiple_runs_metrics_dct
+            model_metrics_df_copy = model_metrics_df.copy(deep=True)  # Version copy for multiple_runs_metrics_dct
             # Append current run metrics to multiple_runs_metrics_dct
             if multiple_runs_metrics_dct.get(model_name) is None:
                 multiple_runs_metrics_dct[model_name] = model_metrics_df_copy
@@ -368,7 +370,6 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                 multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df_copy])
 
             # Extend df with technical columns
-            model_metrics_df['Model_Name'] = model_name
             model_metrics_df['Tag'] = 'OK'
             model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
             for column, value in custom_tbl_fields_dct.items():
