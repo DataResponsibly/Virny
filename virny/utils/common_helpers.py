@@ -21,18 +21,18 @@ def validate_config(config_obj):
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
 
-    elif not isinstance(config_obj.bootstrap_fraction, float) \
+    if not isinstance(config_obj.bootstrap_fraction, float) \
             or config_obj.bootstrap_fraction < 0.0 \
             or config_obj.bootstrap_fraction > 1.0:
         raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
 
-    elif not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
+    if not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
         raise ValueError('n_estimators must be integer greater than 1')
 
-    elif not isinstance(config_obj.sensitive_attributes_dct, dict):
+    if not isinstance(config_obj.sensitive_attributes_dct, dict):
         raise ValueError('sensitive_attributes_dct must be python dictionary')
 
-    elif isinstance(config_obj.sensitive_attributes_dct, dict):
+    if isinstance(config_obj.sensitive_attributes_dct, dict):
         intersectional_attrs = [attr for attr in config_obj.sensitive_attributes_dct.keys()
                                 if INTERSECTION_SIGN in attr]
         for intersectional_attr in intersectional_attrs:
@@ -48,11 +48,16 @@ def validate_config(config_obj):
                     raise ValueError('Intersectional attributes in sensitive_attributes_dct must contain '
                                      'single sensitive attributes that also exist in sensitive_attributes_dct')
 
-    # ================== Optional parameters ==================
-    elif config_obj.runs_seed_lst is not None and not isinstance(config_obj.runs_seed_lst, list):
-        raise ValueError('runs_seed_lst must be python list')
+    # ================== Parameters dependent on a metrics computation interface ==================
+    if config_obj.num_runs is not None and (not isinstance(config_obj.num_runs, int) or config_obj.num_runs <= 0):
+        raise ValueError('num_runs must be an integer greater than 0')
 
-    elif config_obj.model_setting is not None \
+    if config_obj.runs_seed_lst is not None \
+            and (not isinstance(config_obj.runs_seed_lst, list) or not isinstance(config_obj.runs_seed_lst[0], int)):
+        raise ValueError('runs_seed_lst must be a Python list of integers')
+
+    # ================== Optional parameters ==================
+    if config_obj.model_setting is not None \
             and not isinstance(config_obj.model_setting, str) \
             and config_obj.model_setting not in ModelSetting:
         raise ValueError('model_setting must be a string that is included in the ModelSetting enum. '

@@ -228,7 +228,6 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                       desc="Analyze models in one run",
                                       colour="red"):
         print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
-        model_seed += 1
         try:
             base_model = models_config[model_name]
             model_metrics_df = compute_model_metrics(base_model=base_model,
@@ -278,6 +277,16 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
         [Optional] Enable or disable extra logs
 
     """
+    # Input arguments validation
+    if config.num_runs is None:
+        raise ValueError("num_runs is required for multiple runs interfaces. Please define it in your config.")
+    if config.runs_seed_lst is None:
+        config.runs_seed_lst = random.choices(range(1, 1001), k=config.num_runs)
+        print(f'Seeds for {config.num_runs} runs are {config.runs_seed_lst}')
+    else:
+        if len(config.runs_seed_lst) != config.num_runs:
+            raise ValueError("Length of config.runs_seed_lst must be equal to config.num_runs")
+
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
 
@@ -337,6 +346,16 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
         [Optional] Enable or disable extra logs
 
     """
+    # Input arguments validation
+    if config.num_runs is None:
+        raise ValueError("num_runs is required for multiple runs interfaces. Please define it in your config.")
+    if config.runs_seed_lst is None:
+        config.runs_seed_lst = random.choices(range(1, 1001), k=config.num_runs)
+        print(f'Seeds for {config.num_runs} runs are {config.runs_seed_lst}')
+    else:
+        if len(config.runs_seed_lst) != config.num_runs:
+            raise ValueError("Length of config.runs_seed_lst must be equal to config.num_runs")
+
     multiple_runs_metrics_dct = dict()
     for run_num, run_seed in tqdm(enumerate(config.runs_seed_lst),
                                   total=len(config.runs_seed_lst),
