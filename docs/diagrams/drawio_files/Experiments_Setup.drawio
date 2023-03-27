@@ -1,0 +1,49 @@
+<mxfile host="app.diagrams.net" modified="2023-03-24T12:31:25.866Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0" etag="ETwXJtxqrpbOWCJwmTUK" version="21.1.0">
+  <diagram name="Page-1" id="iKRWBIuH51G9c9xsH80-">
+    <mxGraphModel dx="1135" dy="638" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="hIHHXnigMWgGEYUIQFVs-1" target="hIHHXnigMWgGEYUIQFVs-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.153;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="hIHHXnigMWgGEYUIQFVs-1" target="hIHHXnigMWgGEYUIQFVs-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-1" value="" style="sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=user" vertex="1" parent="1">
+          <mxGeometry x="250" y="120" width="68" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.839;entryDx=0;entryDy=0;entryPerimeter=0;startArrow=classic;startFill=1;" edge="1" parent="1" source="hIHHXnigMWgGEYUIQFVs-3" target="hIHHXnigMWgGEYUIQFVs-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-3" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn1.iconfinder.com/data/icons/picons-social/57/github_rounded-128.png" vertex="1" parent="1">
+          <mxGeometry x="250" y="270" width="68" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-4" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="120" width="250" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-5" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;NYU HPC Cluster&lt;br&gt;&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="410" y="140" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="hIHHXnigMWgGEYUIQFVs-6" target="hIHHXnigMWgGEYUIQFVs-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-6" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="445" y="240" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-9" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Jupyter_logo.svg/1200px-Jupyter_logo.svg.png;" vertex="1" parent="1">
+          <mxGeometry x="495.64" y="242" width="58.72" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-10" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;SLURM Job&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="420.64" y="200" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-16" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="241" width="150" height="68" as="geometry" />
+        </mxCell>
+        <mxCell id="hIHHXnigMWgGEYUIQFVs-15" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://d7umqicpi7263.cloudfront.net/img/product/ab5111b7-41e1-4340-8742-3246c00b0032/6c304059-3213-4f88-94de-12aed777a18d.png;" vertex="1" parent="1">
+          <mxGeometry x="715" y="248.75" width="140" height="52.5" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
