@@ -1,0 +1,3 @@
+include virny/datasets/*.csv
+include virny/datasets/*.gz
+include virny/datasets/*.zip
