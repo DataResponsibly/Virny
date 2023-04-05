@@ -45,7 +45,7 @@ def create_test_protected_groups(X_test: pd.DataFrame, init_features_df: pd.Data
     """
     Create protected groups based on a test feature set.
 
-    Return a dictionary where keys are subgroup names, and values are X_test rows correspondent to this subgroup.
+    Return a dictionary where keys are subgroup names, and values are X_test row indexes correspondent to this subgroup.
 
     Parameters
     ----------

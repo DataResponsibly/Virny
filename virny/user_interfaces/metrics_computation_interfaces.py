@@ -16,7 +16,7 @@ from virny.analyzers.subgroup_statistical_bias_analyzer import SubgroupStatistic
 
 
 def compute_model_metrics_with_config(base_model, model_name: str, dataset: BaseFlowDataset, config, save_results_dir_path: str,
-                                      model_seed: int = None, save_results: bool = True, debug_mode: bool = False) -> pd.DataFrame:
+                                      model_seed: int = None, save_results: bool = True, verbose: int = 0) -> pd.DataFrame:
     """
     Compute subgroup metrics for the base model. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
@@ -39,8 +39,9 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
         [Optional] Model seed
     save_results
         [Optional] If to save result metrics in a file
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     if model_seed is None:
@@ -56,13 +57,13 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
                                  base_model_name=model_name,
                                  save_results=save_results,
                                  save_results_dir_path=save_results_dir_path,
-                                 debug_mode=debug_mode)
+                                 verbose=verbose)
 
 
 def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                           sensitive_attributes_dct: dict, model_seed: int, dataset_name: str, base_model_name: str,
                           model_setting: str = ModelSetting.BATCH.value, save_results: bool = True,
-                          save_results_dir_path: str = None, debug_mode: bool = False):
+                          save_results_dir_path: str = None, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
     Save results in `save_results_dir_path` folder.
@@ -92,15 +93,16 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         [Optional] If to save result metrics in a file
     save_results_dir_path
         [Optional] Location where to save result files with metrics
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
-    base_model = reset_model_seed(base_model, model_seed)
+    base_model = reset_model_seed(base_model, model_seed, verbose)
     test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_features_df, sensitive_attributes_dct)
-    if debug_mode:
+    if verbose >= 2:
         print('\nProtected groups splits:')
         for g in test_protected_groups.keys():
             print(g, test_protected_groups[g].shape)
@@ -114,7 +116,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           dataset=dataset,
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
-                                                          test_protected_groups=test_protected_groups)
+                                                          test_protected_groups=test_protected_groups,
+                                                          verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
                                                                               save_dir_path=None,
@@ -145,7 +148,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
 
 
 def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
-                                        run_seed: int = None, debug_mode: bool = False) -> dict:
+                                        run_seed: int = None, verbose: int = 0) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
@@ -164,8 +167,9 @@ def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models
         Location where to save result files with metrics
     run_seed
         [Optional] Base seed for this run
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     if run_seed is None:
@@ -183,13 +187,13 @@ def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models
                                    model_seed=run_seed,
                                    save_results_dir_path=save_results_dir_path,
                                    save_results=True,
-                                   debug_mode=debug_mode)
+                                   verbose=verbose)
 
 
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
-                            save_results: bool = True, save_results_dir_path: str = None, debug_mode: bool = False) -> dict:
+                            save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
@@ -217,8 +221,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] If to save result metrics in a file
     save_results_dir_path
         [Optional] Location where to save result files with metrics
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     models_metrics_dct = dict()
@@ -227,7 +232,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                       total=num_models,
                                       desc="Analyze models in one run",
                                       colour="red"):
-        print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
+        if verbose >= 1:
+            print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
             model_metrics_df = compute_model_metrics(base_model=base_model,
@@ -241,22 +247,23 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      base_model_name=model_name,
                                                      save_results=save_results,
                                                      save_results_dir_path=save_results_dir_path,
-                                                     debug_mode=debug_mode)
+                                                     verbose=verbose)
             models_metrics_dct[model_name] = model_metrics_df
-            if debug_mode:
+            if verbose >= 2:
                 print(f'\n[{model_name}] Metrics matrix:')
                 display(model_metrics_df)
         except Exception as err:
             print('#' * 20, f'ERROR with {model_name}', '#' * 20)
             traceback.print_exc()
 
-        print('\n\n\n')
+        if verbose >= 1:
+            print('\n\n\n')
 
     return models_metrics_dct
 
 
 def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
-                                  save_results_dir_path: str, debug_mode=False) -> dict:
+                                  save_results_dir_path: str, verbose: int = 0) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
@@ -273,8 +280,9 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
         Dictionary where keys are model names, and values are initialized models
     save_results_dir_path
         Location where to save result files with metrics
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     # Input arguments validation
@@ -304,7 +312,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
                                                      model_setting=config.model_setting,
                                                      model_seed=run_seed,
                                                      save_results=False,
-                                                     debug_mode=debug_mode)
+                                                     verbose=verbose)
 
         # Concatenate with previous results and save them in an overwrite mode each time for backups
         for model_name in models_metrics_dct.keys():
@@ -323,7 +331,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
 
 
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
-                                                 custom_tbl_fields_dct: dict, db_writer_func, debug_mode=False) -> dict:
+                                                 custom_tbl_fields_dct: dict, db_writer_func, verbose: int = 0) -> dict:
     """
     Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
@@ -342,8 +350,9 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
         Dictionary where keys are column names and values to add to inserted metrics during saving results to a database
     db_writer_func
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
-    debug_mode
-        [Optional] Enable or disable extra logs
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+            As for now, 0, 1, 2 levels are supported.
 
     """
     # Input arguments validation
@@ -371,7 +380,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                      model_setting=config.model_setting,
                                                      model_seed=run_seed,
                                                      save_results=False,
-                                                     debug_mode=debug_mode)
+                                                     verbose=verbose)
 
         # Concatenate current run metrics with previous results and
         # create melted_model_metrics_df to save it in a database
