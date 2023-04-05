@@ -116,7 +116,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           dataset=dataset,
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
-                                                          test_protected_groups=test_protected_groups)
+                                                          test_protected_groups=test_protected_groups,
+                                                          verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
                                                                               save_dir_path=None,
