@@ -66,13 +66,15 @@ def validate_config(config_obj):
     return True
 
 
-def reset_model_seed(model, new_seed):
+def reset_model_seed(model, new_seed, verbose):
     if isinstance(model, base.Classifier): # For incremental models
         model.seed = new_seed
-        print('Model seed: ', model.seed)
+        if verbose >= 1:
+            print('Model seed: ', model.seed)
     elif 'random_state' in model.get_params():
         model.set_params(random_state=new_seed)
-        print('Model seed: ', model.get_params().get('random_state', None))
+        if verbose >= 1:
+            print('Model seed: ', model.get_params().get('random_state', None))
 
     return model
 

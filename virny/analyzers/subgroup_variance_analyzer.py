@@ -27,11 +27,20 @@ class SubgroupVarianceAnalyzer:
         Initialized object of GenericPipeline class
     dataset_name
         Name of dataset, used for correct results naming
+    sensitive_attributes_dct
+        A dictionary where keys are sensitive attribute names (including attributes intersections),
+         and values are privilege values for these attributes
+    test_protected_groups
+        A dictionary of protected groups where keys are subgroup names,
+         and values are X_test row indexes correspondent to this subgroup.
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+         As for now, 0, 1, 2 levels are supported.
 
     """
     def __init__(self, model_setting: ModelSetting, n_estimators: int, base_model, base_model_name: str,
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
-                 sensitive_attributes_dct: dict, test_protected_groups: dict):
+                 sensitive_attributes_dct: dict, test_protected_groups: dict, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
             overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
                                                                      base_model_name=base_model_name,
@@ -42,7 +51,8 @@ class SubgroupVarianceAnalyzer:
                                                                      y_test=dataset.y_test,
                                                                      dataset_name=dataset_name,
                                                                      target_column=dataset.target,
-                                                                     n_estimators=n_estimators)
+                                                                     n_estimators=n_estimators,
+                                                                     verbose=verbose)
         elif model_setting == ModelSetting.INCREMENTAL:
             overall_variance_analyzer = IncrementalOverallVarianceAnalyzer(base_model=base_model,
                                                                            base_model_name=base_model_name,
@@ -53,7 +63,8 @@ class SubgroupVarianceAnalyzer:
                                                                            y_test=dataset.y_test,
                                                                            dataset_name=dataset_name,
                                                                            target_column=dataset.target,
-                                                                           n_estimators=n_estimators)
+                                                                           n_estimators=n_estimators,
+                                                                           verbose=verbose)
         else:
             raise ValueError('model_setting is incorrect or not supported')
 

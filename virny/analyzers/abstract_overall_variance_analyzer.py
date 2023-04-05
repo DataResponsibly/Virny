@@ -36,11 +36,14 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+         As for now, 0, 1, 2 levels are supported.
 
     """
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 dataset_name: str, n_estimators: int):
+                 dataset_name: str, n_estimators: int, verbose: int = 0):
         self.base_model = base_model
         self.base_model_name = base_model_name
         self.bootstrap_fraction = bootstrap_fraction
@@ -49,7 +52,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
         self.models_predictions = None
 
-        self.__logger = get_logger()
+        self._verbose = verbose
+        self.__logger = get_logger(verbose)
 
         self.X_train = X_train
         self.y_train = y_train
@@ -142,7 +146,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
-        print('\n', flush=True)
+        if self._verbose >= 1:
+            print('\n', flush=True)
         self.__logger.info('Start classifiers testing by bootstrap')
         # Train and test each estimator in models_predictions
         for idx in tqdm(range(self.n_estimators),
@@ -154,7 +159,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             classifier = self._fit_model(classifier, X_sample, y_sample)
             models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
 
-        print('\n', flush=True)
+        if self._verbose >= 1:
+            print('\n', flush=True)
         self.__logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions

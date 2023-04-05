@@ -10,9 +10,9 @@ class CustomHandler(logging.StreamHandler):
         self.setFormatter(formatter)
 
 
-def get_logger():
+def get_logger(verbose: int = 0):
     logger = logging.getLogger('root')
-    logger.setLevel('INFO')
+    logger.setLevel(logging.INFO if verbose >= 1 else logging.WARNING)
     logging.disable(logging.DEBUG)
 
     if logger.hasHandlers():
