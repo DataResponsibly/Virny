@@ -140,7 +140,7 @@ class ACSEmploymentDataset(BaseDataLoader):
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
-            df = df.reset_index(drop=True)
+            acs_data = acs_data.reset_index(drop=True)
 
         dataset = acs_data
         features = ACSEmployment.features
