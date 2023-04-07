@@ -25,6 +25,7 @@ class CreditDataset(BaseDataLoader):
         if subsample_size:
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
 
         target = 'SeriousDlqin2yrs'
         numerical_columns = ['RevolvingUtilizationOfUnsecuredLines', 'age', 'NumberOfTime30-59DaysPastDueNotWorse',
@@ -58,6 +59,7 @@ class CompasDataset(BaseDataLoader):
         if subsample_size:
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
 
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
                        'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
@@ -96,6 +98,7 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
         if subsample_size:
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
 
         # Initial data types transformation
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -137,6 +140,7 @@ class ACSEmploymentDataset(BaseDataLoader):
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
+            df = df.reset_index(drop=True)
 
         dataset = acs_data
         features = ACSEmployment.features
