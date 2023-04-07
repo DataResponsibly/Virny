@@ -17,13 +17,14 @@ class CreditDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
 
     """
-    def __init__(self, subsample_size=None):
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
         filename = 'givemesomecredit.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
 
         df = pd.read_csv(dataset_path, index_col=0)
         if subsample_size:
-            df = df.sample(subsample_size)
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
 
         target = 'SeriousDlqin2yrs'
         numerical_columns = ['RevolvingUtilizationOfUnsecuredLines', 'age', 'NumberOfTime30-59DaysPastDueNotWorse',
@@ -49,13 +50,14 @@ class CompasDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
 
     """
-    def __init__(self, subsample_size=None):
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
         filename = 'COMPAS.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
 
         df = pd.read_csv(dataset_path)
         if subsample_size:
-            df = df.sample(subsample_size)
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
 
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
                        'age_cat_Less than 25', 'c_charge_degree_F', 'c_charge_degree_M', 'sex']
@@ -86,13 +88,14 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
 
     """
-    def __init__(self, subsample_size: int = None):
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
         filename = 'COMPAS.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
 
         df = pd.read_csv(dataset_path)
         if subsample_size:
-            df = df.sample(subsample_size)
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
 
         # Initial data types transformation
         int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -115,7 +118,8 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
 
 
 class ACSEmploymentDataset(BaseDataLoader):
-    def __init__(self, state, year, root_dir=None, with_nulls=False, optimize=True, subsample=None):
+    def __init__(self, state, year, root_dir=None, with_nulls=False,
+                 optimize=True, subsample_size: int = None, subsample_seed: int = None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
         We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
@@ -130,8 +134,9 @@ class ACSEmploymentDataset(BaseDataLoader):
             root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
-        if subsample is not None:
-            acs_data = acs_data.sample(subsample)
+        if subsample_size:
+            acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else acs_data.sample(subsample_size)
 
         dataset = acs_data
         features = ACSEmployment.features
