@@ -1,9 +1,8 @@
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-from virny.utils.validation import check_is_fitted
 from virny.datasets.data_loaders import BaseDataLoader
 from virny.custom_classes.base_dataset import BaseFlowDataset
 
@@ -17,22 +16,9 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
     X_train_val, X_test, y_train_val, y_test = train_test_split(data_loader.X_data, data_loader.y_data,
                                                                 test_size=test_set_fraction,
                                                                 random_state=dataset_split_seed)
-    X_train_features_np_arr = column_transformer.fit_transform(X_train_val)
-    X_test_features_np_arr = column_transformer.transform(X_test)
-
-    # Get pipeline column names
-    transformers_vars = column_transformer.get_params()['transformers']
-    feature_names = set()
-    for name, _, features in transformers_vars:
-        encoder = column_transformer.named_transformers_[name]
-        if isinstance(encoder, OneHotEncoder) and check_is_fitted(encoder):
-            feature_names = feature_names.union(column_transformer.named_transformers_[name].get_feature_names_out().tolist())
-        else:
-            feature_names = feature_names.union(features)
-
-    feature_names = list(feature_names)
-    X_train_features = pd.DataFrame(X_train_features_np_arr, columns=feature_names, index=X_train_val.index)
-    X_test_features = pd.DataFrame(X_test_features_np_arr, columns=feature_names, index=X_test.index)
+    column_transformer = column_transformer.set_output(transform="pandas")  # Set transformer output to a pandas df
+    X_train_features = column_transformer.fit_transform(X_train_val)
+    X_test_features = column_transformer.transform(X_test)
 
     return BaseFlowDataset(init_features_df=data_loader.full_df.drop(data_loader.target, axis=1, errors='ignore'),
                            X_train_val=X_train_features,
