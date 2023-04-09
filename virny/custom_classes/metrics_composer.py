@@ -45,7 +45,7 @@ class MetricsComposer:
                 priv_group = sensitive_attr + '_priv'
 
                 groups_metrics_dct[sensitive_attr] = {
-                    # Group statistical bias metrics
+                    # Group fairness metrics
                     'Equalized_Odds_TPR': cfm[dis_group]['TPR'] - cfm[priv_group]['TPR'],
                     'Equalized_Odds_FPR': cfm[dis_group]['FPR'] - cfm[priv_group]['FPR'],
                     'Disparate_Impact': cfm[dis_group]['Positive-Rate'] / cfm[priv_group]['Positive-Rate'],

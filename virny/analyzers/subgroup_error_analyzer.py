@@ -4,9 +4,9 @@ from virny.analyzers.abstract_subgroup_analyzer import AbstractSubgroupAnalyzer
 from virny.utils.common_helpers import confusion_matrix_metrics
 
 
-class SubgroupStatisticalBiasAnalyzer(AbstractSubgroupAnalyzer):
+class SubgroupErrorAnalyzer(AbstractSubgroupAnalyzer):
     """
-    Analyzer to compute statistical bias metrics for subgroups.
+    Analyzer to compute error metrics for subgroups.
 
     Parameters
     ----------
