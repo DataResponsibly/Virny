@@ -12,7 +12,7 @@ from virny.utils.protected_groups_partitioning import create_test_protected_grou
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
 from virny.utils.common_helpers import save_metrics_to_file
-from virny.analyzers.subgroup_statistical_bias_analyzer import SubgroupStatisticalBiasAnalyzer
+from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 
 def compute_model_metrics_with_config(base_model, model_name: str, dataset: BaseFlowDataset, config, save_results_dir_path: str,
@@ -123,16 +123,16 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                                               save_dir_path=None,
                                                                               make_plots=False)
 
-    # Compute bias metrics for subgroups
-    bias_analyzer = SubgroupStatisticalBiasAnalyzer(dataset.X_test, dataset.y_test,
-                                                    sensitive_attributes_dct, test_protected_groups)
-    dtc_res = bias_analyzer.compute_subgroup_metrics(y_preds,
-                                                     save_results=False,
-                                                     result_filename=None,
-                                                     save_dir_path=None)
-    bias_metrics_df = pd.DataFrame(dtc_res)
+    # Compute error metrics for subgroups
+    error_analyzer = SubgroupErrorAnalyzer(dataset.X_test, dataset.y_test,
+                                           sensitive_attributes_dct, test_protected_groups)
+    dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
+                                                      save_results=False,
+                                                      result_filename=None,
+                                                      save_dir_path=None)
+    error_metrics_df = pd.DataFrame(dtc_res)
 
-    metrics_df = pd.concat([variance_metrics_df, bias_metrics_df])
+    metrics_df = pd.concat([variance_metrics_df, error_metrics_df])
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Seed'] = model_seed
@@ -150,7 +150,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
 def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
                                         run_seed: int = None, verbose: int = 0) -> dict:
     """
-    Find variance and statistical bias metrics for each model in models_config.
+    Find variance and error metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
@@ -195,7 +195,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                             model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
                             save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
-    Find variance and statistical bias metrics for each model in models_config.
+    Find variance and error metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
@@ -265,7 +265,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
 def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
                                   save_results_dir_path: str, verbose: int = 0) -> dict:
     """
-    Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
+    Find variance and error metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
@@ -333,7 +333,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
                                                  custom_tbl_fields_dct: dict, db_writer_func, verbose: int = 0) -> dict:
     """
-    Find variance and statistical bias metrics for each model in models_config. Arguments are defined as an input config object.
+    Find variance and error metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
     Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.

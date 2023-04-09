@@ -1,5 +1,5 @@
 """
-This module contains functions for variance and statistical bias metrics.
+This module contains functions for computing subgroup variance and error metrics.
 """
 from .stability_metrics import (
     compute_std_mean_iqr_metrics,
