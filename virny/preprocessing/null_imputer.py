@@ -2,7 +2,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from virny.preprocessing.null_helpers import find_column_mode, find_column_mean, find_column_median
 
 
-class NullImputer(BaseEstimator, TransformerMixin):
+class NullImputer(TransformerMixin, BaseEstimator):
     """
     Null imputer that has ["mean", "median", "mode", "special"] strategies.
 
@@ -30,6 +30,9 @@ class NullImputer(BaseEstimator, TransformerMixin):
         for col in self.target_columns:
             values_to_impute[col] = special_value
         self.values_to_impute = values_to_impute
+
+    def get_feature_names_out(self):
+        pass
 
     def fit(self, X, y=None):
         allowed = ["mean", "median", "mode", "special"]
