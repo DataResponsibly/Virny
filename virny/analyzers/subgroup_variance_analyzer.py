@@ -79,8 +79,17 @@ class SubgroupVarianceAnalyzer:
         self.overall_variance_metrics_dct = dict()
         self.subgroup_variance_metrics_dct = dict()
 
+    def set_test_sets(self, new_X_test, new_y_test):
+        self.__overall_variance_analyzer.X_test = new_X_test
+        self.__overall_variance_analyzer.y_test = new_y_test
+        self.__subgroup_variance_calculator.X_test = new_X_test
+        self.__subgroup_variance_calculator.y_test = new_y_test
+
+    def set_test_protected_groups(self, new_test_protected_groups):
+        self.__subgroup_variance_calculator.test_protected_groups = new_test_protected_groups
+
     def compute_metrics(self, save_results: bool, result_filename: str = None, save_dir_path: str = None,
-                        make_plots: bool = True):
+                        make_plots: bool = True, with_fit: bool = True):
         """
         Measure variance metrics for subgroups for the base model. Display variance plots for analysis if needed.
          Save results to a .csv file if needed.
@@ -97,9 +106,11 @@ class SubgroupVarianceAnalyzer:
             [Optional] Location where to save the results file
         make_plots
             If to display plots for analysis
+        with_fit
+            If to fit estimators in bootstrap
 
         """
-        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(make_plots, save_results=False)
+        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(make_plots, save_results=False, with_fit=with_fit)
         self.overall_variance_metrics_dct = self.__overall_variance_analyzer.get_metrics_dict()
 
         # Count and display fairness metrics

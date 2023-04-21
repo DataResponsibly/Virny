@@ -81,7 +81,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
     def _batch_predict_proba(self, classifier, X_test):
         pass
 
-    def compute_metrics(self, make_plots: bool = False, save_results: bool = True):
+    def compute_metrics(self, make_plots: bool = False, save_results: bool = True, with_fit: bool = True):
         """
         Measure metrics for the base model. Display plots for analysis if needed. Save results to a .pkl file
 
@@ -91,11 +91,13 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             bool, if to display plots for analysis
         save_results
             If to save result metrics in a file
+        with_fit
+            If to fit estimators in bootstrap
 
         """
         # Quantify uncertainty for the base model
         boostrap_size = int(self.bootstrap_fraction * self.X_train.shape[0])
-        self.models_predictions = self.UQ_by_boostrap(boostrap_size, with_replacement=True)
+        self.models_predictions = self.UQ_by_boostrap(boostrap_size, with_replacement=True, with_fit=with_fit)
 
         # Count metrics based on prediction proba results
         y_preds, uq_labels, prediction_stats = count_prediction_stats(self.y_test.values, self.models_predictions)
@@ -130,7 +132,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         else:
             return y_preds, self.y_test
 
-    def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool) -> dict:
+    def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool, with_fit: bool = True) -> dict:
         """
         Quantifying uncertainty of the base model by constructing an ensemble from bootstrapped samples.
 
@@ -143,6 +145,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             Number of records in bootstrap splits
         with_replacement
             Enable replacement or not
+        with_fit
+            If to fit estimators in bootstrap
 
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
@@ -155,9 +159,11 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                         colour="blue",
                         mininterval=10):
             classifier = self.models_lst[idx]
-            X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
-            classifier = self._fit_model(classifier, X_sample, y_sample)
+            if with_fit:
+                X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
+                classifier = self._fit_model(classifier, X_sample, y_sample)
             models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+            self.models_lst[idx] = classifier
 
         if self._verbose >= 1:
             print('\n', flush=True)
