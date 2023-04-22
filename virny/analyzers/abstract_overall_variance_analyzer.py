@@ -41,6 +41,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
          As for now, 0, 1, 2 levels are supported.
 
     """
+
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
                  dataset_name: str, n_estimators: int, verbose: int = 0):
@@ -121,11 +122,16 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             per_sample_accuracy_lst = prediction_stats.per_sample_accuracy_lst
             label_stability_lst = prediction_stats.label_stability_lst
 
-            plot_generic(labels_means_lst, labels_stds_lst, "Mean of probability", "Standard deviation", x_lim=1.01, y_lim=0.5, plot_title="Probability mean vs Standard deviation")
-            plot_generic(labels_stds_lst, label_stability_lst, "Standard deviation", "Label stability", x_lim=0.5, y_lim=1.01, plot_title="Standard deviation vs Label stability")
-            plot_generic(labels_means_lst, label_stability_lst, "Mean", "Label stability", x_lim=1.01, y_lim=1.01, plot_title="Mean vs Label stability")
-            plot_generic(per_sample_accuracy_lst, labels_stds_lst, "Accuracy", "Standard deviation", x_lim=1.01, y_lim=0.5, plot_title="Accuracy vs Standard deviation")
-            plot_generic(per_sample_accuracy_lst, labels_iqr_lst, "Accuracy", "Inter quantile range", x_lim=1.01, y_lim=1.01, plot_title="Accuracy vs Inter quantile range")
+            plot_generic(labels_means_lst, labels_stds_lst, "Mean of probability", "Standard deviation", x_lim=1.01,
+                         y_lim=0.5, plot_title="Probability mean vs Standard deviation")
+            plot_generic(labels_stds_lst, label_stability_lst, "Standard deviation", "Label stability", x_lim=0.5,
+                         y_lim=1.01, plot_title="Standard deviation vs Label stability")
+            plot_generic(labels_means_lst, label_stability_lst, "Mean", "Label stability", x_lim=1.01, y_lim=1.01,
+                         plot_title="Mean vs Label stability")
+            plot_generic(per_sample_accuracy_lst, labels_stds_lst, "Accuracy", "Standard deviation", x_lim=1.01,
+                         y_lim=0.5, plot_title="Accuracy vs Standard deviation")
+            plot_generic(per_sample_accuracy_lst, labels_iqr_lst, "Accuracy", "Inter quantile range", x_lim=1.01,
+                         y_lim=1.01, plot_title="Accuracy vs Inter quantile range")
 
         if save_results:
             self.save_metrics_to_file()
@@ -153,11 +159,14 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         if self._verbose >= 1:
             print('\n', flush=True)
         self.__logger.info('Start classifiers testing by bootstrap')
+        # Remove a progress bar for UQ without estimators fitting
+        cycle_range = range(self.n_estimators) if with_fit is False else \
+            tqdm(range(self.n_estimators),
+                 desc="Classifiers testing by bootstrap",
+                 colour="blue",
+                 mininterval=10)
         # Train and test each estimator in models_predictions
-        for idx in tqdm(range(self.n_estimators),
-                        desc="Classifiers testing by bootstrap",
-                        colour="blue",
-                        mininterval=10):
+        for idx in cycle_range:
             classifier = self.models_lst[idx]
             if with_fit:
                 X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
