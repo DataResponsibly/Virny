@@ -2,7 +2,8 @@ import pathlib
 import pandas as pd
 import numpy as np
 
-from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility
+from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility, \
+    employment_filter
 from virny.datasets.base import BaseDataLoader
 
 
@@ -137,6 +138,7 @@ class ACSEmploymentDataset(BaseDataLoader):
             root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
+        acs_data = employment_filter(acs_data)
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
