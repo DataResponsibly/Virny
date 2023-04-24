@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility, \
-    employment_filter
+    employment_filter, adult_filter
 from virny.datasets.base import BaseDataLoader
 
 
@@ -121,8 +121,64 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
         )
 
 
+class ACSIncomeDataset(BaseDataLoader):
+    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=False,
+                 optimize=True, subsample_size: int = None, subsample_seed: int = None):
+        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
+        data_source = ACSDataSource(
+            survey_year=year,
+            horizon='1-Year',
+            survey='person',
+            root_dir=data_dir
+        )
+        acs_data = data_source.get_data(states=state, download=True)
+        if with_filter:
+            acs_data = adult_filter(acs_data)
+        if subsample_size:
+            acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else acs_data.sample(subsample_size)
+            acs_data = acs_data.reset_index(drop=True)
+
+        features = ACSIncome.features
+        target = ACSIncome.target
+        categorical_columns = ['SCHL', 'COW', 'MAR', 'OCCP', 'POBP', 'RELP', 'SEX', 'RAC1P']
+        numerical_columns = ['AGEP', 'WKHP']
+
+        if with_nulls:
+            X_data = acs_data[features]
+        else:
+            X_data = acs_data[features].apply(lambda x: np.nan_to_num(x, -1))
+
+        if optimize:
+            X_data = optimize_data_loading(X_data, categorical_columns)
+
+        optimized_X_data = X_data[categorical_columns].astype('str')
+        for col in numerical_columns:
+            optimized_X_data[col] = X_data[col]
+        y_data = acs_data[target].apply(lambda x: int(x > 50_000))
+
+        columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
+
+        super().__init__(
+            full_df=optimized_X_data,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+            X_data=optimized_X_data,
+            y_data=y_data,
+            columns_with_nulls=columns_with_nulls,
+        )
+
+    def update_X_data(self, X_data):
+        """
+        To save simulated nulls
+        """
+        self.X_data = X_data
+        self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
+
+
 class ACSEmploymentDataset(BaseDataLoader):
-    def __init__(self, state, year, root_dir=None, with_nulls=False,
+    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=False,
                  optimize=True, subsample_size: int = None, subsample_seed: int = None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
@@ -138,13 +194,13 @@ class ACSEmploymentDataset(BaseDataLoader):
             root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
-        acs_data = employment_filter(acs_data)
+        if with_filter:
+            acs_data = employment_filter(acs_data)
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
             acs_data = acs_data.reset_index(drop=True)
 
-        dataset = acs_data
         features = ACSEmployment.features
         target = ACSEmployment.target
         categorical_columns = ['MAR', 'MIL', 'ESP', 'MIG', 'DREM', 'NATIVITY', 'DIS', 'DEAR', 'DEYE', 'SEX', 'RAC1P', 'RELP', 'CIT', 'ANC','SCHL']
@@ -299,51 +355,6 @@ class ACSTravelTimeDataset(BaseDataLoader):
             filtered_X_data[col] = X_data[col]
             
         y_data = acs_data[target].apply(lambda x: int(x > 20))
-        columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
-
-        super().__init__(
-            full_df=acs_data,
-            target=target,
-            numerical_columns=numerical_columns,
-            categorical_columns=categorical_columns,
-            X_data=filtered_X_data,
-            y_data=y_data,
-            columns_with_nulls=columns_with_nulls,
-        )
-
-    def update_X_data(self, X_data):
-        """
-        To save simulated nulls
-        """
-        self.X_data = X_data
-        self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list()
-    
-
-class ACSIncomeDataset(BaseDataLoader):
-    def __init__(self, state, year, root_dir=None, with_nulls=False):
-        data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
-        data_source = ACSDataSource(
-            survey_year=year,
-            horizon='1-Year',
-            survey='person',
-            root_dir=data_dir
-        )
-        acs_data = data_source.get_data(states=state, download=True)
-        features = ACSIncome.features
-        target = ACSIncome.target
-        categorical_columns = ['COW','MAR','OCCP','POBP','RELP','WKHP','SEX','RAC1P']
-        numerical_columns = ['AGEP', 'SCHL']
-
-        if with_nulls:
-            X_data = acs_data[features]
-        else:
-            X_data = acs_data[features].apply(lambda x: np.nan_to_num(x, -1))
-
-        filtered_X_data = X_data[categorical_columns].astype('str')
-        for col in numerical_columns:
-            filtered_X_data[col] = X_data[col]
-            
-        y_data = acs_data[target].apply(lambda x: int(x > 50000))
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
