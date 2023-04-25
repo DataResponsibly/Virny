@@ -122,7 +122,7 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
 
 
 class ACSIncomeDataset(BaseDataLoader):
-    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=False,
+    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=True,
                  optimize=True, subsample_size: int = None, subsample_seed: int = None):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -178,7 +178,7 @@ class ACSIncomeDataset(BaseDataLoader):
 
 
 class ACSEmploymentDataset(BaseDataLoader):
-    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=False,
+    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=True,
                  optimize=True, subsample_size: int = None, subsample_seed: int = None):
         """
         Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
