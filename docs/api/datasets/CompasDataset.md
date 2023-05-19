@@ -1,14 +1,18 @@
 # CompasDataset
 
-Dataset class for COMPAS dataset that contains sensitive attributes among feature columns.
+Dataset class for the COMPAS dataset that contains sensitive attributes among feature columns.
 
 
 
 ## Parameters
 
-- **dataset_path** (*str*) – defaults to `virny/data/COMPAS.csv`
+- **subsample_size** (*int*) – defaults to `None`
 
-    Path to a dataset file
+    Subsample size to create based on the input dataset
+
+- **subsample_seed** (*int*) – defaults to `None`
+
+    Seed for sampling using the sample() method from pandas
 
 
 

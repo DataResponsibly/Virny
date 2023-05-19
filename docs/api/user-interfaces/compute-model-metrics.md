@@ -14,13 +14,9 @@ Return a dataframe of model metrics.
 
     Number of estimators for bootstrap to compute subgroup variance metrics
 
-- **dataset** (*[custom_classes.BaseDataset](../../custom_classes/BaseDataset)*)
+- **dataset** (*[custom_classes.BaseFlowDataset](../../custom_classes/BaseFlowDataset)*)
 
-    BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
-
-- **test_set_fraction** (*float*)
-
-    Fraction of the whole dataset in range [0.0 - 1.0] to create a test set
+    BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
 
 - **bootstrap_fraction** (*float*)
 
@@ -42,6 +38,10 @@ Return a dataframe of model metrics.
 
     Model name to name a result file with metrics
 
+- **model_setting** (*str*) – defaults to `batch`
+
+    Model type: 'batch' or incremental.
+
 - **save_results** (*bool*) – defaults to `True`
 
     [Optional] If to save result metrics in a file
@@ -50,9 +50,9 @@ Return a dataframe of model metrics.
 
     [Optional] Location where to save result files with metrics
 
-- **debug_mode** (*bool*) – defaults to `False`
+- **verbose** (*int*) – defaults to `0`
 
-    [Optional] Enable or disable extra logs
+    [Optional] Level of logs printing. The greater level provides more logs.     As for now, 0, 1, 2 levels are supported.
 
 
 

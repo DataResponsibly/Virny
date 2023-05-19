@@ -9,6 +9,26 @@ from virny.custom_classes.base_dataset import BaseFlowDataset
 
 def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTransformer,
                        test_set_fraction: float, dataset_split_seed: int) -> BaseFlowDataset:
+    """
+    Preprocess an input dataset using sklearn ColumnTransformer. Split the dataset on train and test using test_set_fraction.
+     Create an instance of BaseFlowDataset.
+
+    Parameters
+    ----------
+    data_loader
+        Instance of BaseDataLoader that contains a target, numerical, and categorical columns.
+    column_transformer
+        Instance of sklearn ColumnTransformer to preprocess categorical and numerical columns.
+    test_set_fraction
+        Fraction from 0 to 1. Used to split the input dataset on the train and test sets.
+    dataset_split_seed
+        Seed for dataset splitting.
+
+    Return
+    ----------
+    An instance of BaseFlowDataset.
+
+    """
     if test_set_fraction < 0.0 or test_set_fraction > 1.0:
         raise ValueError("test_set_fraction must be a float in the [0.0-1.0] range")
 

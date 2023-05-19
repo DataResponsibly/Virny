@@ -7,7 +7,7 @@ from virny.analyzers.abstract_overall_variance_analyzer import AbstractOverallVa
 
 class IncrementalOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
     """
-    Analyzer to compute subgroup variance metrics for batch learning models.
+    Analyzer to compute subgroup variance metrics for incremental learning models.
 
     Parameters
     ----------

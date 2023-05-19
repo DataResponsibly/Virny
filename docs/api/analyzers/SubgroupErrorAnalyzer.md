@@ -1,6 +1,6 @@
-# SubgroupStatisticalBiasAnalyzer
+# SubgroupErrorAnalyzer
 
-Analyzer to compute statistical bias metrics for subgroups.
+Analyzer to compute error metrics for subgroups.
 
 
 

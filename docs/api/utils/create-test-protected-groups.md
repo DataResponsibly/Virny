@@ -2,7 +2,7 @@
 
 Create protected groups based on a test feature set.
 
-Return a dictionary where keys are subgroup names, and values are X_test rows correspondent to this subgroup.
+Return a dictionary where keys are subgroup names, and values are X_test row indexes correspondent to this subgroup.
 
 ## Parameters
 
@@ -10,9 +10,9 @@ Return a dictionary where keys are subgroup names, and values are X_test rows co
 
     Test feature set
 
-- **full_df** (*pandas.core.frame.DataFrame*)
+- **init_features_df** (*pandas.core.frame.DataFrame*)
 
-    Full dataset
+    Initial full dataset without preprocessing
 
 - **sensitive_attributes_dct** (*dict*)
 

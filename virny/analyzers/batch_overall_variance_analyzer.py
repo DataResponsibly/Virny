@@ -30,6 +30,9 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+         As for now, 0, 1, 2 levels are supported.
 
     """
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,

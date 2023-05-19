@@ -14,13 +14,13 @@ Return a dataframe of model metrics.
 
     Model name to name a result file with metrics
 
-- **dataset** (*[custom_classes.BaseDataset](../../custom_classes/BaseDataset)*)
+- **dataset** (*[custom_classes.BaseFlowDataset](../../custom_classes/BaseFlowDataset)*)
 
-    BaseDataset object that contains all needed attributes like target, features, numerical_columns etc.
+    BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
 
 - **config**
 
-    Object that contains test_set_fraction, bootstrap_fraction, dataset_name,  n_estimators, sensitive_attributes_dct attributes
+    Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
 
 - **save_results_dir_path** (*str*)
 
@@ -34,9 +34,9 @@ Return a dataframe of model metrics.
 
     [Optional] If to save result metrics in a file
 
-- **debug_mode** (*bool*) – defaults to `False`
+- **verbose** (*int*) – defaults to `0`
 
-    [Optional] Enable or disable extra logs
+    [Optional] Level of logs printing. The greater level provides more logs.     As for now, 0, 1, 2 levels are supported.
 
 
 

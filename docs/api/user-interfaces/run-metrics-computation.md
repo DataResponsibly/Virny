@@ -1,18 +1,14 @@
 # run_metrics_computation
 
-Find variance and statistical bias metrics for each model in models_config. Save results in `save_results_dir_path` folder.
+Compute stability and accuracy metrics for each model in models_config. Save results in `save_results_dir_path` folder.
 
 Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
 ## Parameters
 
-- **dataset** (*[custom_classes.BaseDataset](../../custom_classes/BaseDataset)*)
+- **dataset** (*[custom_classes.BaseFlowDataset](../../custom_classes/BaseFlowDataset)*)
 
     Dataset object that contains all needed attributes like target, features, numerical_columns etc.
-
-- **test_set_fraction** (*float*)
-
-    Fraction of the whole dataset in range [0.0 - 1.0] to create a test set
 
 - **bootstrap_fraction** (*float*)
 
@@ -28,11 +24,15 @@ Return a dictionary where keys are model names, and values are metrics for sensi
 
 - **n_estimators** (*int*)
 
-    Number of estimators for bootstrap to compute subgroup variance metrics
+    Number of estimators for bootstrap to compute subgroup stability metrics
 
 - **sensitive_attributes_dct** (*dict*)
 
     A dictionary where keys are sensitive attribute names (including attributes intersections),  and values are privilege values for these attributes
+
+- **model_setting** (*str*) – defaults to `batch`
+
+    Model type: 'batch' or incremental.
 
 - **model_seed** (*int*) – defaults to `None`
 
@@ -46,9 +46,9 @@ Return a dictionary where keys are model names, and values are metrics for sensi
 
     [Optional] Location where to save result files with metrics
 
-- **debug_mode** (*bool*) – defaults to `False`
+- **verbose** (*int*) – defaults to `0`
 
-    [Optional] Enable or disable extra logs
+    [Optional] Level of logs printing. The greater level provides more logs.     As for now, 0, 1, 2 levels are supported.
 
 
 
