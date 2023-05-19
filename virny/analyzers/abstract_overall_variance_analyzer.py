@@ -152,7 +152,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         with_replacement
             Enable replacement or not
         with_fit
-            If to fit estimators in bootstrap
+            Whether to fit estimators in bootstrap
 
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}

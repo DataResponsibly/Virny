@@ -3,7 +3,7 @@ import pandas as pd
 
 class BaseDataLoader:
     """
-    Base data loader class that is used as input for preprocessing.
+    Base data loader class that helps to unify the logic for various datasets.
 
     Parameters
     ----------

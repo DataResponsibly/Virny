@@ -9,13 +9,15 @@ from virny.datasets.base import BaseDataLoader
 
 class CreditDataset(BaseDataLoader):
     """
-    Dataset class for Credit dataset that contains sensitive attributes among feature columns.
+    Dataset class for the Credit dataset that contains sensitive attributes among feature columns.
     Source: https://www.kaggle.com/competitions/GiveMeSomeCredit/overview
 
     Parameters
     ----------
     subsample_size
         Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None):
@@ -44,12 +46,14 @@ class CreditDataset(BaseDataLoader):
 
 class CompasDataset(BaseDataLoader):
     """
-    Dataset class for COMPAS dataset that contains sensitive attributes among feature columns.
+    Dataset class for the COMPAS dataset that contains sensitive attributes among feature columns.
 
     Parameters
     ----------
     subsample_size
         Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None):
@@ -82,13 +86,15 @@ class CompasDataset(BaseDataLoader):
 
 class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
     """
-    Dataset class for COMPAS dataset that does not contain sensitive attributes among feature columns
+    Dataset class for the COMPAS dataset that does not contain sensitive attributes among feature columns
      to test blind classifiers
 
     Parameters
     ----------
     subsample_size
         Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None):
@@ -122,6 +128,31 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
 
 
 class ACSIncomeDataset(BaseDataLoader):
+    """
+    Dataset class for the income task from the folktables dataset.
+    Target: binary classification, predict if a person has an annual income > $50,000.
+    Source of the dataset: https://github.com/socialfoundations/folktables
+
+    Parameters
+    ----------
+    state
+        State in the US for which to get the data. All states in the US are available.
+    year
+        Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+    root_dir
+        Path to the root directory where to store the extracted dataset or where it is stored.
+    with_nulls
+        Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+    with_filter
+        Whether to use a folktables filter for this task. Default: True.
+    optimize
+        Whether to optimize the dataset size by downcasting categorical columns. Default: True.
+    subsample_size
+        Subsample size to create based on the input dataset.
+    subsample_seed
+        Seed for sampling using the sample() method from pandas.
+
+    """
     def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=True,
                  optimize=True, subsample_size: int = None, subsample_seed: int = None):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
@@ -178,14 +209,33 @@ class ACSIncomeDataset(BaseDataLoader):
 
 
 class ACSEmploymentDataset(BaseDataLoader):
+    """
+    Dataset class for the employment task from the folktables dataset.
+    Target: binary classification, predict if a person is employed.
+    Source of the dataset: https://github.com/socialfoundations/folktables
+
+    Parameters
+    ----------
+    state
+        State in the US for which to get the data. All states in the US are available.
+    year
+        Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+    root_dir
+        Path to the root directory where to store the extracted dataset or where it is stored.
+    with_nulls
+        Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+    with_filter
+        Whether to use a folktables filter for this task. Default: True.
+    optimize
+        Whether to optimize the dataset size by downcasting categorical columns. Default: True.
+    subsample_size
+        Subsample size to create based on the input dataset.
+    subsample_seed
+        Seed for sampling using the sample() method from pandas.
+
+    """
     def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=True,
                  optimize=True, subsample_size: int = None, subsample_seed: int = None):
-        """
-        Loading task data: instead of using the task wrapper, we subsample the acs_data dataframe on the task features
-        We do this to retain the nulls as task wrappers handle nulls by imputing as a special category
-        Alternatively, we could have altered the configuration from here:
-        https://github.com/zykls/folktables/blob/main/folktables/acs.py
-        """
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
@@ -240,6 +290,23 @@ class ACSEmploymentDataset(BaseDataLoader):
 
 
 class ACSMobilityDataset(BaseDataLoader):
+    """
+    Dataset class for the mobility task from the folktables dataset.
+    Target: binary classification, predict whether a young adult moved addresses in the last year.
+    Source of the dataset: https://github.com/socialfoundations/folktables
+
+    Parameters
+    ----------
+    state
+        State in the US for which to get the data. All states in the US are available.
+    year
+        Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+    root_dir
+        Path to the root directory where to store the extracted dataset or where it is stored.
+    with_nulls
+        Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+
+    """
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -286,6 +353,24 @@ class ACSMobilityDataset(BaseDataLoader):
 
 
 class ACSPublicCoverageDataset(BaseDataLoader):
+    """
+    Dataset class for the public coverage task from the folktables dataset.
+    Target: binary classification, predict whether a low-income individual, not eligible for Medicare,
+        has coverage from public health insurance.
+    Source of the dataset: https://github.com/socialfoundations/folktables
+
+    Parameters
+    ----------
+    state
+        State in the US for which to get the data. All states in the US are available.
+    year
+        Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+    root_dir
+        Path to the root directory where to store the extracted dataset or where it is stored.
+    with_nulls
+        Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+
+    """
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
@@ -331,6 +416,23 @@ class ACSPublicCoverageDataset(BaseDataLoader):
 
 
 class ACSTravelTimeDataset(BaseDataLoader):
+    """
+    Dataset class for the travel time task from the folktables dataset.
+    Target: binary classification, predict whether a working adult has a travel time to work of greater than 20 minutes.
+    Source of the dataset: https://github.com/socialfoundations/folktables
+
+    Parameters
+    ----------
+    state
+        State in the US for which to get the data. All states in the US are available.
+    year
+        Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+    root_dir
+        Path to the root directory where to store the extracted dataset or where it is stored.
+    with_nulls
+        Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+
+    """
     def __init__(self, state, year, root_dir=None, with_nulls=False):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(

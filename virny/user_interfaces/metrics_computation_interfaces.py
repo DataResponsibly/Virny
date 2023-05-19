@@ -107,7 +107,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         for g in test_protected_groups.keys():
             print(g, test_protected_groups[g].shape)
 
-    # Compute variance metrics for subgroups
+    # Compute stability metrics for subgroups
     subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
                                                           n_estimators=n_estimators,
                                                           base_model=base_model,
@@ -150,7 +150,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
 def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
                                         run_seed: int = None, verbose: int = 0) -> dict:
     """
-    Find variance and error metrics for each model in models_config.
+    Compute stability and accuracy metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
@@ -195,7 +195,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                             model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
                             save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
-    Find variance and error metrics for each model in models_config.
+    Compute stability and accuracy metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
@@ -211,7 +211,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     models_config
         Dictionary where keys are model names, and values are initialized models
     n_estimators
-        Number of estimators for bootstrap to compute subgroup variance metrics
+        Number of estimators for bootstrap to compute subgroup stability metrics
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
@@ -265,7 +265,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
 def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
                                   save_results_dir_path: str, verbose: int = 0) -> dict:
     """
-    Find variance and error metrics for each model in models_config. Arguments are defined as an input config object.
+    Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
@@ -333,7 +333,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
                                                  custom_tbl_fields_dct: dict, db_writer_func, verbose: int = 0) -> dict:
     """
-    Find variance and error metrics for each model in models_config. Arguments are defined as an input config object.
+    Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
     Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
@@ -420,17 +420,18 @@ def compute_metrics_multiple_runs_with_multiple_test_sets(dataset: BaseFlowDatas
                                                           config, models_config: dict, custom_tbl_fields_dct: dict,
                                                           db_writer_func, verbose: int = 0):
     """
-    Find variance and error metrics for each model in models_config. Arguments are defined as an input config object.
-    Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
-
-    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+    Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
+     in extra_test_sets_lst. Arguments are defined as an input config object. Save results to a database after each run
+      appending fields and value from custom_tbl_fields_dct and using db_writer_func.
+      Index of each test set is also added as a separate column in out final records in the database
+      (0 index -- for dataset.X_test, 1 and greater -- for each extra test set in extra_test_sets_lst, keeping the original sequence).
 
     Parameters
     ----------
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     extra_test_sets_lst
-        A list of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
+        List of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
         that are not equal to original dataset.X_test and dataset.y_test
     config
         Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
@@ -508,8 +509,8 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                     model_setting: str = ModelSetting.BATCH.value,
                                                     model_seed: int = None, verbose: int = 0) -> dict:
     """
-    Find variance and error metrics for each model in models_config.
-    Save results in `save_results_dir_path` folder.
+    Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
+     in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
@@ -522,11 +523,11 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
     dataset_name
         Dataset name to name a result file with metrics
     extra_test_sets_lst
-        A list of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
+        List of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
     models_config
         Dictionary where keys are model names, and values are initialized models
     n_estimators
-        Number of estimators for bootstrap to compute subgroup variance metrics
+        Number of estimators for bootstrap to compute subgroup stability metrics
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
@@ -575,7 +576,7 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                   model_seed: int, dataset_name: str, base_model_name: str,
                                                   model_setting: str = ModelSetting.BATCH.value, verbose: int = 0):
     """
-    Compute subgroup metrics for the base model.
+    Compute subgroup metrics for the base model based on dataset.X_test and each extra test set in extra_test_sets_lst.
     Save results in `save_results_dir_path` folder.
 
     Return a dataframe of model metrics.
@@ -585,11 +586,11 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
     base_model
         Base model for metrics computation
     n_estimators
-        Number of estimators for bootstrap to compute subgroup variance metrics
+        Number of estimators for bootstrap to compute subgroup stability metrics
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     extra_test_sets_lst
-        A list of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
+        List of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
     bootstrap_fraction
         Fraction of a train set in range [0.0 - 1.0] to fit models in bootstrap
     sensitive_attributes_dct
@@ -632,14 +633,14 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         subgroup_variance_analyzer.set_test_sets(new_X_test, new_y_test)
         subgroup_variance_analyzer.set_test_protected_groups(new_test_protected_groups)
 
-        # Compute variance metrics for subgroups
+        # Compute stability metrics for subgroups
         y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                                   result_filename=None,
                                                                                   save_dir_path=None,
                                                                                   make_plots=False,
                                                                                   with_fit=True if set_idx == 0 else False)
 
-        # Compute error metrics for subgroups
+        # Compute accuracy metrics for subgroups
         error_analyzer = SubgroupErrorAnalyzer(new_X_test, new_y_test, sensitive_attributes_dct, new_test_protected_groups)
         dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
                                                           save_results=False,
