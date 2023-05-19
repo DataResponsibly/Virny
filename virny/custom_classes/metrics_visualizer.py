@@ -88,8 +88,8 @@ class MetricsVisualizer:
     def create_overall_metrics_bar_char(self, metrics_names: list, reversed_metrics_names: list = None,
                                         metrics_title: str = "Overall Metrics"):
         """
-        This bar chart includes all defined models and all overall subgroup error and variance metrics,
-        which are averaged across multiple runs. Using it, you can compare all models for each subgroup error or variance metric.
+        This bar chart includes all defined models and all overall subgroup error and stability metrics,
+        which are averaged across multiple runs. Using it, you can compare all models for each subgroup error or stability metric.
         This comparison also includes reversed metrics, in which values closer to zero are better
         since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
 
@@ -149,7 +149,7 @@ class MetricsVisualizer:
 
     def create_boxes_and_whiskers_for_models_multiple_runs(self, metrics_lst: list):
         """
-        This boxes and whiskers plot is based on overall subgroup error and variance metrics for all defined models
+        This boxes and whiskers plot is based on overall subgroup error and stability metrics for all defined models
         and results after all runs. Using it, you can see combined information on one plot that includes different models,
          subgroup metrics, and results after multiple runs.
 
@@ -229,10 +229,10 @@ class MetricsVisualizer:
 
     def create_fairness_variance_interactive_bar_chart(self):
         """
-        This interactive bar chart includes all groups, all composed group fairness and variance metrics,
-         and all defined models. Using it, you can select any pair of group fairness and variance metrics and
+        This interactive bar chart includes all groups, all composed group fairness and stability metrics,
+         and all defined models. Using it, you can select any pair of group fairness and stability metrics and
           compare them across all groups and models. Since this plot is interactive, it saves a lot of space for other plots.
-           Also, it could be more convenient to compare each group fairness and variance metric using the interactive mode.
+           Also, it could be more convenient to compare each group fairness and stability metric using the interactive mode.
         """
         models_fairness_metrics_chart, select_fairness_metric_legend, fairness_color_legend = \
             self.create_models_metrics_bar_chart(self.fairness_metrics_lst, metrics_group_name="Fairness")
@@ -267,7 +267,7 @@ class MetricsVisualizer:
 
     def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
         """
-        This heatmap includes all group fairness and variance metrics and all defined models.
+        This heatmap includes all group fairness and stability metrics and all defined models.
         Using it, you can visually compare all models across all group metrics. On this plot,
         colors display ranks where 1 is the best model for the metric. These ranks are conditioned
         on difference or ratio operations used to create these group metrics:
@@ -308,14 +308,14 @@ class MetricsVisualizer:
             plt.close()
             return ax
 
-        ax.set_title('Model Ranks Based On Group Fairness and Variance Metrics', fontsize=20)
+        ax.set_title('Model Ranks Based On Group Fairness and Stability Metrics', fontsize=20)
 
     def create_total_model_rank_heatmap(self, sorted_matrix_by_rank, num_models):
         """
-        This heatmap includes all defined models and sums of their fairness and variance ranks.
+        This heatmap includes all defined models and sums of their fairness and stability ranks.
         On this plot, colors display sums of ranks for one model. If the sum is smaller,
-        the model has better fairness or variance characteristics than other models.
-        Using this plot, you can visually compare all models for fairness and variance characteristics.
+        the model has better fairness or stability characteristics than other models.
+        Using this plot, you can visually compare all models for fairness and stability characteristics.
 
         Parameters
         ----------
@@ -350,7 +350,7 @@ class MetricsVisualizer:
             plt.close()
             return ax
 
-        ax.set_title('Total Ranks Sum For Group Fairness and Variance Metrics', fontsize=15)
+        ax.set_title('Total Ranks Sum For Group Fairness and Stability Metrics', fontsize=15)
 
     def create_model_rank_heatmaps(self, metrics_lst: list, groups_lst):
         """
@@ -393,7 +393,7 @@ class MetricsVisualizer:
 
     def create_html_report(self, report_type: ReportType, report_save_path: str):
         """
-        Create Fairness and Variance Report depending on report type.
+        Create Fairness and Stability Report depending on report type.
         It includes visualizations and helpful details to them.
         """
         # Create a directory if it does not exist
@@ -410,7 +410,7 @@ class MetricsVisualizer:
         variance_overall_metrics_bar_chart = self.create_overall_metrics_bar_char(
             metrics_names=['Label_Stability'],
             reversed_metrics_names=['Std', 'IQR', 'Jitter'],
-            metrics_title="Variance Metrics"
+            metrics_title="Stability Metrics"
         )
         interactive_bar_chart = self.create_fairness_variance_interactive_bar_chart()
         model_rank_heatmap, total_model_rank_heatmap = \
@@ -429,30 +429,30 @@ class MetricsVisualizer:
             "Below you can find a dataframe of composed group metrics for all defined models and sensitive attributes.\n"
         )
         boxes_and_whiskers_plot_desc = dp.Text(
-            "The below boxes and whiskers plot is based on _overall_ subgroup error and variance metrics for all defined models and results after all runs.\n"
+            "The below boxes and whiskers plot is based on _overall_ subgroup error and stability metrics for all defined models and results after all runs.\n"
             "This plot can give you the following benefits:\n"
             "* You can see combined information on one plot that includes different models, subgroup metrics, and results after multiple runs\n"
             "* You can see all quartiles for each model metric based on multiple runs\n"
             "* You can compare different models for each metric\n"
-            "* You can see the variance of each model metric\n"
+            "* You can see the stability of each model metric\n"
         )
         overall_metrics_desc = dp.Text(
-            "The below bar chart includes all defined models and all _overall_ subgroup error and variance metrics, which are averaged across multiple runs.\n"
+            "The below bar chart includes all defined models and all _overall_ subgroup error and stability metrics, which are averaged across multiple runs.\n"
             "This plot can give you the following benefits:\n"
-            "* You can compare all models for each subgroup error or variance metric\n"
+            "* You can compare all models for each subgroup error or stability metric\n"
             "* This comparison also includes reversed metrics, in which values closer to zero are better "
             "since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better\n"
         )
         individual_metrics_interactive_bar_chart_desc = dp.Text(
-            "The below interactive bar chart includes all groups, all composed group fairness and variance metrics, "
+            "The below interactive bar chart includes all groups, all composed group fairness and stability metrics, "
             "and all defined models.\n"
             "This plot can give you the following benefits:\n"
-            "* You can select any pair of group fairness and variance metrics and compare them across all groups and models\n"
+            "* You can select any pair of group fairness and stability metrics and compare them across all groups and models\n"
             "* Since this plot is interactive, it saves a lot of space for other plots. "
-            "Also, it could be more convenient to compare each group fairness and variance metric using the interactive mode\n"
+            "Also, it could be more convenient to compare each group fairness and stability metric using the interactive mode\n"
         )
         model_ranked_heatmap_desc = dp.Text(
-            "The below heatmap includes all group fairness and variance metrics and all defined models.\n"
+            "The below heatmap includes all group fairness and stability metrics and all defined models.\n"
             "On this plot, colors display ranks where 1 is the best model for the metric. "
             "These ranks are conditioned on difference or ratio operations used to create these group metrics:\n"
             "* If the metric is created based on the difference operation, **closer values to zero** have ranks that are closer to the first rank\n"
@@ -463,12 +463,12 @@ class MetricsVisualizer:
             "* You can find the best and worst models for each group metric\n"
         )
         overall_model_ranked_heatmap_desc = dp.Text(
-            "The below heatmap includes all defined models and sums of their fairness and variance ranks.\n"
-            "On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better fairness or variance characteristics than other models.\n"
+            "The below heatmap includes all defined models and sums of their fairness and stability ranks.\n"
+            "On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better fairness or stability characteristics than other models.\n"
             "This plot can give you the following benefits:\n"
-            "* You can visually compare all models for fairness and variance characteristics\n"
+            "* You can visually compare all models for fairness and stability characteristics\n"
             "* You can visually understand where one model is better or worse than other models\n"
-            "* You can find the best or most balanced model based on fairness or variance metrics\n"
+            "* You can find the best or most balanced model based on fairness or stability metrics\n"
         )
 
         report_filename = f'{self.dataset_name}_Metrics_Report_{datetime.now(timezone.utc).strftime("%Y%m%d__%H%M%S")}.html'
@@ -477,7 +477,7 @@ class MetricsVisualizer:
                 metrics_lst=['Std', 'IQR', 'Jitter', 'Label_Stability', 'Accuracy', 'TPR', 'TNR', 'FPR', 'FNR']
             )
 
-            dp.Report("# Fairness and Variance Report",
+            dp.Report("# Fairness and Stability Report",
                       general_desc,
 
                       "## Model Composed Metrics",
@@ -488,45 +488,45 @@ class MetricsVisualizer:
                       boxes_and_whiskers_plot_desc,
                       dp.Plot(boxes_and_whiskers_plot),
 
-                      "## Overall Fairness and Variance Model Metrics Comparison",
+                      "## Overall Fairness and Stability Model Metrics Comparison",
                       overall_metrics_desc,
                       dp.Plot(fairness_overall_metrics_bar_chart, responsive=False),
                       dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
 
-                      "## Fairness and Variance Interactive Bar Chart",
+                      "## Fairness and Stability Interactive Bar Chart",
                       individual_metrics_interactive_bar_chart_desc,
                       dp.Plot(interactive_bar_chart),
 
-                      "## Model Ranks Based On Group Fairness and Variance Metrics",
+                      "## Model Ranks Based On Group Fairness and Stability Metrics",
                       model_ranked_heatmap_desc,
                       dp.Plot(model_rank_heatmap, responsive=False),
 
-                      "## Total Ranks Sum For Group Fairness and Variance Metrics",
+                      "## Total Ranks Sum For Group Fairness and Stability Metrics",
                       overall_model_ranked_heatmap_desc,
                       dp.Plot(total_model_rank_heatmap, responsive=False),
                       ).save(path=os.path.join(report_save_path, report_filename))
         else:
-            dp.Report("# Fairness and Variance Report",
+            dp.Report("# Fairness and Stability Report",
                       general_desc,
 
                       "## Model Composed Metrics",
                       composed_metrics_desc,
                       dp.DataTable(self.models_composed_metrics_df),
 
-                      "## Overall Fairness and Variance Model Metrics Comparison",
+                      "## Overall Fairness and Stability Model Metrics Comparison",
                       overall_metrics_desc,
                       dp.Plot(fairness_overall_metrics_bar_chart, responsive=False),
                       dp.Plot(variance_overall_metrics_bar_chart, responsive=False),
 
-                      "## Fairness and Variance Interactive Bar Chart",
+                      "## Fairness and Stability Interactive Bar Chart",
                       individual_metrics_interactive_bar_chart_desc,
                       dp.Plot(interactive_bar_chart),
 
-                      "## Model Ranks Based On Group Fairness and Variance Metrics",
+                      "## Model Ranks Based On Group Fairness and Stability Metrics",
                       model_ranked_heatmap_desc,
                       dp.Plot(model_rank_heatmap, responsive=False),
 
-                      "## Total Ranks Sum For Group Fairness and Variance Metrics",
+                      "## Total Ranks Sum For Group Fairness and Stability Metrics",
                       overall_model_ranked_heatmap_desc,
                       dp.Plot(total_model_rank_heatmap, responsive=False),
                       ).save(path=os.path.join(report_save_path, report_filename))
