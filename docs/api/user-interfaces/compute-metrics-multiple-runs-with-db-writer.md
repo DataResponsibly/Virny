@@ -1,6 +1,6 @@
-# compute_metrics_multiple_runs
+# compute_metrics_multiple_runs_with_db_writer
 
-Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object. Save results in `save_results_dir_path` folder.
+Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object. Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
 Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
 
@@ -18,9 +18,13 @@ Return a dictionary where keys are model names, and values are metrics for multi
 
     Dictionary where keys are model names, and values are initialized models
 
-- **save_results_dir_path** (*str*)
+- **custom_tbl_fields_dct** (*dict*)
 
-    Location where to save result files with metrics
+    Dictionary where keys are column names and values to add to inserted metrics during saving results to a database
+
+- **db_writer_func**
+
+    Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
 
 - **verbose** (*int*) – defaults to `0`
 

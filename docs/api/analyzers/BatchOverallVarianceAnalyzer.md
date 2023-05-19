@@ -46,6 +46,10 @@ Analyzer to compute subgroup variance metrics for batch learning models.
 
     Number of estimators in ensemble to measure base_model stability
 
+- **verbose** (*int*) – defaults to `0`
+
+    [Optional] Level of logs printing. The greater level provides more logs.  As for now, 0, 1, 2 levels are supported.
+
 
 
 
@@ -61,6 +65,7 @@ Analyzer to compute subgroup variance metrics for batch learning models.
 
     - **boostrap_size**     (*int*)    
     - **with_replacement**     (*bool*)    
+    - **with_fit**     (*bool*)     – defaults to `True`    
     
 ???- note "compute_metrics"
 
@@ -70,6 +75,7 @@ Analyzer to compute subgroup variance metrics for batch learning models.
 
     - **make_plots**     (*bool*)     – defaults to `False`    
     - **save_results**     (*bool*)     – defaults to `True`    
+    - **with_fit**     (*bool*)     – defaults to `True`    
     
 ???- note "get_metrics_dict"
 

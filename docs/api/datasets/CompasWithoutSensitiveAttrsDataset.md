@@ -1,14 +1,18 @@
 # CompasWithoutSensitiveAttrsDataset
 
-Dataset class for COMPAS dataset that does not contain sensitive attributes among feature columns  to test blind classifiers
+Dataset class for the COMPAS dataset that does not contain sensitive attributes among feature columns  to test blind classifiers
 
 
 
 ## Parameters
 
-- **dataset_path** – defaults to `virny/data/COMPAS.csv`
+- **subsample_size** (*int*) – defaults to `None`
 
-    Path to a dataset file
+    Subsample size to create based on the input dataset
+
+- **subsample_seed** (*int*) – defaults to `None`
+
+    Seed for sampling using the sample() method from pandas
 
 
 

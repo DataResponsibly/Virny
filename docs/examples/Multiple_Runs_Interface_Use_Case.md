@@ -44,7 +44,7 @@ Based on the library flow, we need to create 3 input objects for a user interfac
 
 * A **config yaml** that is a file with configuration parameters for different user interfaces for metrics computation.
 
-* A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseDataset class, which was created for user convenience.
+* A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseFlowDataset class, which was created for user convenience.
 
 * Finally, a **models config** that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits of multiple models for one or multiple runs and analyze different types of models.
 
@@ -138,7 +138,7 @@ SAVE_RESULTS_DIR_PATH = os.path.join(ROOT_DIR, 'results', f'{config.dataset_name
 
 ### Preprocess the dataset and create a BaseFlowDataset class
 
-Based on the BaseDataset class, your **dataset class** should include the following attributes:
+Based on the BaseFlowDataset class, your **dataset class** should include the following attributes:
 
 * **Obligatory attributes**: dataset, target, features, numerical_columns, categorical_columns
 

@@ -91,6 +91,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         Model name to name a result file with metrics
     save_results
         [Optional] If to save result metrics in a file
+    model_setting
+        Model type: 'batch' or incremental.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
     verbose
@@ -215,6 +217,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
+    model_setting
+        Model type: 'batch' or incremental.
     model_seed
         [Optional] Model seed
     save_results
@@ -531,6 +535,8 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
+    model_setting
+        Model type: 'batch' or incremental.
     model_seed
         [Optional] Model seed
     verbose
@@ -602,6 +608,8 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         Dataset name to name a result file with metrics
     base_model_name
         Model name to name a result file with metrics
+    model_setting
+        Model type: 'batch' or incremental.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.

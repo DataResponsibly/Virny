@@ -39,7 +39,7 @@ from virny.configs.constants import ReportType
 
 Based on the library flow, we need to create 3 input objects for a user interface:
 
-* A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseDataset class, which was created for user convenience.
+* A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseFlowDataset class, which was created for user convenience.
 
 * A **config yaml** that is a file with configuration parameters for different user interfaces for metrics computation.
 
@@ -53,7 +53,7 @@ DATASET_SPLIT_SEED = 42
 
 ### Create a Dataset class
 
-Based on the BaseDataset class, your **dataset class** should include the following attributes:
+Based on the BaseFlowDataset class, your **dataset class** should include the following attributes:
 
 * **Obligatory attributes**: dataset, target, features, numerical_columns, categorical_columns
 
