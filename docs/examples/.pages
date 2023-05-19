@@ -1,5 +1,7 @@
 title: Examples 🍱
 nav:
     - Multiple_Runs_Interface_Use_Case.md
-    - One_Run_Multiple_Models_Interface_Use_Case.md
-    - One_Run_One_Model_Interface_Use_Case.md
+    - Multiple_Runs_Interface_With_DB_Writer.md
+    - Multiple_Runs_Interface_With_Multiple_Test_Sets.md
+    - Single_Run_Multiple_Models_Interface_Use_Case.md
+    - Single_Run_Single_Model_Interface_Use_Case.md
