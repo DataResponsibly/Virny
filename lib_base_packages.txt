@@ -1,6 +1,5 @@
 numpy~=1.24.2
-datapane~=0.16.4
-requests-toolbelt==1.0.0
+datapane~=0.15.5
 matplotlib~=3.6.2
 pandas~=1.5.2
 altair~=4.2.0
