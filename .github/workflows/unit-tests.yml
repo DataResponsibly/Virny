@@ -23,4 +23,5 @@ jobs:
       - name: pytest [Branch]
         run: |
           source ~/.venv/bin/activate
+          pip install requests-toolbelt==1.0.0
           pytest --durations=10 -n logical # Run pytest on all logical CPU cores
