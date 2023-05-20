@@ -1,6 +1,6 @@
 # Welcome to Virny
 
-## Description 📜
+## 📜 Description
 
 **Virny** is a Python library for auditing model stability and fairness. The Virny library was
 developed based on three fundamental principles: 
@@ -18,7 +18,7 @@ to use the library for model development and monitoring post-deployment.
 For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Runs_Interface_Use_Case/).
 
 
-## Installation 🛠
+## 🛠 Installation
 
 Virny supports **Python 3.8, 3.9** and can be installed with `pip`:
 
@@ -27,7 +27,7 @@ pip install virny
 ```
 
 
-## Features 💡
+## 💡 Features
 
 * Entire pipeline for auditing model stability and fairness
 * Metrics reports and visualizations
@@ -39,7 +39,7 @@ pip install virny
 * Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
 
 
-## Library Terminology 📖
+## 📖 Library Terminology
 
 This section briefly explains the main terminology used in our library.
 

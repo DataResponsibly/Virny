@@ -1,4 +1,4 @@
-# Multiple Runs Interface Usage Wit DB Writer
+# Multiple Runs Interface Usage With DB Writer
 
 In this example, we are going to audit 4 models for stability and fairness, visualize metrics, and create an analysis report. To get better analysis accuracy, we will use `compute_metrics_multiple_runs_with_db_writer` interface that will make multiple runs per model and save results in the user database based on the db_writer function. For that, we will need to do the next steps:
 
