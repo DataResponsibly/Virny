@@ -1,0 +1,5 @@
+
+dataset_name: COMPAS
+bootstrap_fraction: 0.8
+n_estimators: 100
+sensitive_attributes_dct: {'sex': 0, 'age': 25, 'race': 'Caucasian', 'sex&race': None}

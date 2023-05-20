@@ -1,0 +1,37 @@
+# ACSPublicCoverageDataset
+
+Dataset class for the public coverage task from the folktables dataset. Target: binary classification, predict whether a low-income individual, not eligible for Medicare,     has coverage from public health insurance. Source of the dataset: https://github.com/socialfoundations/folktables
+
+
+
+## Parameters
+
+- **state**
+
+    State in the US for which to get the data. All states in the US are available.
+
+- **year**
+
+    Year for which to get the data. Five different years of data collection are available: 2014–2018 inclusive.
+
+- **root_dir** – defaults to `None`
+
+    Path to the root directory where to store the extracted dataset or where it is stored.
+
+- **with_nulls** – defaults to `False`
+
+    Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+
+
+
+
+## Methods
+
+???- note "update_X_data"
+
+    To save simulated nulls
+
+    **Parameters**
+
+    - **X_data**    
+    

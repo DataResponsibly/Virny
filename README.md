@@ -28,7 +28,7 @@
 </p>
 
 
-## Description 📜
+## 📜 Description
 
 **Virny** is a Python library for auditing model stability and fairness. The Virny library was
 developed based on three fundamental principles: 
@@ -44,14 +44,14 @@ to use the library for model development and monitoring post-deployment.
 For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Runs_Interface_Use_Case/).
 
 
-## Documentation 📒
+## 📒 Documentation
 
 * [Introduction](https://dataresponsibly.github.io/Virny/)
 * [API Reference](https://dataresponsibly.github.io/Virny/api/overview/)
 * [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Runs_Interface_Use_Case/)
 
 
-## Features 💡
+## 💡 Features
 
 * Entire pipeline for auditing model stability and fairness
 * Metrics reports and visualizations
@@ -63,7 +63,7 @@ For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.i
 * Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
 
 
-## Library Terminology 📖
+## 📖 Library Terminology
 
 This section briefly explains the main terminology used in our library.
 
@@ -74,7 +74,7 @@ This section briefly explains the main terminology used in our library.
 * A **group metric** is a metric that shows the relation between privileged and disprivileged subgroups created based on one or many sensitive attributes.
 
 
-## Installation 🛠
+## 🛠 Installation
 
 Virny supports **Python 3.8, 3.9** and can be installed with `pip`:
 
@@ -83,13 +83,11 @@ pip install virny
 ```
 
 
-## Affiliations 🤗
+## 🤗 Affiliations
 
 ![NYU-UCU-Logos](https://user-images.githubusercontent.com/42843889/216840888-071bf184-f0e3-4a3e-94dc-c0d1c7784143.png)
 
 
-## License 📝
+## 📝 License
 
 **Virny** is free and open-source software licensed under the [3-clause BSD license](https://github.com/DataResponsibly/Virny/blob/main/LICENSE).
-
-

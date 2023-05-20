@@ -36,11 +36,15 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+         As for now, 0, 1, 2 levels are supported.
 
     """
+
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 dataset_name: str, n_estimators: int):
+                 dataset_name: str, n_estimators: int, verbose: int = 0):
         self.base_model = base_model
         self.base_model_name = base_model_name
         self.bootstrap_fraction = bootstrap_fraction
@@ -49,7 +53,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
         self.models_predictions = None
 
-        self.__logger = get_logger()
+        self._verbose = verbose
+        self.__logger = get_logger(verbose)
 
         self.X_train = X_train
         self.y_train = y_train
@@ -77,7 +82,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
     def _batch_predict_proba(self, classifier, X_test):
         pass
 
-    def compute_metrics(self, make_plots: bool = False, save_results: bool = True):
+    def compute_metrics(self, make_plots: bool = False, save_results: bool = True, with_fit: bool = True):
         """
         Measure metrics for the base model. Display plots for analysis if needed. Save results to a .pkl file
 
@@ -87,11 +92,13 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             bool, if to display plots for analysis
         save_results
             If to save result metrics in a file
+        with_fit
+            If to fit estimators in bootstrap
 
         """
         # Quantify uncertainty for the base model
         boostrap_size = int(self.bootstrap_fraction * self.X_train.shape[0])
-        self.models_predictions = self.UQ_by_boostrap(boostrap_size, with_replacement=True)
+        self.models_predictions = self.UQ_by_boostrap(boostrap_size, with_replacement=True, with_fit=with_fit)
 
         # Count metrics based on prediction proba results
         y_preds, uq_labels, prediction_stats = count_prediction_stats(self.y_test.values, self.models_predictions)
@@ -115,18 +122,23 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             per_sample_accuracy_lst = prediction_stats.per_sample_accuracy_lst
             label_stability_lst = prediction_stats.label_stability_lst
 
-            plot_generic(labels_means_lst, labels_stds_lst, "Mean of probability", "Standard deviation", x_lim=1.01, y_lim=0.5, plot_title="Probability mean vs Standard deviation")
-            plot_generic(labels_stds_lst, label_stability_lst, "Standard deviation", "Label stability", x_lim=0.5, y_lim=1.01, plot_title="Standard deviation vs Label stability")
-            plot_generic(labels_means_lst, label_stability_lst, "Mean", "Label stability", x_lim=1.01, y_lim=1.01, plot_title="Mean vs Label stability")
-            plot_generic(per_sample_accuracy_lst, labels_stds_lst, "Accuracy", "Standard deviation", x_lim=1.01, y_lim=0.5, plot_title="Accuracy vs Standard deviation")
-            plot_generic(per_sample_accuracy_lst, labels_iqr_lst, "Accuracy", "Inter quantile range", x_lim=1.01, y_lim=1.01, plot_title="Accuracy vs Inter quantile range")
+            plot_generic(labels_means_lst, labels_stds_lst, "Mean of probability", "Standard deviation", x_lim=1.01,
+                         y_lim=0.5, plot_title="Probability mean vs Standard deviation")
+            plot_generic(labels_stds_lst, label_stability_lst, "Standard deviation", "Label stability", x_lim=0.5,
+                         y_lim=1.01, plot_title="Standard deviation vs Label stability")
+            plot_generic(labels_means_lst, label_stability_lst, "Mean", "Label stability", x_lim=1.01, y_lim=1.01,
+                         plot_title="Mean vs Label stability")
+            plot_generic(per_sample_accuracy_lst, labels_stds_lst, "Accuracy", "Standard deviation", x_lim=1.01,
+                         y_lim=0.5, plot_title="Accuracy vs Standard deviation")
+            plot_generic(per_sample_accuracy_lst, labels_iqr_lst, "Accuracy", "Inter quantile range", x_lim=1.01,
+                         y_lim=1.01, plot_title="Accuracy vs Inter quantile range")
 
         if save_results:
             self.save_metrics_to_file()
         else:
             return y_preds, self.y_test
 
-    def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool) -> dict:
+    def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool, with_fit: bool = True) -> dict:
         """
         Quantifying uncertainty of the base model by constructing an ensemble from bootstrapped samples.
 
@@ -139,22 +151,31 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             Number of records in bootstrap splits
         with_replacement
             Enable replacement or not
+        with_fit
+            Whether to fit estimators in bootstrap
 
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
-        print('\n', flush=True)
+        if self._verbose >= 1:
+            print('\n', flush=True)
         self.__logger.info('Start classifiers testing by bootstrap')
+        # Remove a progress bar for UQ without estimators fitting
+        cycle_range = range(self.n_estimators) if with_fit is False else \
+            tqdm(range(self.n_estimators),
+                 desc="Classifiers testing by bootstrap",
+                 colour="blue",
+                 mininterval=10)
         # Train and test each estimator in models_predictions
-        for idx in tqdm(range(self.n_estimators),
-                        desc="Classifiers testing by bootstrap",
-                        colour="blue",
-                        mininterval=10):
+        for idx in cycle_range:
             classifier = self.models_lst[idx]
-            X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
-            classifier = self._fit_model(classifier, X_sample, y_sample)
+            if with_fit:
+                X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
+                classifier = self._fit_model(classifier, X_sample, y_sample)
             models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+            self.models_lst[idx] = classifier
 
-        print('\n', flush=True)
+        if self._verbose >= 1:
+            print('\n', flush=True)
         self.__logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions
@@ -205,6 +226,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         metrics_to_report['Jitter'] = [self.jitter]
         metrics_to_report['Per_Sample_Accuracy'] = [self.per_sample_accuracy]
         metrics_to_report['Label_Stability'] = [self.label_stability]
+
         metrics_df = pd.DataFrame(metrics_to_report)
 
         dir_path = os.path.join('..', '..', 'results', 'models_stability_metrics')

@@ -31,22 +31,22 @@ Class to create useful visualizations of models metrics.
 
 ## Methods
 
-???- note "create_bias_variance_interactive_bar_chart"
-
-    This interactive bar chart includes all groups, all composed group bias and variance metrics,  and all defined models. Using it, you can select any pair of group bias and variance metrics and   compare them across all groups and models. Since this plot is interactive, it saves a lot of space for other plots.    Also, it could be more convenient to compare individual group bias and variance metrics using the interactive mode.
-
-    
 ???- note "create_boxes_and_whiskers_for_models_multiple_runs"
 
-    This boxes and whiskers plot is based on overall subgroup bias and variance metrics for all defined models and results after all runs. Using it, you can see combined information on one plot that includes different models,  subgroup metrics, and results after multiple runs.
+    This boxes and whiskers plot is based on overall subgroup error and stability metrics for all defined models and results after all runs. Using it, you can see combined information on one plot that includes different models,  subgroup metrics, and results after multiple runs.
 
     **Parameters**
 
     - **metrics_lst**     (*list*)    
     
+???- note "create_fairness_variance_interactive_bar_chart"
+
+    This interactive bar chart includes all groups, all composed group fairness and stability metrics,  and all defined models. Using it, you can select any pair of group fairness and stability metrics and   compare them across all groups and models. Since this plot is interactive, it saves a lot of space for other plots.    Also, it could be more convenient to compare each group fairness and stability metric using the interactive mode.
+
+    
 ???- note "create_html_report"
 
-    Create Statistical Bias and Variance Report depending on report type. It includes visualizations and helpful details to them.
+    Create Fairness and Stability Report depending on report type. It includes visualizations and helpful details to them.
 
     **Parameters**
 
@@ -55,7 +55,7 @@ Class to create useful visualizations of models metrics.
     
 ???- note "create_model_rank_heatmap"
 
-    This heatmap includes all group bias and variance metrics and all defined models. Using it, you can visually compare all models across all group metrics. On this plot, colors display ranks where 1 is the best model for the metric. These ranks are conditioned on difference or ratio operations used to create these group metrics:
+    This heatmap includes all group fairness and stability metrics and all defined models. Using it, you can visually compare all models across all group metrics. On this plot, colors display ranks where 1 is the best model for the metric. These ranks are conditioned on difference or ratio operations used to create these group metrics:
 
     1) if the metric is created based on the difference operation, closer values to zero have ranks that are closer to the first rank  2) if the metric is created based on the ratio operation, closer values to one have ranks that are closer to the first rank
 
@@ -78,7 +78,7 @@ Class to create useful visualizations of models metrics.
 
 ???- note "create_overall_metrics_bar_char"
 
-    This bar chart includes all defined models and all overall subgroup bias and variance metrics, which are averaged across multiple runs. Using it, you can compare all models for each subgroup bias or variance metric. This comparison also includes reversed metrics, in which values closer to zero are better since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
+    This bar chart includes all defined models and all overall subgroup error and stability metrics, which are averaged across multiple runs. Using it, you can compare all models for each subgroup error or stability metric. This comparison also includes reversed metrics, in which values closer to zero are better since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
 
     **Parameters**
 
@@ -88,7 +88,7 @@ Class to create useful visualizations of models metrics.
     
 ???- note "create_total_model_rank_heatmap"
 
-    This heatmap includes all defined models and sums of their bias and variance ranks. On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better bias or variance characteristics than other models. Using this plot, you can visually compare all models for bias and variance characteristics.
+    This heatmap includes all defined models and sums of their fairness and stability ranks. On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better fairness or stability characteristics than other models. Using this plot, you can visually compare all models for fairness and stability characteristics.
 
     **Parameters**
 

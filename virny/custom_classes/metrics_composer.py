@@ -3,7 +3,8 @@ import pandas as pd
 
 class MetricsComposer:
     """
-    Composer class that combines different metrics to create new ones such as 'Disparate_Impact' or 'Accuracy_Parity'
+    Composer class that combines different subgroup metrics to create group metrics
+     such as 'Disparate_Impact' or 'Accuracy_Parity'
 
     Parameters
     ----------
@@ -45,9 +46,10 @@ class MetricsComposer:
                 priv_group = sensitive_attr + '_priv'
 
                 groups_metrics_dct[sensitive_attr] = {
-                    # Group statistical bias metrics
+                    # Group fairness metrics
                     'Equalized_Odds_TPR': cfm[dis_group]['TPR'] - cfm[priv_group]['TPR'],
                     'Equalized_Odds_FPR': cfm[dis_group]['FPR'] - cfm[priv_group]['FPR'],
+                    'Equalized_Odds_FNR': cfm[dis_group]['FNR'] - cfm[priv_group]['FNR'],
                     'Disparate_Impact': cfm[dis_group]['Positive-Rate'] / cfm[priv_group]['Positive-Rate'],
                     'Statistical_Parity_Difference': cfm[dis_group]['Positive-Rate'] - cfm[priv_group]['Positive-Rate'],
                     'Accuracy_Parity': cfm[dis_group]['Accuracy'] - cfm[priv_group]['Accuracy'],

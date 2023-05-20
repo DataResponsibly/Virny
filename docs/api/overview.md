@@ -3,7 +3,7 @@
 ## analyzers
 
 
-Subgroup Statistical Bias and Variance Analyzers.
+Subgroup Error and Variance Analyzers.
 
 This module contains fairness and stability analysing methods for defined subgroups.
 The purpose of an analyzer is to analyse defined metrics for defined subgroups.
@@ -12,7 +12,7 @@ The purpose of an analyzer is to analyse defined metrics for defined subgroups.
 - [AbstractOverallVarianceAnalyzer](../analyzers/AbstractOverallVarianceAnalyzer)
 - [AbstractSubgroupAnalyzer](../analyzers/AbstractSubgroupAnalyzer)
 - [BatchOverallVarianceAnalyzer](../analyzers/BatchOverallVarianceAnalyzer)
-- [SubgroupStatisticalBiasAnalyzer](../analyzers/SubgroupStatisticalBiasAnalyzer)
+- [SubgroupErrorAnalyzer](../analyzers/SubgroupErrorAnalyzer)
 - [SubgroupVarianceAnalyzer](../analyzers/SubgroupVarianceAnalyzer)
 - [SubgroupVarianceCalculator](../analyzers/SubgroupVarianceCalculator)
 
@@ -31,8 +31,7 @@ The purpose is to split metrics computation and visualization pipeline on compon
 that are highly  customizable for future library features.
 
 
-- [BaseDataset](../custom-classes/BaseDataset)
-- [GenericPipeline](../custom-classes/GenericPipeline)
+- [BaseFlowDataset](../custom-classes/BaseFlowDataset)
 - [MetricsComposer](../custom-classes/MetricsComposer)
 - [MetricsVisualizer](../custom-classes/MetricsVisualizer)
 
@@ -43,13 +42,21 @@ This module contains sample datasets and data loaders.
 The purpose is to provide sample datasets for functionality testing and show examples of data loaders (aka dataset classes).
 
 
+- [ACSEmploymentDataset](../datasets/ACSEmploymentDataset)
+- [ACSIncomeDataset](../datasets/ACSIncomeDataset)
+- [ACSMobilityDataset](../datasets/ACSMobilityDataset)
+- [ACSPublicCoverageDataset](../datasets/ACSPublicCoverageDataset)
+- [ACSTravelTimeDataset](../datasets/ACSTravelTimeDataset)
 - [CompasDataset](../datasets/CompasDataset)
 - [CompasWithoutSensitiveAttrsDataset](../datasets/CompasWithoutSensitiveAttrsDataset)
+
+## incremental_ml
+
 
 ## metrics
 
 
-This module contains functions for variance and statistical bias metrics.
+This module contains functions for computing subgroup variance and error metrics.
 
 
 - [compute_churn](../metrics/compute-churn)
@@ -69,6 +76,7 @@ This module contains function for input dataset preprocessing.
 
 - [get_dummies](../preprocessing/get-dummies)
 - [make_features_dfs](../preprocessing/make-features-dfs)
+- [preprocess_dataset](../preprocessing/preprocess-dataset)
 
 ## user_interfaces
 
@@ -79,6 +87,8 @@ This module contains user interfaces for metrics computation.
 
 
 - [compute_metrics_multiple_runs](../user-interfaces/compute-metrics-multiple-runs)
+- [compute_metrics_multiple_runs_with_db_writer](../user-interfaces/compute-metrics-multiple-runs-with-db-writer)
+- [compute_metrics_multiple_runs_with_multiple_test_sets](../user-interfaces/compute-metrics-multiple-runs-with-multiple-test-sets)
 - [compute_model_metrics](../user-interfaces/compute-model-metrics)
 - [compute_model_metrics_with_config](../user-interfaces/compute-model-metrics-with-config)
 - [run_metrics_computation](../user-interfaces/run-metrics-computation)

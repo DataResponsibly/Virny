@@ -1,6 +1,6 @@
 # MetricsComposer
 
-Composer class that combines different metrics to create new ones such as 'Disparate_Impact' or 'Accuracy_Parity'
+Composer class that combines different subgroup metrics to create group metrics  such as 'Disparate_Impact' or 'Accuracy_Parity'
 
 
 
