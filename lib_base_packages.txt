@@ -1,3 +1,4 @@
+requests==2.28.2
 urllib3==1.26.15
 requests-toolbelt==0.10.1
 numpy~=1.24.2
