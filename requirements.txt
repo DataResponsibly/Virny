@@ -1,5 +1,6 @@
 wheel~=0.38.4
 twine~=4.0.2
+requests-toolbelt==1.0.0
 numpy~=1.24.2
 datapane~=0.15.5
 matplotlib~=3.6.2
