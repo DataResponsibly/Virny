@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 from virny.configs.constants import CountPredictionStatsResponse
 from virny.utils.data_viz_utils import set_size
-from virny.metrics.stability_metrics import compute_std_mean_iqr_metrics, compute_entropy, compute_jitter, \
+from virny.metrics.stability_metrics import compute_std_mean_iqr_metrics, compute_entropy_from_predicted_probability, compute_jitter, \
     compute_per_sample_accuracy
 
 
@@ -32,20 +32,22 @@ def count_prediction_stats(y_test, uq_results):
         results = pd.DataFrame(uq_results).transpose()
 
     means_lst, stds_lst, iqr_lst = compute_std_mean_iqr_metrics(results)
+    mean_ensemble_entropy_lst = results.apply(compute_entropy_from_predicted_probability).mean().values
 
     # Convert predict proba results of each model to correspondent labels.
-    # Here we use int(x<0.5) since we use predict_probe()[:, 0] to make predictions.
+    # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
     # Hence, if value is for example, 0.3 --> label == 1, 0.6 -- > label == 0
     uq_labels = results.applymap(lambda x: int(x<0.5))
+    jitter_lst = compute_jitter(uq_labels.values)
 
-    entropy_lst = np.apply_along_axis(compute_entropy, 1, uq_labels.transpose().values)
-    jitter = compute_jitter(uq_labels.values)
+    main_prediction = results.mean().values
+    overall_entropy_lst = np.array([compute_entropy_from_predicted_probability(x) for x in main_prediction])
 
-    y_preds = np.array([int(x<0.5) for x in results.mean().values])
+    y_preds = np.array([int(x<0.5) for x in main_prediction])
 
     per_sample_accuracy_lst, label_stability_lst = compute_per_sample_accuracy(y_test, results)
-    prediction_stats = CountPredictionStatsResponse(jitter, means_lst, stds_lst, iqr_lst, entropy_lst,
-                                                    per_sample_accuracy_lst, label_stability_lst)
+    prediction_stats = CountPredictionStatsResponse(jitter_lst, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst,
+                                                    overall_entropy_lst, per_sample_accuracy_lst, label_stability_lst)
 
     return y_preds, uq_labels, prediction_stats
 

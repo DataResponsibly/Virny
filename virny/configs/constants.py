@@ -4,11 +4,12 @@ from dataclasses import dataclass
 
 @dataclass
 class CountPredictionStatsResponse:
-    jitter: float
+    jitter_lst: float
     means_lst: list
     stds_lst: list
     iqr_lst: list
-    entropy_lst: list
+    mean_ensemble_entropy_lst: list
+    overall_entropy_lst: list
     per_sample_accuracy_lst: list
     label_stability_lst: list
 

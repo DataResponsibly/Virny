@@ -2,7 +2,7 @@ import os
 
 from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
-from river import base
+#from river import base
 
 from virny.configs.constants import INTERSECTION_SIGN, ModelSetting
 
