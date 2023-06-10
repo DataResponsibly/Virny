@@ -21,6 +21,10 @@ class ModelSetting(Enum):
     BATCH = "batch"
 
 
+class ComputationMode(Enum):
+    ERROR_ANALYSIS = "error_analysis"
+
+
 class ReportType(Enum):
     MULTIPLE_RUNS_MULTIPLE_MODELS = "multiple_runs_multiple_models"
     ONE_RUN_MULTIPLE_MODELS = "one_run_multiple_models"

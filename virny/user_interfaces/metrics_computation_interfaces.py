@@ -62,7 +62,7 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
 
 def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                           sensitive_attributes_dct: dict, model_seed: int, dataset_name: str, base_model_name: str,
-                          model_setting: str = ModelSetting.BATCH.value, save_results: bool = True,
+                          model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
                           save_results_dir_path: str = None, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
@@ -92,7 +92,9 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     save_results
         [Optional] If to save result metrics in a file
     model_setting
-        Model type: 'batch' or incremental.
+        [Optional] Model type: 'batch' or 'incremental'. Default: 'batch'.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
     verbose
@@ -119,6 +121,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=test_protected_groups,
+                                                          computation_mode=computation_mode,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
@@ -126,8 +129,11 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                                               make_plots=False)
 
     # Compute error metrics for subgroups
-    error_analyzer = SubgroupErrorAnalyzer(dataset.X_test, dataset.y_test,
-                                           sensitive_attributes_dct, test_protected_groups)
+    error_analyzer = SubgroupErrorAnalyzer(X_test=dataset.X_test,
+                                           y_test=dataset.y_test,
+                                           sensitive_attributes_dct=sensitive_attributes_dct,
+                                           test_protected_groups=test_protected_groups,
+                                           computation_mode=computation_mode)
     dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
                                                       save_results=False,
                                                       result_filename=None,
@@ -186,6 +192,7 @@ def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models
                                    n_estimators=config.n_estimators,
                                    sensitive_attributes_dct=config.sensitive_attributes_dct,
                                    model_setting=config.model_setting,
+                                   computation_mode=config.computation_mode,
                                    model_seed=run_seed,
                                    save_results_dir_path=save_results_dir_path,
                                    save_results=True,
@@ -194,7 +201,7 @@ def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models
 
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
-                            model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
+                            model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, model_seed: int = None,
                             save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
@@ -218,7 +225,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
     model_setting
-        Model type: 'batch' or incremental.
+        [Optional] Model type: 'batch' or incremental. Default: 'batch'.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     model_seed
         [Optional] Model seed
     save_results
@@ -246,6 +255,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      bootstrap_fraction=bootstrap_fraction,
                                                      sensitive_attributes_dct=sensitive_attributes_dct,
                                                      model_setting=model_setting,
+                                                     computation_mode=computation_mode,
                                                      model_seed=model_seed,
                                                      dataset_name=dataset_name,
                                                      base_model_name=model_name,
@@ -314,6 +324,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
                                                      n_estimators=config.n_estimators,
                                                      sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                      model_setting=config.model_setting,
+                                                     computation_mode=config.computation_mode,
                                                      model_seed=run_seed,
                                                      save_results=False,
                                                      verbose=verbose)
@@ -382,6 +393,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                      n_estimators=config.n_estimators,
                                                      sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                      model_setting=config.model_setting,
+                                                     computation_mode=config.computation_mode,
                                                      model_seed=run_seed,
                                                      save_results=False,
                                                      verbose=verbose)

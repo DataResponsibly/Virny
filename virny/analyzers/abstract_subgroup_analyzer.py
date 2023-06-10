@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 
+from virny.configs.constants import ComputationMode
+
 
 class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
     """
@@ -23,16 +25,48 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
          that are correspondent to these sensitive attributes
 
     """
-    def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict, test_protected_groups: dict):
+    def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict,
+                 test_protected_groups: dict, computation_mode: str = None):
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.X_test = X_test
         self.y_test = y_test
         self.test_protected_groups = test_protected_groups
+        self.computation_mode = computation_mode
         self.subgroup_metrics_dict = {}
 
     @abstractmethod
     def _compute_metrics(self, y_test, y_preds):
         pass
+
+    def _partition_and_compute_metrics(self, y_pred_all, results: dict):
+        for group_name in self.test_protected_groups.keys():
+            X_test_group = self.test_protected_groups[group_name]
+            results[group_name] = self._compute_metrics(self.y_test[X_test_group.index], y_pred_all[X_test_group.index])
+
+        return results
+
+    def _partition_and_compute_metrics_for_error_analysis(self, y_preds, results: dict):
+        # Partition and compute subgroup metrics
+        for group_name in self.test_protected_groups.keys():
+            X_test_group = self.test_protected_groups[group_name]
+            group_y_true = self.y_test[X_test_group.index]
+            group_y_preds = y_preds[X_test_group.index]
+
+            # Define indexes of each partition of the group: overall group indexes,
+            # correct preds group indexes, incorrect preds group indexes
+            correct_preds_indexes = group_y_true.index[group_y_true == group_y_preds]
+            incorrect_preds_indexes = group_y_true.index[group_y_true != group_y_preds]
+            partition_indexes_dct = {
+                group_name: X_test_group.index,
+                f'{group_name}_correct': correct_preds_indexes,
+                f'{group_name}_incorrect': incorrect_preds_indexes,
+            }
+
+            # Compute metrics for each group partition
+            for group_partition_name, partition_indexes in partition_indexes_dct.items():
+                results[group_partition_name] = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
+
+        return results
 
     def compute_subgroup_metrics(self, y_preds, save_results: bool,
                                  result_filename: str = None, save_dir_path: str = None):
@@ -55,12 +89,15 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
         """
         y_pred_all = pd.Series(y_preds, index=self.y_test.index)
 
-        # Compute metrics for each subgroup
+        # Compute overall metrics
         results = dict()
         results['overall'] = self._compute_metrics(self.y_test, y_pred_all)
-        for group_name in self.test_protected_groups.keys():
-            X_test_group = self.test_protected_groups[group_name]
-            results[group_name] = self._compute_metrics(self.y_test[X_test_group.index], y_pred_all[X_test_group.index])
+
+        # Compute metrics for subgroups
+        if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
+            results = self._partition_and_compute_metrics_for_error_analysis(y_pred_all, results)
+        else:
+            results = self._partition_and_compute_metrics(y_pred_all, results)
 
         self.subgroup_metrics_dict = results
         if save_results:
