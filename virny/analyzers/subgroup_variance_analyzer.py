@@ -33,6 +33,8 @@ class SubgroupVarianceAnalyzer:
     test_protected_groups
         A dictionary of protected groups where keys are subgroup names,
          and values are X_test row indexes correspondent to this subgroup.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
          As for now, 0, 1, 2 levels are supported.
@@ -40,7 +42,7 @@ class SubgroupVarianceAnalyzer:
     """
     def __init__(self, model_setting: ModelSetting, n_estimators: int, base_model, base_model_name: str,
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
-                 sensitive_attributes_dct: dict, test_protected_groups: dict, verbose: int = 0):
+                 sensitive_attributes_dct: dict, test_protected_groups: dict, computation_mode: str = None, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
             overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
                                                                      base_model_name=base_model_name,
