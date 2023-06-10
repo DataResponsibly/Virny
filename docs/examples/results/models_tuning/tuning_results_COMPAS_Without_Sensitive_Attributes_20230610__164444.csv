@@ -1,0 +1,2 @@
+Dataset_Name,Model_Name,F1_Score,Accuracy_Score,Model_Best_Params
+COMPAS_Without_Sensitive_Attributes,DecisionTreeClassifier,0.6429,0.6443,"{'criterion': 'gini', 'max_depth': 20, 'max_features': 'sqrt', 'min_samples_split': 0.1}"

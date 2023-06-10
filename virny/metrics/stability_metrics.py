@@ -1,9 +1,7 @@
-import math
 import itertools
 import numpy as np
 import pandas as pd
 import scipy as sp
-#from scipy.stats import entropy
 
 
 def compute_label_stability(predicted_labels: list):
@@ -56,37 +54,9 @@ def compute_jitter(models_prediction_labels):
 
     return churns_sum / (n_models * (n_models - 1) * 0.5)
 
+
 def compute_entropy_from_predicted_probability(x):
     return sp.stats.entropy([x, 1-x], base=2)
-
-def compute_entropy_old(labels):
-    """
-    Computes entropy of label distribution.
-
-    Parameters
-    ----------
-    labels
-
-    """
-    n_labels = len(labels)
-
-    if n_labels <= 1:
-        return 0
-
-    value, counts = np.unique(labels, return_counts=True)
-    probs = counts / n_labels
-    n_classes = np.count_nonzero(probs)
-
-    if n_classes <= 1:
-        return 0
-
-    # Compute entropy
-    ent = 0.
-    base = math.e
-    for i in probs:
-        ent -= i * math.log(i, base)
-
-    return ent
 
 
 def compute_conf_interval(labels):

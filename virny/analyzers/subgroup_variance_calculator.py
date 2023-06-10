@@ -34,11 +34,12 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
     def _compute_metrics(self, y_test: pd.DataFrame, group_models_predictions):
         _, _, prediction_stats = count_prediction_stats(y_test, group_models_predictions)
         return {
+            'Jitter': prediction_stats.jitter,
             'Mean': np.mean(prediction_stats.means_lst),
             'Std': np.mean(prediction_stats.stds_lst),
             'IQR': np.mean(prediction_stats.iqr_lst),
-            'Entropy': np.mean(prediction_stats.entropy_lst),
-            'Jitter': prediction_stats.jitter,
+            'Aleatoric_Uncertainty': np.mean(prediction_stats.mean_ensemble_entropy_lst),
+            'Overall_Uncertainty': np.mean(prediction_stats.overall_entropy_lst),
             'Per_Sample_Accuracy': np.mean(prediction_stats.per_sample_accuracy_lst),
             'Label_Stability': np.mean(prediction_stats.label_stability_lst),
         }

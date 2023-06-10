@@ -38,7 +38,7 @@ def count_prediction_stats(y_test, uq_results):
     # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
     # Hence, if value is for example, 0.3 --> label == 1, 0.6 -- > label == 0
     uq_labels = results.applymap(lambda x: int(x<0.5))
-    jitter_lst = compute_jitter(uq_labels.values)
+    jitter = compute_jitter(uq_labels.values)
 
     main_prediction = results.mean().values
     overall_entropy_lst = np.array([compute_entropy_from_predicted_probability(x) for x in main_prediction])
@@ -46,8 +46,14 @@ def count_prediction_stats(y_test, uq_results):
     y_preds = np.array([int(x<0.5) for x in main_prediction])
 
     per_sample_accuracy_lst, label_stability_lst = compute_per_sample_accuracy(y_test, results)
-    prediction_stats = CountPredictionStatsResponse(jitter_lst, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst,
-                                                    overall_entropy_lst, per_sample_accuracy_lst, label_stability_lst)
+    prediction_stats = CountPredictionStatsResponse(jitter=jitter,
+                                                    means_lst=means_lst,
+                                                    stds_lst=stds_lst,
+                                                    iqr_lst=iqr_lst,
+                                                    mean_ensemble_entropy_lst=mean_ensemble_entropy_lst,
+                                                    overall_entropy_lst=overall_entropy_lst,
+                                                    per_sample_accuracy_lst=per_sample_accuracy_lst,
+                                                    label_stability_lst=label_stability_lst)
 
     return y_preds, uq_labels, prediction_stats
 

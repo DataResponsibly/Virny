@@ -105,14 +105,14 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         y_preds, uq_labels, prediction_stats = count_prediction_stats(self.y_test.values, self.models_predictions)
         self.__logger.info(f'Successfully computed predict proba metrics')
 
-        self.__update_metrics(prediction_stats.means_lst,
-                              prediction_stats.stds_lst,
-                              prediction_stats.iqr_lst,
-                              prediction_stats.mean_ensemble_entropy_lst,
-                              prediction_stats.overall_entropy_lst,
-                              prediction_stats.jitter_lst,
-                              prediction_stats.per_sample_accuracy_lst,
-                              prediction_stats.label_stability_lst)
+        self.__update_metrics(means_lst=prediction_stats.means_lst,
+                              stds_lst=prediction_stats.stds_lst,
+                              iqr_lst=prediction_stats.iqr_lst,
+                              mean_ensemble_entropy_lst=prediction_stats.mean_ensemble_entropy_lst,
+                              overall_entropy_lst=prediction_stats.overall_entropy_lst,
+                              jitter=prediction_stats.jitter,
+                              per_sample_accuracy_lst=prediction_stats.per_sample_accuracy_lst,
+                              label_stability_lst=prediction_stats.label_stability_lst)
 
         # Display plots if needed
         if make_plots:
@@ -183,14 +183,14 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
         return models_predictions
 
-    def __update_metrics(self, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst, overall_entropy_lst, jitter_lst,
+    def __update_metrics(self, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst, overall_entropy_lst, jitter,
                          per_sample_accuracy_lst, label_stability_lst):
         self.mean = np.mean(means_lst)
         self.std = np.mean(stds_lst)
         self.iqr = np.mean(iqr_lst)
         self.aleatoric_uncertainty = np.mean(mean_ensemble_entropy_lst)
         self.overall_uncertainty = np.mean(overall_entropy_lst)
-        self.jitter = jitter_lst
+        self.jitter = jitter
         self.per_sample_accuracy = np.mean(per_sample_accuracy_lst)
         self.label_stability = np.mean(label_stability_lst)
 
