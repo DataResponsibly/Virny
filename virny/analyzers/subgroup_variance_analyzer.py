@@ -75,9 +75,11 @@ class SubgroupVarianceAnalyzer:
         self.base_model_name = overall_variance_analyzer.base_model_name
 
         self.__overall_variance_analyzer = overall_variance_analyzer
-        self.__subgroup_variance_calculator = SubgroupVarianceCalculator(dataset.X_test, dataset.y_test,
-                                                                         sensitive_attributes_dct,
-                                                                         test_protected_groups)
+        self.__subgroup_variance_calculator = SubgroupVarianceCalculator(X_test=dataset.X_test,
+                                                                         y_test=dataset.y_test,
+                                                                         sensitive_attributes_dct=sensitive_attributes_dct,
+                                                                         test_protected_groups=test_protected_groups,
+                                                                         computation_mode=computation_mode)
         self.overall_variance_metrics_dct = dict()
         self.subgroup_variance_metrics_dct = dict()
 

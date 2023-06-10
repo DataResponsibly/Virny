@@ -66,9 +66,6 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                 f'{group_name}_correct': correct_preds_indexes,
                 f'{group_name}_incorrect': incorrect_preds_indexes,
             }
-            print('X_test_group.shape -- ', X_test_group.shape)
-            print('correct_preds_indexes.shape -- ', correct_preds_indexes.shape)
-            print('incorrect_preds_indexes.shape -- ', incorrect_preds_indexes.shape)
 
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
@@ -123,7 +120,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         results['overall'] = self.overall_variance_metrics
 
         # Compute stability metrics for subgroups
-        if self.computation_mode == ComputationMode.ERROR_ANALYSIS:
+        if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
             results = self._partition_and_compute_metrics_for_error_analysis(models_predictions, results)
         else:
             results = self._partition_and_compute_metrics(models_predictions, results)

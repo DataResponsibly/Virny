@@ -61,9 +61,6 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
                 f'{group_name}_correct': correct_preds_indexes,
                 f'{group_name}_incorrect': incorrect_preds_indexes,
             }
-            print('error analyzer: X_test_group.shape -- ', X_test_group.shape)
-            print('error analyzer: correct_preds_indexes.shape -- ', correct_preds_indexes.shape)
-            print('error analyzer: incorrect_preds_indexes.shape -- ', incorrect_preds_indexes.shape)
 
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
@@ -97,7 +94,7 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
         results['overall'] = self._compute_metrics(self.y_test, y_pred_all)
 
         # Compute metrics for subgroups
-        if self.computation_mode == ComputationMode.ERROR_ANALYSIS:
+        if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
             results = self._partition_and_compute_metrics_for_error_analysis(y_pred_all, results)
         else:
             results = self._partition_and_compute_metrics(y_pred_all, results)
