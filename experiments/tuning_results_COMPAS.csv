@@ -1,0 +1,7 @@
+Dataset_Name,Model_Name,F1_Score,Accuracy_Score,Model_Best_Params
+COMPAS_Without_Sensitive_Attributes,LogisticRegression,0.6785,0.6837,"{'C': 1, 'max_iter': 50, 'penalty': 'l2', 'solver': 'newton-cg'}"
+COMPAS_Without_Sensitive_Attributes,DecisionTreeClassifier,0.6952,0.6989,"{'criterion': 'gini', 'max_depth': 20, 'max_features': 0.6, 'min_samples_split': 0.1}"
+COMPAS_Without_Sensitive_Attributes,RandomForestClassifier,0.6962,0.7008,"{'max_depth': 4, 'max_features': 0.6, 'min_samples_leaf': 1, 'n_estimators': 500}"
+COMPAS_Without_Sensitive_Attributes,XGBClassifier,0.6971,0.7008,"{'lambda': 100, 'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 200}"
+COMPAS_Without_Sensitive_Attributes,KNeighborsClassifier,0.7056,0.7112,"{'metric': 'minkowski', 'n_neighbors': 25, 'weights': 'uniform'}"
+COMPAS_Without_Sensitive_Attributes,MLPClassifier,0.6834,0.6875,"{'activation': 'relu', 'hidden_layer_sizes': (100, 100), 'learning_rate': 'adaptive', 'solver': 'sgd'}"

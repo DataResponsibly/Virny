@@ -1,0 +1,6 @@
+dataset_name: COMPAS
+test_set_fraction: 0.2
+bootstrap_fraction: 0.8
+n_estimators: 200
+runs_seed_lst: [100, 200, 300, 400, 500, 600, 700, 800, 900]
+sensitive_attributes_dct: {'sex': 0, 'race': 'Caucasian', 'sex&race': None}
