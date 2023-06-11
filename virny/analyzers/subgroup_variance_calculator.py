@@ -73,8 +73,9 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                     model_idx: models_predictions[model_idx][partition_indexes].reset_index(drop=True)
                     for model_idx in models_predictions.keys()
                 }
-                results[group_partition_name] = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
-                                                                      group_models_predictions)
+                metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
+                                                    group_models_predictions)
+                results[group_partition_name] = metrics_dct
 
         return results
 

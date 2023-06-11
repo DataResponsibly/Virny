@@ -64,7 +64,9 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
 
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
-                results[group_partition_name] = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
+                metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
+                metrics_dct['Sample_Size'] = len(partition_indexes)
+                results[group_partition_name] = metrics_dct
 
         return results
 
@@ -91,7 +93,9 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
 
         # Compute overall metrics
         results = dict()
-        results['overall'] = self._compute_metrics(self.y_test, y_pred_all)
+        metrics_dct = self._compute_metrics(self.y_test, y_pred_all)
+        metrics_dct['Sample_Size'] = self.y_test.shape[0]
+        results['overall'] = metrics_dct
 
         # Compute metrics for subgroups
         if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
