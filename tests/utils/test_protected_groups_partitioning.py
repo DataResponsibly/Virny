@@ -100,7 +100,7 @@ def test_create_test_protected_groups_folk_true1(folk_emp_config_params):
     assert actual_test_protected_groups['SEX_dis'].shape[0] == X_test[X_test.SEX == '2'].shape[0]
     assert actual_test_protected_groups['RAC1P_priv'].shape[0] == X_test[X_test.RAC1P != '2'].shape[0]
     assert actual_test_protected_groups['RAC1P_dis'].shape[0] == X_test[X_test.RAC1P == '2'].shape[0]
-    assert actual_test_protected_groups['SEX&RAC1P_priv'].shape[0] == X_test[(X_test.SEX != '2') & (X_test.RAC1P != '2')].shape[0]
+    assert actual_test_protected_groups['SEX&RAC1P_priv'].shape[0] == X_test[(X_test.SEX != '2') | (X_test.RAC1P != '2')].shape[0]
     assert actual_test_protected_groups['SEX&RAC1P_dis'].shape[0] == X_test[(X_test.SEX == '2') & (X_test.RAC1P == '2')].shape[0]
 
 
