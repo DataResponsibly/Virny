@@ -18,10 +18,12 @@ def partition_by_group_intersectional(df, attrs, dis_values):
 
     priv_condition = (get_df_condition(df, attrs[0], dis_values[0], include_dis=False))
     for idx in range(1, len(attrs)):
-        priv_condition &= get_df_condition(df, attrs[idx], dis_values[idx], include_dis=False)
+        priv_condition |= get_df_condition(df, attrs[idx], dis_values[idx], include_dis=False)
 
     priv = df[priv_condition]
     dis = df[dis_condition]
+    if len(priv) + len(dis) != len(df):
+        raise ValueError("Error! Not a partition")
 
     return priv, dis
 
