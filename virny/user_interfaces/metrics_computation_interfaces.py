@@ -485,6 +485,7 @@ def compute_metrics_multiple_runs_with_multiple_test_sets(dataset: BaseFlowDatas
                                                                              n_estimators=config.n_estimators,
                                                                              sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                                              model_setting=config.model_setting,
+                                                                             computation_mode=config.computation_mode,
                                                                              model_seed=run_seed,
                                                                              verbose=verbose)
 
@@ -521,9 +522,8 @@ def compute_metrics_multiple_runs_with_multiple_test_sets(dataset: BaseFlowDatas
 
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
-                                                    sensitive_attributes_dct: dict,
-                                                    model_setting: str = ModelSetting.BATCH.value,
-                                                    model_seed: int = None, verbose: int = 0) -> dict:
+                                                    sensitive_attributes_dct: dict, model_setting: str = ModelSetting.BATCH.value,
+                                                    computation_mode: str = None, model_seed: int = None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
@@ -549,6 +549,8 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
          and values are privilege values for these attributes
     model_setting
         Model type: 'batch' or incremental.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     model_seed
         [Optional] Model seed
     verbose
@@ -573,6 +575,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                                                   bootstrap_fraction=bootstrap_fraction,
                                                                                   sensitive_attributes_dct=sensitive_attributes_dct,
                                                                                   model_setting=model_setting,
+                                                                                  computation_mode=computation_mode,
                                                                                   model_seed=model_seed,
                                                                                   dataset_name=dataset_name,
                                                                                   base_model_name=model_name,
@@ -592,7 +595,8 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                   dataset: BaseFlowDataset, extra_test_sets_lst: list,
                                                   bootstrap_fraction: float, sensitive_attributes_dct: dict,
                                                   model_seed: int, dataset_name: str, base_model_name: str,
-                                                  model_setting: str = ModelSetting.BATCH.value, verbose: int = 0):
+                                                  model_setting: str = ModelSetting.BATCH.value,
+                                                  computation_mode: str = None, verbose: int = 0):
     """
     Compute subgroup metrics for the base model based on dataset.X_test and each extra test set in extra_test_sets_lst.
     Save results in `save_results_dir_path` folder.
@@ -622,6 +626,8 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         Model name to name a result file with metrics
     model_setting
         Model type: 'batch' or incremental.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -638,6 +644,7 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=dict(),  # stub for this attribute
+                                                          computation_mode=computation_mode,
                                                           verbose=verbose)
 
     test_sets_lst = [(dataset.X_test, dataset.y_test)] + extra_test_sets_lst
@@ -661,7 +668,11 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                                                   with_fit=True if set_idx == 0 else False)
 
         # Compute accuracy metrics for subgroups
-        error_analyzer = SubgroupErrorAnalyzer(new_X_test, new_y_test, sensitive_attributes_dct, new_test_protected_groups)
+        error_analyzer = SubgroupErrorAnalyzer(X_test=new_X_test,
+                                               y_test=new_y_test,
+                                               sensitive_attributes_dct=sensitive_attributes_dct,
+                                               test_protected_groups=new_test_protected_groups,
+                                               computation_mode=computation_mode)
         dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
                                                           save_results=False,
                                                           result_filename=None,
