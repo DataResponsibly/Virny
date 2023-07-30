@@ -62,7 +62,8 @@ def compute_entropy_from_predicted_probability(x):
 def compute_statistical_bias_from_predict_proba(x, y_true):
     # If x (main prediction) = 0.4 and true label = 0, then bias = |0 - 0.4| = 0.4
     # If x (main prediction) = 0.4 and true label = 1, then bias = |1 - 0.4| = 0.6
-    return abs(y_true - x)
+    y_pred_proba = x if y_true == 0 else 1 - x
+    return abs(y_true - y_pred_proba)
 
 
 def compute_conf_interval(labels):
