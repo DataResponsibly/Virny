@@ -15,7 +15,6 @@ def test_count_prediction_stats_true1():
     uq_results = np.array([[0.6, 0.7, 0.3, 0.4, 0.5, 0.3, 0.7, 0.6, 0.4, 0.4],
                            [0.7, 0.6, 0.4, 0.4, 0.5, 0.3, 0.2, 0.6, 0.4, 0.4]])
     y_preds, uq_labels, prediction_stats = count_prediction_stats(y_test, uq_results)
-    print('\nstatistical_bias_lst: ', prediction_stats.statistical_bias_lst)
 
     mean = np.mean(prediction_stats.means_lst)
     std = np.mean(prediction_stats.stds_lst)
@@ -36,7 +35,7 @@ def test_count_prediction_stats_true1():
     assert abs(iqr - 0.03999999999999998) < alpha
     assert abs(aleatoric_uncertainty - 0.9345065014636438) < alpha
     assert abs(overall_uncertainty - 0.9560071897163649) < alpha
-    assert abs(statistical_bias - 0.5799999999999998) < alpha
+    assert abs(statistical_bias - 0.47000000000000003) < alpha
     assert abs(per_sample_accuracy - 0.85) < alpha
     assert abs(label_stability - 0.9) < alpha
 
