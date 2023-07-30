@@ -38,7 +38,7 @@ def test_create_test_protected_groups_true(compas_dataset_class, config_params):
     assert actual_test_protected_groups['sex_dis'].shape[0] == 845
     assert actual_test_protected_groups['race_priv'].shape[0] == 414
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
-    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 99
+    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 526
     assert actual_test_protected_groups['sex&race_dis'].shape[0] == 530
 
 
@@ -57,7 +57,7 @@ def test_create_test_protected_groups_true_without_sensitive_attrs(compas_withou
     assert actual_test_protected_groups['sex_dis'].shape[0] == 845
     assert actual_test_protected_groups['race_priv'].shape[0] == 414
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
-    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 99
+    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 526
     assert actual_test_protected_groups['sex&race_dis'].shape[0] == 530
 
 

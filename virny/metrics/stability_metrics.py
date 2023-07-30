@@ -59,6 +59,12 @@ def compute_entropy_from_predicted_probability(x):
     return sp.stats.entropy([x, 1-x], base=2)
 
 
+def compute_statistical_bias_from_predict_proba(x, y_true):
+    # If x (main prediction) = 0.4 and true label = 0, then bias = |0 - 0.4| = 0.4
+    # If x (main prediction) = 0.4 and true label = 1, then bias = |1 - 0.4| = 0.6
+    return abs(y_true - x)
+
+
 def compute_conf_interval(labels):
     """
     Create 95% confidence interval for population mean weight.

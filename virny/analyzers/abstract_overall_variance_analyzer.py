@@ -67,6 +67,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.iqr = None
         self.aleatoric_uncertainty = None
         self.overall_uncertainty = None
+        self.statistical_bias = None
         self.jitter = None
         self.per_sample_accuracy = None
         self.label_stability = None
@@ -110,6 +111,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                               iqr_lst=prediction_stats.iqr_lst,
                               mean_ensemble_entropy_lst=prediction_stats.mean_ensemble_entropy_lst,
                               overall_entropy_lst=prediction_stats.overall_entropy_lst,
+                              statistical_bias_lst=prediction_stats.statistical_bias_lst,
                               jitter=prediction_stats.jitter,
                               per_sample_accuracy_lst=prediction_stats.per_sample_accuracy_lst,
                               label_stability_lst=prediction_stats.label_stability_lst)
@@ -183,13 +185,14 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
         return models_predictions
 
-    def __update_metrics(self, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst, overall_entropy_lst, jitter,
-                         per_sample_accuracy_lst, label_stability_lst):
+    def __update_metrics(self, means_lst, stds_lst, iqr_lst, mean_ensemble_entropy_lst, overall_entropy_lst,
+                         statistical_bias_lst, jitter, per_sample_accuracy_lst, label_stability_lst):
         self.mean = np.mean(means_lst)
         self.std = np.mean(stds_lst)
         self.iqr = np.mean(iqr_lst)
         self.aleatoric_uncertainty = np.mean(mean_ensemble_entropy_lst)
         self.overall_uncertainty = np.mean(overall_entropy_lst)
+        self.statistical_bias = np.mean(statistical_bias_lst)
         self.jitter = jitter
         self.per_sample_accuracy = np.mean(per_sample_accuracy_lst)
         self.label_stability = np.mean(label_stability_lst)
@@ -203,6 +206,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
               f'IQR: {np.round(self.iqr, precision)}\n'
               f'Aleatoric uncertainty: {np.round(self.aleatoric_uncertainty, precision)}\n'
               f'Overall uncertainty: {np.round(self.overall_uncertainty, precision)}\n'
+              f'Statistical bias: {np.round(self.statistical_bias, precision)}\n'
               f'Jitter: {np.round(self.jitter, precision)}\n'
               f'Per sample accuracy: {np.round(self.per_sample_accuracy, precision)}\n'
               f'Label stability: {np.round(self.label_stability, precision)}\n\n')
@@ -214,6 +218,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             'IQR': self.iqr,
             'Aleatoric_Uncertainty': self.aleatoric_uncertainty,
             'Overall_Uncertainty': self.overall_uncertainty,
+            'Statistical_Bias': self.statistical_bias,
             'Jitter': self.jitter,
             'Per_Sample_Accuracy': self.per_sample_accuracy,
             'Label_Stability': self.label_stability,
@@ -230,6 +235,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         metrics_to_report['IQR'] = [self.iqr]
         metrics_to_report['Aleatoric_Uncertainty'] = [self.aleatoric_uncertainty]
         metrics_to_report['Overall_Uncertainty'] = [self.overall_uncertainty]
+        metrics_to_report['Statistical_Bias'] = [self.statistical_bias]
         metrics_to_report['Jitter'] = [self.jitter]
         metrics_to_report['Per_Sample_Accuracy'] = [self.per_sample_accuracy]
         metrics_to_report['Label_Stability'] = [self.label_stability]
