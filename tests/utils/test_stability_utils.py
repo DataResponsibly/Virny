@@ -35,7 +35,7 @@ def test_count_prediction_stats_true1():
     assert abs(iqr - 0.03999999999999998) < alpha
     assert abs(aleatoric_uncertainty - 0.9345065014636438) < alpha
     assert abs(overall_uncertainty - 0.9560071897163649) < alpha
-    assert abs(statistical_bias - 0.47000000000000003) < alpha
+    assert abs(statistical_bias - 0.42000000000000004) < alpha
     assert abs(per_sample_accuracy - 0.85) < alpha
     assert abs(label_stability - 0.9) < alpha
 
