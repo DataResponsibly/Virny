@@ -12,6 +12,7 @@ class CountPredictionStatsResponse:
     iqr_lst: list
     mean_ensemble_entropy_lst: list
     overall_entropy_lst: np.ndarray
+    statistical_bias_lst: np.ndarray
     per_sample_accuracy_lst: list
     label_stability_lst: list
 

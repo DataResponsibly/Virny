@@ -88,6 +88,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
             'IQR': np.mean(prediction_stats.iqr_lst),
             'Aleatoric_Uncertainty': np.mean(prediction_stats.mean_ensemble_entropy_lst),
             'Overall_Uncertainty': np.mean(prediction_stats.overall_entropy_lst),
+            'Statistical_Bias': np.mean(prediction_stats.statistical_bias_lst),
             'Per_Sample_Accuracy': np.mean(prediction_stats.per_sample_accuracy_lst),
             'Label_Stability': np.mean(prediction_stats.label_stability_lst),
         }

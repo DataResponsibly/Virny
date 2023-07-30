@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 
 from virny.configs.constants import CountPredictionStatsResponse
 from virny.utils.data_viz_utils import set_size
-from virny.metrics.stability_metrics import compute_std_mean_iqr_metrics, compute_entropy_from_predicted_probability, compute_jitter, \
-    compute_per_sample_accuracy
+from virny.metrics.stability_metrics import compute_std_mean_iqr_metrics, compute_entropy_from_predicted_probability,\
+    compute_jitter, compute_per_sample_accuracy, compute_statistical_bias_from_predict_proba
 
 
 def combine_bootstrap_predictions(bootstrap_predictions: dict, y_test_indexes: np.ndarray):
@@ -61,11 +61,14 @@ def count_prediction_stats(y_test, uq_results):
 
     # Convert predict proba results of each model to correspondent labels.
     # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
-    # Hence, if value is for example, 0.3 --> label == 1, 0.6 -- > label == 0
+    # Hence, if a value is, for example, 0.3 --> label == 1, 0.6 -- > label == 0
     uq_labels = results.applymap(lambda x: int(x<0.5))
     jitter = compute_jitter(uq_labels.values)
 
     main_prediction = results.mean().values
+    statistical_bias_lst = np.array(
+        [compute_statistical_bias_from_predict_proba(x, y_true) for x, y_true in np.column_stack((main_prediction, y_test))]
+    )
     overall_entropy_lst = np.array([compute_entropy_from_predicted_probability(x) for x in main_prediction])
 
     y_preds = np.array([int(x<0.5) for x in main_prediction])
@@ -77,6 +80,7 @@ def count_prediction_stats(y_test, uq_results):
                                                     iqr_lst=iqr_lst,
                                                     mean_ensemble_entropy_lst=mean_ensemble_entropy_lst,
                                                     overall_entropy_lst=overall_entropy_lst,
+                                                    statistical_bias_lst=statistical_bias_lst,
                                                     per_sample_accuracy_lst=per_sample_accuracy_lst,
                                                     label_stability_lst=label_stability_lst)
 
