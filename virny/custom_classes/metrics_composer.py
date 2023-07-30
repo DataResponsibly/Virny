@@ -59,8 +59,6 @@ class MetricsComposer:
                     'Std_Parity': cfm[dis_group]['Std'] - cfm[priv_group]['Std'],
                     'Std_Ratio': cfm[dis_group]['Std'] / cfm[priv_group]['Std'],
                     'Jitter_Parity': cfm[dis_group]['Jitter'] - cfm[priv_group]['Jitter'],
-                    'Aleatoric_Uncertainty_Parity': cfm[dis_group]['Aleatoric_Uncertainty'] - cfm[priv_group]['Aleatoric_Uncertainty'],
-                    'Overall_Uncertainty_Parity': cfm[dis_group]['Overall_Uncertainty'] - cfm[priv_group]['Overall_Uncertainty'],
                 }
 
             model_composed_metrics_df = pd.DataFrame(groups_metrics_dct).reset_index()
