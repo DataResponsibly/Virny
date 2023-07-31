@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility, \
-    employment_filter, adult_filter
+    employment_filter, adult_filter, public_coverage_filter
 from virny.datasets.base import BaseDataLoader
 
 
@@ -371,9 +371,18 @@ class ACSPublicCoverageDataset(BaseDataLoader):
         Path to the root directory where to store the extracted dataset or where it is stored.
     with_nulls
         Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
+    with_filter
+        Whether to use a folktables filter for this task. Default: True.
+    optimize
+        Whether to optimize the dataset size by downcasting categorical columns. Default: True.
+    subsample_size
+        Subsample size to create based on the input dataset.
+    subsample_seed
+        Seed for sampling using the sample() method from pandas.
 
     """
-    def __init__(self, state, year, root_dir=None, with_nulls=False):
+    def __init__(self, state, year, root_dir=None, with_nulls=False, with_filter=True,
+                 optimize=True, subsample_size: int = None, subsample_seed: int = None):
         data_dir = pathlib.Path(__file__).parent if root_dir is None else root_dir
         data_source = ACSDataSource(
             survey_year=year,
@@ -382,29 +391,39 @@ class ACSPublicCoverageDataset(BaseDataLoader):
             root_dir=data_dir
         )
         acs_data = data_source.get_data(states=state, download=True)
+        if with_filter:
+            acs_data = public_coverage_filter(acs_data)
+        if subsample_size:
+            acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else acs_data.sample(subsample_size)
+            acs_data = acs_data.reset_index(drop=True)
+
         features = ACSPublicCoverage.features
         target = ACSPublicCoverage.target
-        categorical_columns = ['MAR','SEX','DIS','ESP','CIT','MIG','MIL','ANC','NATIVITY','DEAR','DEYE','DREM','ESR','ST','FER','RAC1P']
-        numerical_columns = ['AGEP', 'SCHL', 'PINCP']
+        categorical_columns = ['SCHL','MAR','SEX','DIS','ESP','CIT','MIG','MIL','ANC','NATIVITY','DEAR','DEYE','DREM','ESR','ST','FER','RAC1P']
+        numerical_columns = ['AGEP', 'PINCP']
 
         if with_nulls is True:
             X_data = acs_data[features]
         else:
             X_data = acs_data[features].apply(lambda x: np.nan_to_num(x, -1))
 
-        filtered_X_data = X_data[categorical_columns].astype('str')
+        if optimize:
+            X_data = optimize_data_loading(X_data, categorical_columns)
+
+        optimized_X_data = X_data[categorical_columns].astype('str')
         for col in numerical_columns:
-            filtered_X_data[col] = X_data[col]
-            
+            optimized_X_data[col] = X_data[col]
         y_data = acs_data[target].apply(lambda x: int(x == 1))
-        columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
+
+        columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
 
         super().__init__(
-            full_df=acs_data,
+            full_df=optimized_X_data,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            X_data=filtered_X_data,
+            X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
         )
