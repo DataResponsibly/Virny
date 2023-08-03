@@ -2,6 +2,7 @@ import pathlib
 import pandas as pd
 import numpy as np
 
+from sklearn import preprocessing
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, ACSPublicCoverage, ACSMobility, \
     employment_filter, adult_filter, public_coverage_filter
 from virny.datasets.base import BaseDataLoader
@@ -67,10 +68,16 @@ class DiabetesDataset(BaseDataLoader):
                 else df.sample(subsample_size)
             df = df.reset_index(drop=True)
 
+        # Cast columns
         columns_to_cast = ['admission_type_id', 'discharge_disposition_id', 'admission_source_id']
         columns_to_cast_dct = {col: "str" for col in columns_to_cast}
         df = df.astype(columns_to_cast_dct)
         df = df.drop(['encounter_id', 'patient_nbr'], axis=1)
+
+        # Encode labels
+        le = preprocessing.LabelEncoder()
+        for i in ['diag_1', 'diag_2', 'diag_3']:
+            df[i] = le.fit_transform(df[i])
 
         target = 'readmitted'
         df[target] = df[target].replace(['<30'], 1)
