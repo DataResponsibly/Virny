@@ -47,7 +47,9 @@ class CreditDataset(BaseDataLoader):
 
 class DiabetesDataset(BaseDataLoader):
     """
-    Dataset class for the COMPAS dataset that contains sensitive attributes among feature columns.
+    Dataset class for the Diabetes dataset that contains sensitive attributes among feature columns.
+    Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/diabetes-clean.csv
+    Description: https://arxiv.org/pdf/2110.00530.pdf
 
     Parameters
     ----------
@@ -92,6 +94,33 @@ class DiabetesDataset(BaseDataLoader):
             'insulin', 'glyburide-metformin', 'glipizide-metformin', 'glimepiride-pioglitazone',
             'metformin-rosiglitazone', 'metformin-pioglitazone', 'change', 'diabetesMed'
         ]
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+
+
+class RicciDataset(BaseDataLoader):
+    """
+    Dataset class for the Ricci dataset that contains sensitive attributes among feature columns.
+    Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/ricci_race.csv
+    Description: https://arxiv.org/pdf/2110.00530.pdf
+
+    """
+    def __init__(self, dataset_path=None):
+        if dataset_path is None:
+            filename = 'ricci_race.csv'
+            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
+        df = pd.read_csv(dataset_path)
+
+        target = 'Promoted'
+        df[target] = df[target].replace([-1], 0)
+        numerical_columns = ['Oral', 'Written', 'Combine']
+        categorical_columns = ['Position', 'Race']
 
         super().__init__(
             full_df=df,
