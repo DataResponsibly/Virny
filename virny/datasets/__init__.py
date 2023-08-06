@@ -4,7 +4,7 @@ The purpose is to provide sample datasets for functionality testing and show exa
 """
 from .data_loaders import CompasWithoutSensitiveAttrsDataset, DiabetesDataset, CompasDataset, \
     ACSIncomeDataset, ACSEmploymentDataset, ACSMobilityDataset, ACSTravelTimeDataset, ACSPublicCoverageDataset, \
-    RicciDataset
+    RicciDataset, LawSchoolDataset
 
 
 __all__ = [
@@ -12,6 +12,7 @@ __all__ = [
     "CompasDataset",
     "DiabetesDataset",
     "RicciDataset",
+    "LawSchoolDataset",
     "ACSIncomeDataset",
     "ACSEmploymentDataset",
     "ACSMobilityDataset",
