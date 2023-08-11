@@ -263,7 +263,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
 
-    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
     Parameters
     ----------
@@ -283,7 +283,7 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
 
-    multiple_runs_metrics_dct = dict()
+    model_metrics_dct = dict()
     models_metrics_dct = run_metrics_computation(dataset=dataset,
                                                  bootstrap_fraction=config.bootstrap_fraction,
                                                  dataset_name=config.dataset_name,
@@ -298,16 +298,12 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
     # Concatenate with previous results and save them in an overwrite mode each time for backups
     for model_name in models_metrics_dct.keys():
         model_metrics_df = models_metrics_dct[model_name]
-
-        if multiple_runs_metrics_dct.get(model_name) is None:
-            multiple_runs_metrics_dct[model_name] = model_metrics_df
-        else:
-            multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df])
+        model_metrics_dct[model_name] = model_metrics_df
 
         result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
-        multiple_runs_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
+        model_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
 
-    return multiple_runs_metrics_dct
+    return model_metrics_dct
 
 
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
@@ -316,7 +312,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
-    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
     Parameters
     ----------
