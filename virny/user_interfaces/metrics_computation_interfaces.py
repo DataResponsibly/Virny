@@ -2,6 +2,7 @@ import os
 import random
 import traceback
 import pandas as pd
+from river import base
 from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 from IPython.display import display
@@ -134,7 +135,10 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Name'] = base_model_name
-    metrics_df['Model_Params'] = str(base_model.get_params())
+    if isinstance(base_model, base.Classifier): # skip for incremental models
+        metrics_df['Model_Params'] = None
+    else:
+        metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics
