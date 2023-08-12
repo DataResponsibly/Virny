@@ -144,45 +144,6 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     return metrics_df
 
 
-def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                        save_results_dir_path: str, verbose: int = 0) -> dict:
-    """
-    Compute stability and accuracy metrics for each model in models_config.
-    Save results in `save_results_dir_path` folder.
-
-    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
-
-    Parameters
-    ----------
-    dataset
-        Dataset object that contains all needed attributes like target, features, numerical_columns etc
-    config
-        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
-    models_config
-        Dictionary where keys are model names, and values are initialized models
-    save_results_dir_path
-        Location where to save result files with metrics
-    verbose
-        [Optional] Level of logs printing. The greater level provides more logs.
-            As for now, 0, 1, 2 levels are supported.
-
-    """
-    # Create a directory for results if not exists
-    os.makedirs(save_results_dir_path, exist_ok=True)
-    # Parse config and execute the main run_metrics_computation function
-    return run_metrics_computation(dataset=dataset,
-                                   bootstrap_fraction=config.bootstrap_fraction,
-                                   dataset_name=config.dataset_name,
-                                   models_config=models_config,
-                                   n_estimators=config.n_estimators,
-                                   sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                   model_setting=config.model_setting,
-                                   computation_mode=config.computation_mode,
-                                   save_results_dir_path=save_results_dir_path,
-                                   save_results=True,
-                                   verbose=verbose)
-
-
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
@@ -257,8 +218,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     return models_metrics_dct
 
 
-def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
-                                  save_results_dir_path: str, verbose: int = 0) -> dict:
+def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
+                                save_results_dir_path: str, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
