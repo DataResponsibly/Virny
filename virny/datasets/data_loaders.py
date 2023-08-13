@@ -155,6 +155,8 @@ class RicciDataset(BaseDataLoader):
     Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/ricci_race.csv
     Description: https://arxiv.org/pdf/2110.00530.pdf
 
+    Parameters
+    ----------
     dataset_path
         [Optional] Path to a file with the data
 

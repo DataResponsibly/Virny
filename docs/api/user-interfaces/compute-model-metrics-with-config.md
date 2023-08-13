@@ -26,10 +26,6 @@ Return a dataframe of model metrics.
 
     Location where to save result files with metrics
 
-- **model_seed** (*int*) – defaults to `None`
-
-    [Optional] Model seed
-
 - **save_results** (*bool*) – defaults to `True`
 
     [Optional] If to save result metrics in a file

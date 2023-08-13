@@ -23,6 +23,8 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
     test_protected_groups
         A dictionary where keys are sensitive attributes, and values input dataset rows
          that are correspondent to these sensitive attributes
+    computation_mode
+        A mode to compute metrics. It can have two values 'error_analysis' and default (None).
 
     """
     def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict,

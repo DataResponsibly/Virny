@@ -26,10 +26,6 @@ Return a dataframe of model metrics.
 
     A dictionary where keys are sensitive attribute names (including attributes intersections),  and values are privilege values for these attributes
 
-- **model_seed** (*int*)
-
-    Model seed
-
 - **dataset_name** (*str*)
 
     Dataset name to name a result file with metrics
@@ -40,7 +36,11 @@ Return a dataframe of model metrics.
 
 - **model_setting** (*str*) – defaults to `batch`
 
-    Model type: 'batch' or incremental.
+    [Optional] Model type: 'batch' or 'incremental'. Default: 'batch'.
+
+- **computation_mode** (*str*) – defaults to `None`
+
+    [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
 
 - **save_results** (*bool*) – defaults to `True`
 

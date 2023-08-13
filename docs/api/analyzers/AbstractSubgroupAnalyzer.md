@@ -22,6 +22,10 @@ Abstract class for a subgroup analyzer to compute metrics for subgroups.
 
     A dictionary where keys are sensitive attributes, and values input dataset rows  that are correspondent to these sensitive attributes
 
+- **computation_mode** (*str*) – defaults to `None`
+
+    A mode to compute metrics. It can have two values 'error_analysis' and default (None).
+
 
 
 

@@ -49,6 +49,9 @@ The purpose is to provide sample datasets for functionality testing and show exa
 - [ACSTravelTimeDataset](../datasets/ACSTravelTimeDataset)
 - [CompasDataset](../datasets/CompasDataset)
 - [CompasWithoutSensitiveAttrsDataset](../datasets/CompasWithoutSensitiveAttrsDataset)
+- [DiabetesDataset](../datasets/DiabetesDataset)
+- [LawSchoolDataset](../datasets/LawSchoolDataset)
+- [RicciDataset](../datasets/RicciDataset)
 
 ## incremental_ml
 
@@ -61,7 +64,7 @@ This module contains functions for computing subgroup variance and error metrics
 
 - [compute_churn](../metrics/compute-churn)
 - [compute_conf_interval](../metrics/compute-conf-interval)
-- [compute_entropy](../metrics/compute-entropy)
+- [compute_entropy_from_predicted_probability](../metrics/compute-entropy-from-predicted-probability)
 - [compute_jitter](../metrics/compute-jitter)
 - [compute_per_sample_accuracy](../metrics/compute-per-sample-accuracy)
 - [compute_std_mean_iqr_metrics](../metrics/compute-std-mean-iqr-metrics)
@@ -86,13 +89,12 @@ User interfaces.
 This module contains user interfaces for metrics computation.
 
 
-- [compute_metrics_multiple_runs](../user-interfaces/compute-metrics-multiple-runs)
 - [compute_metrics_multiple_runs_with_db_writer](../user-interfaces/compute-metrics-multiple-runs-with-db-writer)
 - [compute_metrics_multiple_runs_with_multiple_test_sets](../user-interfaces/compute-metrics-multiple-runs-with-multiple-test-sets)
+- [compute_metrics_with_config](../user-interfaces/compute-metrics-with-config)
 - [compute_model_metrics](../user-interfaces/compute-model-metrics)
 - [compute_model_metrics_with_config](../user-interfaces/compute-model-metrics-with-config)
 - [run_metrics_computation](../user-interfaces/run-metrics-computation)
-- [run_metrics_computation_with_config](../user-interfaces/run-metrics-computation-with-config)
 
 ## utils
 

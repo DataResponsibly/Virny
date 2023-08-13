@@ -1,6 +1,6 @@
-# CompasDataset
+# LawSchoolDataset
 
-Dataset class for the COMPAS dataset that contains sensitive attributes among feature columns.
+Dataset class for the Law School dataset that contains sensitive attributes among feature columns. Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/law_school_clean.csv Description: https://arxiv.org/pdf/2110.00530.pdf
 
 
 

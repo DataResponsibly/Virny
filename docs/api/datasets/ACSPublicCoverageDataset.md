@@ -22,6 +22,22 @@ Dataset class for the public coverage task from the folktables dataset. Target: 
 
     Whether to keep nulls in the dataset or replace them on the new categorical class. Default: False.
 
+- **with_filter** – defaults to `True`
+
+    Whether to use a folktables filter for this task. Default: True.
+
+- **optimize** – defaults to `True`
+
+    Whether to optimize the dataset size by downcasting categorical columns. Default: True.
+
+- **subsample_size** (*int*) – defaults to `None`
+
+    Subsample size to create based on the input dataset.
+
+- **subsample_seed** (*int*) – defaults to `None`
+
+    Seed for sampling using the sample() method from pandas.
+
 
 
 

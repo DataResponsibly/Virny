@@ -1,8 +1,8 @@
-# compute_metrics_multiple_runs
+# compute_metrics_with_config
 
 Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object. Save results in `save_results_dir_path` folder.
 
-Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
 ## Parameters
 

@@ -14,6 +14,10 @@ Dataset class for the COMPAS dataset that does not contain sensitive attributes 
 
     Seed for sampling using the sample() method from pandas
 
+- **dataset_path** – defaults to `None`
+
+    [Optional] Path to a file with the data
+
 
 
 

@@ -1,6 +1,6 @@
 # create_test_protected_groups
 
-Create protected groups based on a test feature set.
+Create protected groups based on a test feature set. Use a disadvantaged group as a reference group.
 
 Return a dictionary where keys are subgroup names, and values are X_test row indexes correspondent to this subgroup.
 
@@ -16,7 +16,7 @@ Return a dictionary where keys are subgroup names, and values are X_test row ind
 
 - **sensitive_attributes_dct** (*dict*)
 
-    A dictionary where keys are sensitive attribute names (including attributes intersections),  and values are privilege values for these attributes
+    A dictionary where keys are sensitive attribute names (including attributes intersections),  and values are disadvantaged values for these attributes
 
 
 

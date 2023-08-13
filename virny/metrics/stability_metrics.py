@@ -56,10 +56,30 @@ def compute_jitter(models_prediction_labels):
 
 
 def compute_entropy_from_predicted_probability(x):
+    """
+    Compute entropy from predicted probability
+
+    Parameters
+    ----------
+    x
+        Probability of 0 class
+
+    """
     return sp.stats.entropy([x, 1-x], base=2)
 
 
 def compute_statistical_bias_from_predict_proba(x, y_true):
+    """
+    Compute statistical bias from predicted probability
+
+    Parameters
+    ----------
+    x
+        Probability of 0 class
+    y_true
+        True label
+
+    """
     # If x (main prediction) = 0.4, then expected value = 0 * 0.4 + 1 * (1 - 0.4) = 0.6.
     # For true label = 0, we get bias = abs(0 - 0.6) = 0.6.
     # For true label = 1, we get bias = abs(1 - 0.6) = 0.4.

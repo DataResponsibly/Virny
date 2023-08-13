@@ -2,7 +2,7 @@
 
 Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object. Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
-Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
 ## Parameters
 
