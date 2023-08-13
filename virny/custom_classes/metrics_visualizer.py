@@ -55,7 +55,8 @@ class MetricsVisualizer:
         # Create models_average_metrics_dct
         models_average_metrics_dct = dict()
         for model_name in model_names:
-            columns_to_group = models_metrics_dct[model_name].columns
+            columns_to_group = [col for col in models_metrics_dct[model_name].columns
+                                if col not in ('Model_Seed', 'Run_Number')]
             models_average_metrics_dct[model_name] = models_metrics_dct[model_name][columns_to_group].groupby(['Metric', 'Model_Name']).mean().reset_index()
 
         # Create one average metrics df with all model_dfs
