@@ -3,16 +3,14 @@
 ## 📜 Description
 
 **Virny** is a Python library for auditing model stability and fairness. The Virny library was
-developed based on three fundamental principles: 
+developed based on three fundamental principles:
 
 1) easy extensibility of model analysis capabilities;
-
 2) compatibility to user-defined/custom datasets and model types;
-
 3) simple composition of parity metrics based on context of use.
 
 Virny decouples model auditing into several stages, including: **subgroup metrics computation**, **group metrics composition**,
-and **metrics visualization and reporting**. This gives data scientists and practitioners more control and flexibility 
+and **metrics visualization and reporting**. This gives data scientists and practitioners more control and flexibility
 to use the library for model development and monitoring post-deployment.
 
 For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Runs_Interface_Use_Case/).
@@ -20,11 +18,18 @@ For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.i
 
 ## 🛠 Installation
 
-Virny supports **Python 3.8, 3.9** and can be installed with `pip`:
+Virny supports **Python 3.8 (recommended), 3.9** and can be installed with `pip`:
 
 ```bash
 pip install virny
 ```
+
+
+## 📒 Documentation
+
+* [Introduction](https://dataresponsibly.github.io/Virny/)
+* [API Reference](https://dataresponsibly.github.io/Virny/api/overview/)
+* [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Runs_Interface_Use_Case/)
 
 
 ## 💡 Features
@@ -32,10 +37,10 @@ pip install virny
 * Entire pipeline for auditing model stability and fairness
 * Metrics reports and visualizations
 * Ability to analyze intersections of sensitive attributes
-* Blind classifiers audit
-* Interface for multiple runs and multiple models
+* Convenient metric computation interfaces: for multiple models, for multiple test sets, with a built-in database writer
+* An `error_analysis` computation mode to analyze model stability and confidence for correct and incorrect prodictions splitted by groups
+* Data loaders with subsampling for fairness datasets
 * User-friendly parameters input via config yaml files
-* Built-in preprocessing techniques for raw classification datasets
 * Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
 
 

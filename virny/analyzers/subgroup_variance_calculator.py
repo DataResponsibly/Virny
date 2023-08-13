@@ -48,6 +48,13 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         return results
 
     def _partition_and_compute_metrics_for_error_analysis(self, models_predictions, results: dict):
+        """
+        Partition predictions on correct and incorrect and compute subgroup metrics for each of the partitions.
+        Used for the 'error_analysis' mode.
+
+        :param models_predictions: a list of predictions
+        :param results: a dict to add subgroup metrics for each partition
+        """
         # Create a 1D pandas series of predictions for the test set based on bootstrap predictions
         y_preds = combine_bootstrap_predictions(models_predictions, self.y_test.index)
 

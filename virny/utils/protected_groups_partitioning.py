@@ -11,6 +11,15 @@ def get_df_condition(df: pd.DataFrame, col: str, dis, include_dis: bool):
 
 
 def partition_by_group_intersectional(df, attrs, dis_values):
+    """
+    After a partitioning on intersectional groups, a dis group is formed based on the values in sensitive_attributes_dct,
+    and a priv group includes all other records, which are not included to a dis group.
+
+    :param df: n initial df
+    :param attrs: sensitive attributes
+    :param dis_values: disadvantage values for input sensitive attributes
+
+    """
     # Construct complex df conditions
     dis_condition = get_df_condition(df, attrs[0], dis_values[0], include_dis=True)
     for idx in range(1, len(attrs)):

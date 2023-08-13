@@ -1,7 +1,5 @@
-
-dataset_name: Folktables_GA_2018
+dataset_name: COMPAS_Without_Sensitive_Attributes
 bootstrap_fraction: 0.8
+n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
 computation_mode: error_analysis
-n_estimators: 100  # Better to input the higher number of estimators than 100; this is only for this use case example
-# sensitive_attributes_dct: {'SEX': '2', 'RAC1P': ['2', '3', '4', '5', '6', '7', '8', '9'], 'AGEP': [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40], 'SEX & RAC1P & AGEP': None}
-sensitive_attributes_dct: {'SEX': '2', 'RAC1P': ['2', '3', '4', '5', '6', '7', '8', '9'], 'SEX & RAC1P': None}
+sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}

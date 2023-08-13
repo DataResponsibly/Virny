@@ -47,7 +47,7 @@ class CreditDataset(BaseDataLoader):
 
 class LawSchoolDataset(BaseDataLoader):
     """
-    Dataset class for the Diabetes dataset that contains sensitive attributes among feature columns.
+    Dataset class for the Law School dataset that contains sensitive attributes among feature columns.
     Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/law_school_clean.csv
     Description: https://arxiv.org/pdf/2110.00530.pdf
 
@@ -57,6 +57,8 @@ class LawSchoolDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
     subsample_seed
         Seed for sampling using the sample() method from pandas
+    dataset_path
+        [Optional] Path to a file with the data
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None, dataset_path=None):
@@ -99,6 +101,8 @@ class DiabetesDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
     subsample_seed
         Seed for sampling using the sample() method from pandas
+    dataset_path
+        [Optional] Path to a file with the data
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None, dataset_path=None):
@@ -151,6 +155,9 @@ class RicciDataset(BaseDataLoader):
     Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/ricci_race.csv
     Description: https://arxiv.org/pdf/2110.00530.pdf
 
+    dataset_path
+        [Optional] Path to a file with the data
+
     """
     def __init__(self, dataset_path=None):
         if dataset_path is None:
@@ -182,6 +189,8 @@ class CompasDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
     subsample_seed
         Seed for sampling using the sample() method from pandas
+    dataset_path
+        [Optional] Path to a file with the data
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None, dataset_path=None):
@@ -224,6 +233,8 @@ class CompasWithoutSensitiveAttrsDataset(BaseDataLoader):
         Subsample size to create based on the input dataset
     subsample_seed
         Seed for sampling using the sample() method from pandas
+    dataset_path
+        [Optional] Path to a file with the data
 
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None, dataset_path=None):
