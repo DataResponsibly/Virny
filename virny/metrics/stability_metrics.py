@@ -1,9 +1,7 @@
-import math
 import itertools
 import numpy as np
 import pandas as pd
 import scipy as sp
-from scipy.stats import entropy
 
 
 def compute_label_stability(predicted_labels: list):
@@ -57,34 +55,36 @@ def compute_jitter(models_prediction_labels):
     return churns_sum / (n_models * (n_models - 1) * 0.5)
 
 
-def compute_entropy(labels):
+def compute_entropy_from_predicted_probability(x):
     """
-    Computes entropy of label distribution.
+    Compute entropy from predicted probability
 
     Parameters
     ----------
-    labels
+    x
+        Probability of 0 class
 
     """
-    n_labels = len(labels)
+    return sp.stats.entropy([x, 1-x], base=2)
 
-    if n_labels <= 1:
-        return 0
 
-    value, counts = np.unique(labels, return_counts=True)
-    probs = counts / n_labels
-    n_classes = np.count_nonzero(probs)
+def compute_statistical_bias_from_predict_proba(x, y_true):
+    """
+    Compute statistical bias from predicted probability
 
-    if n_classes <= 1:
-        return 0
+    Parameters
+    ----------
+    x
+        Probability of 0 class
+    y_true
+        True label
 
-    # Compute entropy
-    ent = 0.
-    base = math.e
-    for i in probs:
-        ent -= i * math.log(i, base)
-
-    return ent
+    """
+    # If x (main prediction) = 0.4, then expected value = 0 * 0.4 + 1 * (1 - 0.4) = 0.6.
+    # For true label = 0, we get bias = abs(0 - 0.6) = 0.6.
+    # For true label = 1, we get bias = abs(1 - 0.6) = 0.4.
+    expected_val = 0 * x + 1 * (1 - x)
+    return abs(y_true - expected_val)
 
 
 def compute_conf_interval(labels):

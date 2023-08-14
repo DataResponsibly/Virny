@@ -42,6 +42,10 @@ Analyzer to compute variance metrics for subgroups.
 
     A dictionary of protected groups where keys are subgroup names,  and values are X_test row indexes correspondent to this subgroup.
 
+- **computation_mode** (*str*) – defaults to `None`
+
+    [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+
 - **verbose** (*int*) – defaults to `0`
 
     [Optional] Level of logs printing. The greater level provides more logs.  As for now, 0, 1, 2 levels are supported.

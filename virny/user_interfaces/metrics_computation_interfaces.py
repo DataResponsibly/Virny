@@ -2,12 +2,12 @@ import os
 import random
 import traceback
 import pandas as pd
+from river import base
 from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 from IPython.display import display
 
 from virny.configs.constants import ModelSetting
-from virny.utils.common_helpers import reset_model_seed
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
@@ -16,7 +16,7 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 
 def compute_model_metrics_with_config(base_model, model_name: str, dataset: BaseFlowDataset, config, save_results_dir_path: str,
-                                      model_seed: int = None, save_results: bool = True, verbose: int = 0) -> pd.DataFrame:
+                                      save_results: bool = True, verbose: int = 0) -> pd.DataFrame:
     """
     Compute subgroup metrics for the base model. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
@@ -35,8 +35,6 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
         Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
     save_results_dir_path
         Location where to save result files with metrics
-    model_seed
-        [Optional] Model seed
     save_results
         [Optional] If to save result metrics in a file
     verbose
@@ -44,15 +42,11 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
             As for now, 0, 1, 2 levels are supported.
 
     """
-    if model_seed is None:
-        model_seed = random.randint(1, 1000)
-
     return compute_model_metrics(base_model=base_model,
                                  n_estimators=config.n_estimators,
                                  dataset=dataset,
                                  bootstrap_fraction=config.bootstrap_fraction,
                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                 model_seed=model_seed,
                                  dataset_name=config.dataset_name,
                                  base_model_name=model_name,
                                  save_results=save_results,
@@ -61,8 +55,8 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
 
 
 def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
-                          sensitive_attributes_dct: dict, model_seed: int, dataset_name: str, base_model_name: str,
-                          model_setting: str = ModelSetting.BATCH.value, save_results: bool = True,
+                          sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
+                          model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
                           save_results_dir_path: str = None, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
@@ -83,8 +77,6 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
-    model_seed
-        Model seed
     dataset_name
         Dataset name to name a result file with metrics
     base_model_name
@@ -92,7 +84,9 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     save_results
         [Optional] If to save result metrics in a file
     model_setting
-        Model type: 'batch' or incremental.
+        [Optional] Model type: 'batch' or 'incremental'. Default: 'batch'.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
     verbose
@@ -102,7 +96,6 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     """
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
-    base_model = reset_model_seed(base_model, model_seed, verbose)
     test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_features_df, sensitive_attributes_dct)
     if verbose >= 2:
         print('\nProtected groups splits:')
@@ -119,6 +112,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=test_protected_groups,
+                                                          computation_mode=computation_mode,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
@@ -126,8 +120,11 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                                               make_plots=False)
 
     # Compute error metrics for subgroups
-    error_analyzer = SubgroupErrorAnalyzer(dataset.X_test, dataset.y_test,
-                                           sensitive_attributes_dct, test_protected_groups)
+    error_analyzer = SubgroupErrorAnalyzer(X_test=dataset.X_test,
+                                           y_test=dataset.y_test,
+                                           sensitive_attributes_dct=sensitive_attributes_dct,
+                                           test_protected_groups=test_protected_groups,
+                                           computation_mode=computation_mode)
     dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
                                                       save_results=False,
                                                       result_filename=None,
@@ -137,9 +134,11 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     metrics_df = pd.concat([variance_metrics_df, error_metrics_df])
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
-    metrics_df['Model_Seed'] = model_seed
     metrics_df['Model_Name'] = base_model_name
-    metrics_df['Model_Params'] = str(base_model.get_params())
+    if isinstance(base_model, base.Classifier): # skip for incremental models
+        metrics_df['Model_Params'] = None
+    else:
+        metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics
@@ -149,52 +148,9 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     return metrics_df
 
 
-def run_metrics_computation_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
-                                        run_seed: int = None, verbose: int = 0) -> dict:
-    """
-    Compute stability and accuracy metrics for each model in models_config.
-    Save results in `save_results_dir_path` folder.
-
-    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
-
-    Parameters
-    ----------
-    dataset
-        Dataset object that contains all needed attributes like target, features, numerical_columns etc
-    config
-        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
-    models_config
-        Dictionary where keys are model names, and values are initialized models
-    save_results_dir_path
-        Location where to save result files with metrics
-    run_seed
-        [Optional] Base seed for this run
-    verbose
-        [Optional] Level of logs printing. The greater level provides more logs.
-            As for now, 0, 1, 2 levels are supported.
-
-    """
-    if run_seed is None:
-        run_seed = random.randint(1, 1000)
-    # Create a directory for results if not exists
-    os.makedirs(save_results_dir_path, exist_ok=True)
-    # Parse config and execute the main run_metrics_computation function
-    return run_metrics_computation(dataset=dataset,
-                                   bootstrap_fraction=config.bootstrap_fraction,
-                                   dataset_name=config.dataset_name,
-                                   models_config=models_config,
-                                   n_estimators=config.n_estimators,
-                                   sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                   model_setting=config.model_setting,
-                                   model_seed=run_seed,
-                                   save_results_dir_path=save_results_dir_path,
-                                   save_results=True,
-                                   verbose=verbose)
-
-
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
-                            model_setting: str = ModelSetting.BATCH.value, model_seed: int = None,
+                            model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
                             save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
@@ -218,9 +174,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
     model_setting
-        Model type: 'batch' or incremental.
-    model_seed
-        [Optional] Model seed
+        [Optional] Model type: 'batch' or incremental. Default: 'batch'.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results
         [Optional] If to save result metrics in a file
     save_results_dir_path
@@ -246,7 +202,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      bootstrap_fraction=bootstrap_fraction,
                                                      sensitive_attributes_dct=sensitive_attributes_dct,
                                                      model_setting=model_setting,
-                                                     model_seed=model_seed,
+                                                     computation_mode=computation_mode,
                                                      dataset_name=dataset_name,
                                                      base_model_name=model_name,
                                                      save_results=save_results,
@@ -266,13 +222,13 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     return models_metrics_dct
 
 
-def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_config: dict,
-                                  save_results_dir_path: str, verbose: int = 0) -> dict:
+def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
+                                save_results_dir_path: str, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
 
-    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
     Parameters
     ----------
@@ -289,49 +245,30 @@ def compute_metrics_multiple_runs(dataset: BaseFlowDataset, config, models_confi
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # Input arguments validation
-    if config.num_runs is None:
-        raise ValueError("num_runs is required for multiple runs interfaces. Please define it in your config.")
-    if config.runs_seed_lst is None:
-        config.runs_seed_lst = random.choices(range(1, 1001), k=config.num_runs)
-        print(f'Seeds for {config.num_runs} runs are {config.runs_seed_lst}')
-    else:
-        if len(config.runs_seed_lst) != config.num_runs:
-            raise ValueError("Length of config.runs_seed_lst must be equal to config.num_runs")
-
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
 
-    multiple_runs_metrics_dct = dict()
-    for run_num, run_seed in tqdm(enumerate(config.runs_seed_lst),
-                                  total=len(config.runs_seed_lst),
-                                  desc="Multiple runs progress",
-                                  colour="green"):
-        models_metrics_dct = run_metrics_computation(dataset=dataset,
-                                                     bootstrap_fraction=config.bootstrap_fraction,
-                                                     dataset_name=config.dataset_name,
-                                                     models_config=models_config,
-                                                     n_estimators=config.n_estimators,
-                                                     sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                                     model_setting=config.model_setting,
-                                                     model_seed=run_seed,
-                                                     save_results=False,
-                                                     verbose=verbose)
+    model_metrics_dct = dict()
+    models_metrics_dct = run_metrics_computation(dataset=dataset,
+                                                 bootstrap_fraction=config.bootstrap_fraction,
+                                                 dataset_name=config.dataset_name,
+                                                 models_config=models_config,
+                                                 n_estimators=config.n_estimators,
+                                                 sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                 model_setting=config.model_setting,
+                                                 computation_mode=config.computation_mode,
+                                                 save_results=False,
+                                                 verbose=verbose)
 
-        # Concatenate with previous results and save them in an overwrite mode each time for backups
-        for model_name in models_metrics_dct.keys():
-            model_metrics_df = models_metrics_dct[model_name]
-            model_metrics_df['Run_Number'] = f'Run_{run_num + 1}'
+    # Concatenate with previous results and save them in an overwrite mode each time for backups
+    for model_name in models_metrics_dct.keys():
+        model_metrics_df = models_metrics_dct[model_name]
+        model_metrics_dct[model_name] = model_metrics_df
 
-            if multiple_runs_metrics_dct.get(model_name) is None:
-                multiple_runs_metrics_dct[model_name] = model_metrics_df
-            else:
-                multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df])
+        result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
+        model_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
 
-            result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
-            multiple_runs_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
-
-    return multiple_runs_metrics_dct
+    return model_metrics_dct
 
 
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
@@ -340,7 +277,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
 
-    Return a dictionary where keys are model names, and values are metrics for multiple runs and sensitive attributes defined in config.
+    Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
     Parameters
     ----------
@@ -359,63 +296,48 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # Input arguments validation
-    if config.num_runs is None:
-        raise ValueError("num_runs is required for multiple runs interfaces. Please define it in your config.")
-    if config.runs_seed_lst is None:
-        config.runs_seed_lst = random.choices(range(1, 1001), k=config.num_runs)
-        print(f'Seeds for {config.num_runs} runs are {config.runs_seed_lst}')
-    else:
-        if len(config.runs_seed_lst) != config.num_runs:
-            raise ValueError("Length of config.runs_seed_lst must be equal to config.num_runs")
-
     multiple_runs_metrics_dct = dict()
-    for run_num, run_seed in tqdm(enumerate(config.runs_seed_lst),
-                                  total=len(config.runs_seed_lst),
-                                  desc="Multiple runs progress",
-                                  colour="green"):
-        run_models_metrics_df = pd.DataFrame()
-        models_metrics_dct = run_metrics_computation(dataset=dataset,
-                                                     bootstrap_fraction=config.bootstrap_fraction,
-                                                     dataset_name=config.dataset_name,
-                                                     models_config=models_config,
-                                                     n_estimators=config.n_estimators,
-                                                     sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                                     model_setting=config.model_setting,
-                                                     model_seed=run_seed,
-                                                     save_results=False,
-                                                     verbose=verbose)
+    run_models_metrics_df = pd.DataFrame()
+    models_metrics_dct = run_metrics_computation(dataset=dataset,
+                                                 bootstrap_fraction=config.bootstrap_fraction,
+                                                 dataset_name=config.dataset_name,
+                                                 models_config=models_config,
+                                                 n_estimators=config.n_estimators,
+                                                 sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                 model_setting=config.model_setting,
+                                                 computation_mode=config.computation_mode,
+                                                 save_results=False,
+                                                 verbose=verbose)
 
-        # Concatenate current run metrics with previous results and
-        # create melted_model_metrics_df to save it in a database
-        for model_name in models_metrics_dct.keys():
-            model_metrics_df = models_metrics_dct[model_name]
-            model_metrics_df['Run_Number'] = f'Run_{run_num + 1}'
-            model_metrics_df['Dataset_Name'] = config.dataset_name
-            model_metrics_df['Num_Estimators'] = config.n_estimators
+    # Concatenate current run metrics with previous results and
+    # create melted_model_metrics_df to save it in a database
+    for model_name in models_metrics_dct.keys():
+        model_metrics_df = models_metrics_dct[model_name]
+        model_metrics_df['Dataset_Name'] = config.dataset_name
+        model_metrics_df['Num_Estimators'] = config.n_estimators
 
-            model_metrics_df_copy = model_metrics_df.copy(deep=True)  # Version copy for multiple_runs_metrics_dct
-            # Append current run metrics to multiple_runs_metrics_dct
-            if multiple_runs_metrics_dct.get(model_name) is None:
-                multiple_runs_metrics_dct[model_name] = model_metrics_df_copy
-            else:
-                multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df_copy])
+        model_metrics_df_copy = model_metrics_df.copy(deep=True)  # Version copy for multiple_runs_metrics_dct
+        # Append current run metrics to multiple_runs_metrics_dct
+        if multiple_runs_metrics_dct.get(model_name) is None:
+            multiple_runs_metrics_dct[model_name] = model_metrics_df_copy
+        else:
+            multiple_runs_metrics_dct[model_name] = pd.concat([multiple_runs_metrics_dct[model_name], model_metrics_df_copy])
 
-            # Extend df with technical columns
-            model_metrics_df['Tag'] = 'OK'
-            model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
-            for column, value in custom_tbl_fields_dct.items():
-                model_metrics_df[column] = value
+        # Extend df with technical columns
+        model_metrics_df['Tag'] = 'OK'
+        model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
+        for column, value in custom_tbl_fields_dct.items():
+            model_metrics_df[column] = value
 
-            subgroup_names = [col for col in model_metrics_df.columns if '_priv' in col or '_dis' in col] + ['overall']
-            melted_model_metrics_df = model_metrics_df.melt(id_vars=[col for col in model_metrics_df.columns if col not in subgroup_names],
-                                                            value_vars=subgroup_names,
-                                                            var_name="Subgroup",
-                                                            value_name="Metric_Value")
-            run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
+        subgroup_names = [col for col in model_metrics_df.columns if '_priv' in col or '_dis' in col] + ['overall']
+        melted_model_metrics_df = model_metrics_df.melt(id_vars=[col for col in model_metrics_df.columns if col not in subgroup_names],
+                                                        value_vars=subgroup_names,
+                                                        var_name="Subgroup",
+                                                        value_name="Metric_Value")
+        run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
 
-        # Save results for this run in a database
-        db_writer_func(run_models_metrics_df)
+    # Save results for this run in a database
+    db_writer_func(run_models_metrics_df)
 
     return multiple_runs_metrics_dct
 
@@ -450,58 +372,42 @@ def compute_metrics_multiple_runs_with_multiple_test_sets(dataset: BaseFlowDatas
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # Input arguments validation
-    if config.num_runs is None:
-        raise ValueError("num_runs is required for multiple runs interfaces. Please define it in your config.")
-    if config.runs_seed_lst is None:
-        config.runs_seed_lst = random.choices(range(1, 1001), k=config.num_runs)
-        if verbose >= 1:
-            print(f'Seeds for {config.num_runs} runs are {config.runs_seed_lst}')
-    else:
-        if len(config.runs_seed_lst) != config.num_runs:
-            raise ValueError("Length of config.runs_seed_lst must be equal to config.num_runs")
+    models_metrics_dct = run_metrics_computation_with_multiple_test_sets(dataset=dataset,
+                                                                         bootstrap_fraction=config.bootstrap_fraction,
+                                                                         dataset_name=config.dataset_name,
+                                                                         extra_test_sets_lst=extra_test_sets_lst,
+                                                                         models_config=models_config,
+                                                                         n_estimators=config.n_estimators,
+                                                                         sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                                         model_setting=config.model_setting,
+                                                                         computation_mode=config.computation_mode,
+                                                                         verbose=verbose)
 
-    for run_num, run_seed in tqdm(enumerate(config.runs_seed_lst),
-                                  total=len(config.runs_seed_lst),
-                                  desc="Multiple runs progress",
-                                  colour="green"):
-        models_metrics_dct = run_metrics_computation_with_multiple_test_sets(dataset=dataset,
-                                                                             bootstrap_fraction=config.bootstrap_fraction,
-                                                                             dataset_name=config.dataset_name,
-                                                                             extra_test_sets_lst=extra_test_sets_lst,
-                                                                             models_config=models_config,
-                                                                             n_estimators=config.n_estimators,
-                                                                             sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                                                             model_setting=config.model_setting,
-                                                                             model_seed=run_seed,
-                                                                             verbose=verbose)
+    # Concatenate current run metrics with previous results and
+    # create melted_model_metrics_df to save it in a database
+    run_models_metrics_df = pd.DataFrame()
+    for model_name in models_metrics_dct.keys():
+        model_metrics_dfs_lst = models_metrics_dct[model_name]
+        for idx, model_metrics_df in enumerate(model_metrics_dfs_lst):
+            model_metrics_df['Dataset_Name'] = config.dataset_name
+            model_metrics_df['Num_Estimators'] = config.n_estimators
+            model_metrics_df['Test_Set_Index'] = idx
 
-        # Concatenate current run metrics with previous results and
-        # create melted_model_metrics_df to save it in a database
-        run_models_metrics_df = pd.DataFrame()
-        for model_name in models_metrics_dct.keys():
-            model_metrics_dfs_lst = models_metrics_dct[model_name]
-            for idx, model_metrics_df in enumerate(model_metrics_dfs_lst):
-                model_metrics_df['Run_Number'] = f'Run_{run_num + 1}'
-                model_metrics_df['Dataset_Name'] = config.dataset_name
-                model_metrics_df['Num_Estimators'] = config.n_estimators
-                model_metrics_df['Test_Set_Index'] = idx
+            # Extend df with technical columns
+            model_metrics_df['Tag'] = 'OK'
+            model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
+            for column, value in custom_tbl_fields_dct.items():
+                model_metrics_df[column] = value
 
-                # Extend df with technical columns
-                model_metrics_df['Tag'] = 'OK'
-                model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
-                for column, value in custom_tbl_fields_dct.items():
-                    model_metrics_df[column] = value
+            subgroup_names = [col for col in model_metrics_df.columns if '_priv' in col or '_dis' in col] + ['overall']
+            melted_model_metrics_df = model_metrics_df.melt(id_vars=[col for col in model_metrics_df.columns if col not in subgroup_names],
+                                                            value_vars=subgroup_names,
+                                                            var_name="Subgroup",
+                                                            value_name="Metric_Value")
+            run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
 
-                subgroup_names = [col for col in model_metrics_df.columns if '_priv' in col or '_dis' in col] + ['overall']
-                melted_model_metrics_df = model_metrics_df.melt(id_vars=[col for col in model_metrics_df.columns if col not in subgroup_names],
-                                                                value_vars=subgroup_names,
-                                                                var_name="Subgroup",
-                                                                value_name="Metric_Value")
-                run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
-
-        # Save results for this run in a database
-        db_writer_func(run_models_metrics_df)
+    # Save results for this run in a database
+    db_writer_func(run_models_metrics_df)
 
     if verbose >= 1:
         print('Metrics computation interface was successfully executed!')
@@ -509,9 +415,8 @@ def compute_metrics_multiple_runs_with_multiple_test_sets(dataset: BaseFlowDatas
 
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
-                                                    sensitive_attributes_dct: dict,
-                                                    model_setting: str = ModelSetting.BATCH.value,
-                                                    model_seed: int = None, verbose: int = 0) -> dict:
+                                                    sensitive_attributes_dct: dict, model_setting: str = ModelSetting.BATCH.value,
+                                                    computation_mode: str = None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
@@ -537,8 +442,8 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
          and values are privilege values for these attributes
     model_setting
         Model type: 'batch' or incremental.
-    model_seed
-        [Optional] Model seed
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -561,7 +466,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                                                   bootstrap_fraction=bootstrap_fraction,
                                                                                   sensitive_attributes_dct=sensitive_attributes_dct,
                                                                                   model_setting=model_setting,
-                                                                                  model_seed=model_seed,
+                                                                                  computation_mode=computation_mode,
                                                                                   dataset_name=dataset_name,
                                                                                   base_model_name=model_name,
                                                                                   verbose=verbose)
@@ -579,8 +484,9 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
 def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                   dataset: BaseFlowDataset, extra_test_sets_lst: list,
                                                   bootstrap_fraction: float, sensitive_attributes_dct: dict,
-                                                  model_seed: int, dataset_name: str, base_model_name: str,
-                                                  model_setting: str = ModelSetting.BATCH.value, verbose: int = 0):
+                                                  dataset_name: str, base_model_name: str,
+                                                  model_setting: str = ModelSetting.BATCH.value,
+                                                  computation_mode: str = None, verbose: int = 0):
     """
     Compute subgroup metrics for the base model based on dataset.X_test and each extra test set in extra_test_sets_lst.
     Save results in `save_results_dir_path` folder.
@@ -602,21 +508,20 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
-    model_seed
-        Model seed
     dataset_name
         Dataset name to name a result file with metrics
     base_model_name
         Model name to name a result file with metrics
     model_setting
         Model type: 'batch' or incremental.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
 
     """
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
-    base_model = reset_model_seed(base_model, model_seed, verbose)
     subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
                                                           n_estimators=n_estimators,
                                                           base_model=base_model,
@@ -626,6 +531,7 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=dict(),  # stub for this attribute
+                                                          computation_mode=computation_mode,
                                                           verbose=verbose)
 
     test_sets_lst = [(dataset.X_test, dataset.y_test)] + extra_test_sets_lst
@@ -649,7 +555,11 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                                                   with_fit=True if set_idx == 0 else False)
 
         # Compute accuracy metrics for subgroups
-        error_analyzer = SubgroupErrorAnalyzer(new_X_test, new_y_test, sensitive_attributes_dct, new_test_protected_groups)
+        error_analyzer = SubgroupErrorAnalyzer(X_test=new_X_test,
+                                               y_test=new_y_test,
+                                               sensitive_attributes_dct=sensitive_attributes_dct,
+                                               test_protected_groups=new_test_protected_groups,
+                                               computation_mode=computation_mode)
         dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
                                                           save_results=False,
                                                           result_filename=None,
@@ -659,7 +569,6 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         metrics_df = pd.concat([variance_metrics_df, error_metrics_df])
         metrics_df = metrics_df.reset_index()
         metrics_df = metrics_df.rename(columns={"index": "Metric"})
-        metrics_df['Model_Seed'] = model_seed
         metrics_df['Model_Name'] = base_model_name
         metrics_df['Model_Params'] = str(base_model.get_params())
 

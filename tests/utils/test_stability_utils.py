@@ -16,16 +16,28 @@ def test_count_prediction_stats_true1():
                            [0.7, 0.6, 0.4, 0.4, 0.5, 0.3, 0.2, 0.6, 0.4, 0.4]])
     y_preds, uq_labels, prediction_stats = count_prediction_stats(y_test, uq_results)
 
+    mean = np.mean(prediction_stats.means_lst)
+    std = np.mean(prediction_stats.stds_lst)
+    iqr = np.mean(prediction_stats.iqr_lst)
+    aleatoric_uncertainty = np.mean(prediction_stats.mean_ensemble_entropy_lst)
+    overall_uncertainty = np.mean(prediction_stats.overall_entropy_lst)
+    statistical_bias = np.mean(prediction_stats.statistical_bias_lst)
+    per_sample_accuracy = np.mean(prediction_stats.per_sample_accuracy_lst)
+    label_stability = np.mean(prediction_stats.label_stability_lst)
+
     assert np.array_equal(y_preds, np.array([0, 0, 1, 1, 0, 1, 1, 0, 1, 1]))
     assert np.array_equal( uq_labels, np.array([[0, 0, 1, 1, 0, 1, 0, 0, 1, 1], [0, 0, 1, 1, 0, 1, 1, 0, 1, 1]]) )
 
-    assert prediction_stats.jitter is not None
-    assert prediction_stats.means_lst is not None
-    assert prediction_stats.stds_lst is not None
-    assert prediction_stats.iqr_lst is not None
-    assert prediction_stats.entropy_lst is not None
-    assert prediction_stats.per_sample_accuracy_lst is not None
-    assert prediction_stats.label_stability_lst is not None
+    alpha = 0.000_001
+    assert abs(prediction_stats.jitter - 0.1) < alpha
+    assert abs(mean - 0.47000000000000003) < alpha
+    assert abs(std - 0.0565685424949238) < alpha
+    assert abs(iqr - 0.03999999999999998) < alpha
+    assert abs(aleatoric_uncertainty - 0.9345065014636438) < alpha
+    assert abs(overall_uncertainty - 0.9560071897163649) < alpha
+    assert abs(statistical_bias - 0.42000000000000004) < alpha
+    assert abs(per_sample_accuracy - 0.85) < alpha
+    assert abs(label_stability - 0.9) < alpha
 
 
 def test_count_prediction_stats_true2():

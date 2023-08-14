@@ -4,12 +4,19 @@ from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
 from river import base
 
-from virny.configs.constants import INTERSECTION_SIGN, ModelSetting
+from virny.configs.constants import INTERSECTION_SIGN, ModelSetting, ComputationMode
 
 
 def validate_config(config_obj):
     """
     Validate parameters types and values in config yaml file.
+
+    Extra details:
+    * config_obj.model_setting is an optional argument that defines a type of models to use
+      to compute fairness and stability metrics. Should be 'batch' or 'incremental'. Default: 'batch'.
+
+    * config_obj.computation_mode is an optional argument that defines a non-default mode for metrics computation.
+      Currently, only 'error_analysis' mode is supported.
 
     Parameters
     ----------
@@ -48,19 +55,17 @@ def validate_config(config_obj):
                     raise ValueError('Intersectional attributes in sensitive_attributes_dct must contain '
                                      'single sensitive attributes that also exist in sensitive_attributes_dct')
 
-    # ================== Parameters dependent on a metrics computation interface ==================
-    if config_obj.num_runs is not None and (not isinstance(config_obj.num_runs, int) or config_obj.num_runs <= 0):
-        raise ValueError('num_runs must be an integer greater than 0')
-
-    if config_obj.runs_seed_lst is not None \
-            and (not isinstance(config_obj.runs_seed_lst, list) or not isinstance(config_obj.runs_seed_lst[0], int)):
-        raise ValueError('runs_seed_lst must be a Python list of integers')
-
     # ================== Optional parameters ==================
     if config_obj.model_setting is not None \
             and not isinstance(config_obj.model_setting, str) \
             and config_obj.model_setting not in ModelSetting:
         raise ValueError('model_setting must be a string that is included in the ModelSetting enum. '
+                         'Refer to this function documentation for more details!')
+
+    if config_obj.computation_mode is not None \
+            and not isinstance(config_obj.computation_mode, str) \
+            and config_obj.computation_mode not in ComputationMode:
+        raise ValueError('computation_mode must be a string that is included in the ComputationMode enum. '
                          'Refer to this function documentation for more details!')
 
     return True

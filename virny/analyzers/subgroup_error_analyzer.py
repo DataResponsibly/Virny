@@ -19,12 +19,15 @@ class SubgroupErrorAnalyzer(AbstractSubgroupAnalyzer):
          and values are privilege values for these subgroups
     test_protected_groups
         A dictionary where keys are sensitive attributes, and values input dataset rows
-         that are correspondent to these sensitive attributes
+         that are correspondent to these sensitive attributes.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
 
     """
     def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 sensitive_attributes_dct: dict, test_protected_groups: dict = None):
-        super().__init__(X_test, y_test, sensitive_attributes_dct, test_protected_groups)
+                 sensitive_attributes_dct: dict, test_protected_groups: dict = None,
+                 computation_mode: str = None):
+        super().__init__(X_test, y_test, sensitive_attributes_dct, test_protected_groups, computation_mode)
 
     def _compute_metrics(self, y_test: pd.DataFrame, y_preds: list):
         """

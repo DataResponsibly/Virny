@@ -1,7 +1,8 @@
 from sklearn.model_selection import train_test_split
+from virny.datasets import ACSEmploymentDataset
 from virny.utils.protected_groups_partitioning import check_sensitive_attrs_in_columns, create_test_protected_groups
 
-from tests import config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
+from tests import config_params, folk_emp_config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
 
 
 def test_check_sensitive_attrs_in_columns_true(config_params):
@@ -37,7 +38,7 @@ def test_create_test_protected_groups_true(compas_dataset_class, config_params):
     assert actual_test_protected_groups['sex_dis'].shape[0] == 845
     assert actual_test_protected_groups['race_priv'].shape[0] == 414
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
-    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 99
+    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 526
     assert actual_test_protected_groups['sex&race_dis'].shape[0] == 530
 
 
@@ -56,12 +57,12 @@ def test_create_test_protected_groups_true_without_sensitive_attrs(compas_withou
     assert actual_test_protected_groups['sex_dis'].shape[0] == 845
     assert actual_test_protected_groups['race_priv'].shape[0] == 414
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
-    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 99
+    assert actual_test_protected_groups['sex&race_priv'].shape[0] == 526
     assert actual_test_protected_groups['sex&race_dis'].shape[0] == 530
 
 
 def test_create_test_protected_groups_true2(compas_without_sensitive_attrs_dataset_class, config_params):
-    new_sensitive_attributes_dct = {'sex': 0, 'race': 'Caucasian'}
+    new_sensitive_attributes_dct = {'sex': 1, 'race': 'African-American'}
 
     seed = 42
     X_train, X_test, y_train, y_test = train_test_split(compas_without_sensitive_attrs_dataset_class.X_data,

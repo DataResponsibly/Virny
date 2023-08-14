@@ -20,7 +20,11 @@ Analyzer to compute error metrics for subgroups.
 
 - **test_protected_groups** (*dict*) – defaults to `None`
 
-    A dictionary where keys are sensitive attributes, and values input dataset rows  that are correspondent to these sensitive attributes
+    A dictionary where keys are sensitive attributes, and values input dataset rows  that are correspondent to these sensitive attributes.
+
+- **computation_mode** (*str*) – defaults to `None`
+
+    [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
 
 
 

@@ -32,11 +32,11 @@ Return a dictionary where keys are model names, and values are metrics for sensi
 
 - **model_setting** (*str*) – defaults to `batch`
 
-    Model type: 'batch' or incremental.
+    [Optional] Model type: 'batch' or incremental. Default: 'batch'.
 
-- **model_seed** (*int*) – defaults to `None`
+- **computation_mode** (*str*) – defaults to `None`
 
-    [Optional] Model seed
+    [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
 
 - **save_results** (*bool*) – defaults to `True`
 

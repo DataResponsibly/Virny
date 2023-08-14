@@ -35,9 +35,23 @@ def config_params():
         "bootstrap_fraction": 0.8,
         "n_estimators": 100,
         "runs_seed_lst": [100, 200, 300, 400, 500, 600],
-        "sensitive_attributes_dct": {'sex': 0, 'race': 'Caucasian', 'sex&race': None},
+        "sensitive_attributes_dct": {'sex': 1, 'race': 'African-American', 'sex&race': None},
     }
-    return DefaultMunch.fromDict(config_dct)\
+    return DefaultMunch.fromDict(config_dct)
+
+
+@pytest.fixture(scope='package')
+def folk_emp_config_params():
+    config_dct = {
+        "dataset_name": 'Folktables_NY_2018_Employment',
+        "test_set_fraction": 0.2,
+        "bootstrap_fraction": 0.8,
+        "n_estimators": 100,
+        "num_runs": 1,
+        "runs_seed_lst": [100],
+        "sensitive_attributes_dct": {'SEX': '2', 'RAC1P': '2', 'SEX & RAC1P': None},
+    }
+    return DefaultMunch.fromDict(config_dct)
 
 
 @pytest.fixture(scope='package')
