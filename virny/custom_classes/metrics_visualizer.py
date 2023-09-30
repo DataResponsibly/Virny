@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timezone
 
 from virny.configs.constants import ReportType
+from virny.utils.data_viz_utils import create_sorted_matrix_by_rank
 
 
 class MetricsVisualizer:
@@ -252,19 +253,6 @@ class MetricsVisualizer:
                 )
         )
 
-    @staticmethod
-    def _create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
-        models_distances_matrix = model_metrics_matrix.copy(deep=True).T
-        metric_names = models_distances_matrix.columns
-        for metric_name in metric_names:
-            if 'impact' in metric_name.lower() or 'ratio' in metric_name.lower():
-                models_distances_matrix[metric_name] = models_distances_matrix[metric_name] - 1
-            models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
-
-        models_distances_matrix = models_distances_matrix.T
-        sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
-        return sorted_matrix_by_rank
-
     def create_model_rank_heatmap(self, model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
         """
         This heatmap includes all group fairness and stability metrics and all defined models.
@@ -385,7 +373,7 @@ class MetricsVisualizer:
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
-        sorted_matrix_by_rank = MetricsVisualizer._create_sorted_matrix_by_rank(model_metrics_matrix)
+        sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix)
         model_rank_heatmap = self.create_model_rank_heatmap(model_metrics_matrix, sorted_matrix_by_rank, num_models)
         total_model_rank_heatmap = self.create_total_model_rank_heatmap(sorted_matrix_by_rank, num_models)
         if self.__create_report:

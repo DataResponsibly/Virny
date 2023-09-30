@@ -1,6 +1,5 @@
-import os
-import pandas as pd
 import seaborn as sns
+import numpy as np
 
 from matplotlib import pyplot as plt
 
@@ -29,76 +28,59 @@ def plot_generic(x, y, xlabel, ylabel, x_lim, y_lim, plot_title):
     plt.show()
 
 
-def create_average_metrics_df(dataset_name, model_names, metrics_path):
-    results_filenames = [filename for filename in os.listdir(metrics_path)]
-    models_average_results_dct = dict()
-    for model_name in model_names:
-        model_results_filenames = [filename for filename in results_filenames if 'Average_Metrics' not in filename
-                                   and dataset_name in filename
-                                   and model_name in filename]
+def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
+    models_distances_matrix = model_metrics_matrix.copy(deep=True).T
+    metric_names = models_distances_matrix.columns
+    for metric_name in metric_names:
+        if 'impact' in metric_name.lower() or 'ratio' in metric_name.lower():
+            models_distances_matrix[metric_name] = models_distances_matrix[metric_name] - 1
+        models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
 
-        if len(model_results_filenames) == 0:
-            continue
-
-        model_results_dfs = []
-        for model_results_filename in model_results_filenames:
-            model_results_df = pd.read_csv(f'{metrics_path}/{model_results_filename}')
-            model_results_df.set_index('index', inplace = True)
-            model_results_dfs.append(model_results_df)
-
-        model_average_results_df = None
-        for model_results_df in model_results_dfs:
-            if model_average_results_df is None:
-                model_average_results_df = model_results_df
-            else:
-                model_average_results_df += model_results_df
-
-        model_average_results_df = model_average_results_df / len(model_results_dfs)
-        models_average_results_dct[model_name] = model_average_results_df
-
-        filename = f'Average_Metrics_{dataset_name}_{model_name}.csv'
-        model_average_results_df.reset_index().to_csv(f'{metrics_path}/{filename}', index=False)
-        print(f'File with average metrics for {model_name} is created')
-
-    return models_average_results_dct
+    models_distances_matrix = models_distances_matrix.T
+    sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+    return sorted_matrix_by_rank
 
 
-def visualize_fairness_metrics_for_prediction_metric(models_average_results_dct, x_metric, y_metrics: list):
-    sns.set_style("darkgrid")
-    x_lim = 0.5
-    y_lim = 0.22
-    priv_dis_pairs = [('SEX_RAC1P_priv', 'SEX_RAC1P_dis'),
-                      ('SEX_priv', 'SEX_dis'),
-                      ('RAC1P_priv', 'RAC1P_dis')]
-    for y_metric in y_metrics:
-        for fairness_metric_priv, fairness_metric_dis in priv_dis_pairs:
-            display_fairness_plot(models_average_results_dct, x_metric, y_metric,
-                                  fairness_metric_priv, fairness_metric_dis, x_lim, y_lim)
+def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
+    """
+    This heatmap includes group fairness and stability metrics and defined models.
+    Using it, you can visually compare the models across defined group metrics. On this plot,
+    colors display ranks where 1 is the best model for the metric. These ranks are conditioned
+    on difference or ratio operations used to create these group metrics:
 
+    1) if the metric is created based on the difference operation, closer values to zero have ranks that are closer to the first rank
 
-def display_fairness_plot(models_average_results_dct, x_metric, y_metric,
-                          fairness_metric_priv, fairness_metric_dis, x_lim, y_lim):
-    fig, ax = plt.subplots()
-    set_size(15, 8, ax)
+    2) if the metric is created based on the ratio operation, closer values to one have ranks that are closer to the first rank
 
-    # List of all markers -- https://matplotlib.org/stable/api/markers_api.html
-    markers = ['o', '*', '|', '<', '>', '^', 'v', '1', 's', 'x', 'D', 'P', 'H']
-    model_names = models_average_results_dct.keys()
-    shapes = []
-    for idx, model_name in enumerate(model_names):
-        x_val = abs(models_average_results_dct[model_name][fairness_metric_priv].loc[x_metric] - \
-                    models_average_results_dct[model_name][fairness_metric_dis].loc[x_metric])
-        y_val = abs(models_average_results_dct[model_name][fairness_metric_priv].loc[y_metric] - \
-                    models_average_results_dct[model_name][fairness_metric_dis].loc[y_metric])
-        a = ax.scatter(x_val, y_val, marker=markers[idx], s=100)
-        shapes.append(a)
+    Parameters
+    ----------
+    model_metrics_matrix
+        Matrix of model metrics values where indexes are group metric names and columns are model names
+    sorted_matrix_by_rank
+        Matrix of model ranks per metric where indexes are group metric names and columns are model names
+    num_models
+        Number of models to visualize
 
-    plt.axhline(y=0.0, color='r', linestyle='-')
-    plt.xlabel(f'{x_metric} Difference')
-    plt.ylabel(f'{y_metric} Difference')
-    plt.xlim(-0.01, x_lim)
-    plt.ylim(-0.01, y_lim)
-    plt.title(f'{fairness_metric_priv}-{fairness_metric_dis} difference for {x_metric} and {y_metric}', fontsize=20)
-    ax.legend(shapes, model_names, fontsize=12, title='Markers')
+    """
+    font_increase = 2
+    matrix_width = num_models * 5
+    matrix_height = model_metrics_matrix.shape[0] // 1.5
+    fig = plt.figure(figsize=(matrix_width, matrix_height))
+    rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()[::-1]
+    ax = sns.heatmap(sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
+                     fmt='', annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 16 + font_increase})
+    ax.set(xlabel="", ylabel="")
+    ax.xaxis.tick_top()
+    ax.tick_params(labelsize=16 + font_increase)
+    fig.subplots_adjust(left=0.25, top=0.9)
 
-    plt.show()
+    cbar = ax.collections[0].colorbar
+    model_ranks = [idx for idx in range(num_models)]
+    cbar.set_ticks([float(idx) for idx in model_ranks])
+    tick_labels = [str(idx + 1) for idx in model_ranks]
+    tick_labels[0] = tick_labels[0] + ', best'
+    tick_labels[-1] = tick_labels[-1] + ', worst'
+    cbar.set_ticklabels(tick_labels, fontsize=16 + font_increase)
+    cbar.set_label('Model Ranks', fontsize=18 + font_increase)
+
+    return fig, ax
