@@ -1,5 +1,6 @@
 import pandas as pd
 import gradio as gr
+import altair as alt
 
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank)
@@ -35,19 +36,19 @@ class MetricsInteractiveVisualizer:
         models_metrics_df = models_metrics_df.reset_index(drop=True)
 
         self.models_metrics_dct = model_metrics_dct
-        self.models_metrics_df = self._align_input_metric_df(models_metrics_df, allowed_cols=["Metric", "Model_Name"],
+        self.models_metrics_df = self._align_input_metric_df(models_metrics_df, allowed_cols=["Metric", "Model_Name", "overall"],
                                                              sensitive_attrs=list(self.sensitive_attributes_dct.keys()))
         self.model_composed_metrics_df =  self._align_input_metric_df(model_composed_metrics_df, allowed_cols=["Metric", "Model_Name"],
                                                                       sensitive_attrs=list(self.sensitive_attributes_dct.keys()))
 
-        melted_model_metrics_df = self.models_metrics_df.melt(id_vars=["Metric", "Model_Name"],
-                                                              var_name="Subgroup",
-                                                              value_name="Value")
-        self.sorted_model_metrics_df = melted_model_metrics_df.sort_values(by=['Value'])
-        melted_model_composed_metrics_df = self.model_composed_metrics_df.melt(id_vars=["Metric", "Model_Name"],
-                                                                               var_name="Subgroup",
-                                                                               value_name="Value")
-        self.sorted_model_composed_metrics_df = melted_model_composed_metrics_df.sort_values(by=['Value'])
+        self.melted_model_metrics_df = self.models_metrics_df.melt(id_vars=["Metric", "Model_Name"],
+                                                                   var_name="Subgroup",
+                                                                   value_name="Value")
+        self.sorted_model_metrics_df = self.melted_model_metrics_df.sort_values(by=['Value'])
+        self.melted_model_composed_metrics_df = self.model_composed_metrics_df.melt(id_vars=["Metric", "Model_Name"],
+                                                                                    var_name="Subgroup",
+                                                                                    value_name="Value")
+        self.sorted_model_composed_metrics_df = self.melted_model_composed_metrics_df.sort_values(by=['Value'])
 
     def _align_input_metric_df(self, model_metrics_df: pd.DataFrame, allowed_cols: list, sensitive_attrs: list):
         # Filter columns in the input dataframe based on allowed_cols and sensitive_attrs
@@ -89,13 +90,13 @@ class MetricsInteractiveVisualizer:
                         ['Std', 'IQR', 'Jitter', 'Label_Stability'],
                         value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
-                    btn = gr.Button("Submit")
+                    subgroup_btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=2):
                     subgroup_model_ranking_heatmap = gr.Plot(label="Plot")
 
-            btn.click(self._create_subgroup_model_rank_heatmap,
-                      inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
-                      outputs=[subgroup_model_ranking_heatmap])
+            subgroup_btn_view1.click(self._create_subgroup_model_rank_heatmap,
+                                     inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
+                                     outputs=[subgroup_model_ranking_heatmap])
             # ======================================== Group Metrics Heatmap ========================================
             gr.Markdown(
                 """
@@ -116,13 +117,67 @@ class MetricsInteractiveVisualizer:
                         ['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity'],
                         value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Parity Metrics", info="Select stability parity metrics to display on the heatmap:",
                     )
-                    btn = gr.Button("Submit")
+                    group_btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=2):
                     group_model_ranking_heatmap = gr.Plot(label="Plot")
 
-            btn.click(self._create_group_model_rank_heatmap,
-                      inputs=[model_names, fairness_metrics, group_stability_metrics],
-                      outputs=[group_model_ranking_heatmap])
+            group_btn_view1.click(self._create_group_model_rank_heatmap,
+                                  inputs=[model_names, fairness_metrics, group_stability_metrics],
+                                  outputs=[group_model_ranking_heatmap])
+            # =============================== Subgroup and Group Metrics Bar Chart ===============================
+            with gr.Row():
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ## Subgroup Metrics Bar Chart
+                        """)
+                    subgroup_model_names = gr.Dropdown(
+                        self.model_names, value=self.model_names[0], multiselect=False,
+                        label="Model Names", info="Select one model to display on the bar chart:",
+                    )
+                    accuracy_metrics = gr.Dropdown(
+                        ['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1'],
+                        value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
+                    )
+                    uncertainty_metrics = gr.Dropdown(
+                        ['Aleatoric_Uncertainty', 'Overall_Uncertainty'],
+                        value=['Aleatoric_Uncertainty', 'Overall_Uncertainty'], multiselect=True, label="Uncertainty Metrics", info="Select uncertainty metrics to display on the heatmap:",
+                    )
+                    subgroup_stability_metrics = gr.Dropdown(
+                        ['Std', 'IQR', 'Jitter', 'Label_Stability'],
+                        value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
+                    )
+                    subgroup_btn_view2 = gr.Button("Submit")
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ## Group Metrics Bar Chart
+                        """)
+                    group_model_names = gr.Dropdown(
+                        self.model_names, value=self.model_names[0], multiselect=False,
+                        label="Model Names", info="Select one model to display on the bar chart:",
+                    )
+                    fairness_metrics = gr.Dropdown(
+                        ['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity'],
+                        value=['Equalized_Odds_TPR', 'Equalized_Odds_FPR'], multiselect=True, label="Error Parity Metrics", info="Select error parity metrics to display on the heatmap:",
+                    )
+                    group_stability_metrics = gr.Dropdown(
+                        ['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity'],
+                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Parity Metrics", info="Select stability parity metrics to display on the heatmap:",
+                    )
+                    group_btn_view2 = gr.Button("Submit")
+            with gr.Row():
+                with gr.Column():
+                    subgroup_metrics_bar_chart = gr.Plot(label="Plot")
+                with gr.Column():
+                    group_metrics_bar_chart = gr.Plot(label="Plot")
+
+            subgroup_btn_view2.click(self._create_subgroup_metrics_bar_chart_per_one_model,
+                                     inputs=[subgroup_model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
+                                     outputs=[subgroup_metrics_bar_chart])
+            group_btn_view2.click(self._create_group_metrics_bar_chart_per_one_model,
+                                  inputs=[group_model_names, fairness_metrics, group_stability_metrics],
+                                  outputs=[group_metrics_bar_chart])
 
         self.demo = demo
         self.demo.launch(inline=False, debug=True, show_error=True)
@@ -233,3 +288,60 @@ class MetricsInteractiveVisualizer:
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models)
 
         return model_rank_heatmap
+
+    def _create_subgroup_metrics_bar_chart_per_one_model(self, model_name: str, subgroup_accuracy_metrics_lst: list,
+                                                         subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list):
+        metrics_names = subgroup_accuracy_metrics_lst + subgroup_uncertainty_metrics + subgroup_stability_metrics_lst
+        return self._create_metrics_bar_chart_per_one_model(model_name, metrics_names, metrics_type='subgroup')
+
+    def _create_group_metrics_bar_chart_per_one_model(self, model_name: str, group_fairness_metrics_lst: list,
+                                                      group_stability_metrics_lst: list):
+        metrics_names = group_fairness_metrics_lst + group_stability_metrics_lst
+        return self._create_metrics_bar_chart_per_one_model(model_name, metrics_names, metrics_type='group')
+
+    def _create_metrics_bar_chart_per_one_model(self, model_name: str, metrics_names: list, metrics_type: str):
+        """
+        This bar chart displays metrics for different groups and one specific model.
+
+        Parameters
+        ----------
+        model_name
+            A model name to display metrics
+        metrics_names
+            A list of metric names to visualize
+        metrics_type
+            A metrics type ('subgroup' or 'group') to visualize
+
+        """
+        metrics_title = f'{metrics_type.capitalize()} Metrics'
+        metrics_df = self.melted_model_composed_metrics_df if metrics_type == "group" else self.melted_model_metrics_df
+        filtered_groups = [grp for grp in metrics_df.Subgroup.unique() if '_correct' not in grp and '_incorrect' not in grp]
+        filtered_metrics_df = metrics_df[(metrics_df['Metric'].isin(metrics_names)) &
+                                         (metrics_df['Model_Name'] == model_name) &
+                                         (metrics_df['Subgroup'].isin(filtered_groups))]
+
+        models_metrics_chart = (
+            alt.Chart(filtered_metrics_df).mark_bar().encode(
+                alt.Row('Metric:N', title=metrics_title),
+                alt.Y('Subgroup:N', axis=None),
+                alt.X('Value:Q', axis=alt.Axis(grid=True), title=''),
+                alt.Color('Subgroup:N',
+                          scale=alt.Scale(scheme="tableau20"),
+                          legend=alt.Legend(title=metrics_type.capitalize(),
+                                            labelFontSize=14,
+                                            titleFontSize=14)
+                          )
+            )
+        ).properties(
+            width=500, height=80
+        ).configure_headerRow(
+            labelAngle=0,
+            labelPadding=10,
+            labelAlign='left',
+            labelFontSize=14,
+            titleFontSize=18
+        ).configure_axis(
+            labelFontSize=14, titleFontSize=18
+        )
+
+        return models_metrics_chart
