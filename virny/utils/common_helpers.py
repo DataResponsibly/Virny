@@ -93,6 +93,15 @@ def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
     metrics_df.to_csv(f'{save_dir_path}/{filename}', index=False)
 
 
+def check_substring_in_list(val_to_check: str, allowed_lst: list):
+    # Case-insensitive check if a val_to_check substring is in allowed_lst
+    val_to_check = val_to_check.lower()
+    for allowed_val in allowed_lst:
+        if allowed_val.lower() in val_to_check:
+            return True
+    return False
+
+
 def confusion_matrix_metrics(y_true, y_preds):
     metrics = {}
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()

@@ -3,6 +3,8 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 
+from virny.utils.common_helpers import check_substring_in_list
+
 
 def set_size(w,h, ax=None):
     """ w, h: width, height in inches """
@@ -41,6 +43,20 @@ def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
     return sorted_matrix_by_rank
 
 
+def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
+    models_distances_matrix = model_metrics_matrix.copy(deep=True).T
+    metric_names = models_distances_matrix.columns
+    for metric_name in metric_names:
+        if check_substring_in_list(metric_name, ['TPR', 'TNR', 'PPV', 'Accuracy', 'F1', 'Label_Stability']):
+            # Cast a metric to a case when the closer value to zero is the better
+            models_distances_matrix[metric_name] = 1 - models_distances_matrix[metric_name]
+        models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
+
+    models_distances_matrix = models_distances_matrix.T
+    sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+    return sorted_matrix_by_rank
+
+
 def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
     """
     This heatmap includes group fairness and stability metrics and defined models.
@@ -63,8 +79,8 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
 
     """
     font_increase = 2
-    matrix_width = num_models * 5
-    matrix_height = model_metrics_matrix.shape[0] // 1.5
+    matrix_width = 20
+    matrix_height = model_metrics_matrix.shape[0] // 2
     fig = plt.figure(figsize=(matrix_width, matrix_height))
     rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()[::-1]
     ax = sns.heatmap(sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
@@ -72,7 +88,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     ax.set(xlabel="", ylabel="")
     ax.xaxis.tick_top()
     ax.tick_params(labelsize=16 + font_increase)
-    fig.subplots_adjust(left=0.25, top=0.9)
+    fig.subplots_adjust(left=0.25, right=1., top=0.9)
 
     cbar = ax.collections[0].colorbar
     model_ranks = [idx for idx in range(num_models)]
