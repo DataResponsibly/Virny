@@ -26,6 +26,7 @@ class MetricsInteractiveVisualizer:
         self.demo = None
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
+        self.group_names = list(self.sensitive_attributes_dct.keys())
 
         # Create one metrics df with all model_dfs
         models_metrics_df = pd.DataFrame()
@@ -74,13 +75,17 @@ class MetricsInteractiveVisualizer:
                 """)
             with gr.Row():
                 with gr.Column(scale=2):
+                    group_name = gr.Dropdown(
+                        self.group_names,
+                        value=self.group_names[0], multiselect=False, label="Group Name for Parity Metrics",
+                    )
                     with gr.Row():
                         accuracy_metric = gr.Dropdown(
                             ['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1'],
                             value='Accuracy', multiselect=False, label="Constraint 1 (C1)",
                             scale=2
                         )
-                        acc_min_val = gr.Number(value=0.815, label="Min value", scale=1)
+                        acc_min_val = gr.Number(value=0.7, label="Min value", scale=1)
                         acc_max_val = gr.Number(value=0.85, label="Max value", scale=1)
                     with gr.Row():
                         fairness_metric = gr.Dropdown(
@@ -88,8 +93,8 @@ class MetricsInteractiveVisualizer:
                             value='Equalized_Odds_FPR', multiselect=False, label="Constraint 2 (C2)",
                             scale=2
                         )
-                        fairness_min_val = gr.Number(value=-0.03, label="Min value", scale=1)
-                        fairness_max_val = gr.Number(value=0.03, label="Max value", scale=1)
+                        fairness_min_val = gr.Number(value=-0.15, label="Min value", scale=1)
+                        fairness_max_val = gr.Number(value=0.15, label="Max value", scale=1)
                     with gr.Row():
                         subgroup_stability_metric = gr.Dropdown(
                             ['Std', 'IQR', 'Jitter', 'Label_Stability'],
@@ -111,7 +116,8 @@ class MetricsInteractiveVisualizer:
                     bar_plot_for_model_selection = gr.Plot(label="Plot")
 
             btn_view1.click(self._create_bar_plot_for_model_selection,
-                            inputs=[accuracy_metric, acc_min_val, acc_max_val,
+                            inputs=[group_name,
+                                    accuracy_metric, acc_min_val, acc_max_val,
                                     fairness_metric, fairness_min_val, fairness_max_val,
                                     subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
                                     group_stability_metrics, group_stab_min_val, group_stab_max_val],
@@ -235,25 +241,25 @@ class MetricsInteractiveVisualizer:
     def stop_web_app(self):
         self.demo.close()
 
-    def _create_bar_plot_for_model_selection(self, accuracy_metric, acc_min_val, acc_max_val,
+    def _create_bar_plot_for_model_selection(self, group_name, accuracy_metric, acc_min_val, acc_max_val,
                                              fairness_metric, fairness_min_val, fairness_max_val,
                                              subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
                                              group_stability_metrics, group_stab_min_val, group_stab_max_val):
         accuracy_constraint = (accuracy_metric, acc_min_val, acc_max_val)
-        subgroup_stability_constraint = (subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val)
         fairness_constraint = (fairness_metric, fairness_min_val, fairness_max_val)
+        subgroup_stability_constraint = (subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val)
         group_stability_constraint = (group_stability_metrics, group_stab_min_val, group_stab_max_val)
 
         # Create individual constraints
         metrics_value_range_dct = dict()
-        for constraint in [accuracy_constraint, subgroup_stability_constraint, fairness_constraint, group_stability_constraint]:
+        for constraint in [accuracy_constraint, fairness_constraint, subgroup_stability_constraint, group_stability_constraint]:
             metrics_value_range_dct[constraint[0]] = [constraint[1], constraint[2]]
         # Create intersectional constraints
-        metrics_value_range_dct[f'{accuracy_constraint[0]}&{subgroup_stability_constraint[0]}'] = None
         metrics_value_range_dct[f'{accuracy_constraint[0]}&{fairness_constraint[0]}'] = None
+        metrics_value_range_dct[f'{accuracy_constraint[0]}&{subgroup_stability_constraint[0]}'] = None
         metrics_value_range_dct[f'{accuracy_constraint[0]}&{group_stability_constraint[0]}'] = None
-        metrics_value_range_dct[(f'{accuracy_constraint[0]}&{subgroup_stability_constraint[0]}'
-                                 f'&{fairness_constraint[0]}&{group_stability_constraint[0]}')] = None
+        metrics_value_range_dct[(f'{accuracy_constraint[0]}&{fairness_constraint[0]}'
+                                 f'&{subgroup_stability_constraint[0]}&{group_stability_constraint[0]}')] = None
 
         melted_all_subgroup_metrics_per_model_dct = dict()
         for model_name in self.melted_model_metrics_df['Model_Name'].unique():
@@ -268,7 +274,7 @@ class MetricsInteractiveVisualizer:
         return create_bar_plot_for_model_selection(melted_all_subgroup_metrics_per_model_dct,
                                                    melted_all_group_metrics_per_model_dct,
                                                    metrics_value_range_dct,
-                                                   group='sex&race')
+                                                   group=group_name)
 
     def _create_subgroup_model_rank_heatmap(self, model_names: list, subgroup_accuracy_metrics_lst: list,
                                             subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list):
@@ -405,28 +411,52 @@ class MetricsInteractiveVisualizer:
                                          (metrics_df['Model_Name'] == model_name) &
                                          (metrics_df['Subgroup'].isin(filtered_groups))]
 
+        base_font_size = 16
         models_metrics_chart = (
-            alt.Chart(filtered_metrics_df).mark_bar().encode(
-                alt.Row('Metric:N', title=metrics_title),
-                alt.Y('Subgroup:N', axis=None),
+            alt.Chart().mark_bar().encode(
+                alt.Y('Subgroup:N', axis=None, sort='descending'),
                 alt.X('Value:Q', axis=alt.Axis(grid=True), title=''),
                 alt.Color('Subgroup:N',
+                          sort='descending',
                           scale=alt.Scale(scheme="tableau20"),
                           legend=alt.Legend(title=metrics_type.capitalize(),
-                                            labelFontSize=14,
-                                            titleFontSize=14)
+                                            labelFontSize=base_font_size,
+                                            titleFontSize=base_font_size + 2)
                           )
             )
-        ).properties(
-            width=500, height=80
-        ).configure_headerRow(
-            labelAngle=0,
-            labelPadding=10,
-            labelAlign='left',
-            labelFontSize=14,
-            titleFontSize=18
-        ).configure_axis(
-            labelFontSize=14, titleFontSize=18
         )
 
-        return models_metrics_chart
+        text = (
+            models_metrics_chart.mark_text(
+                align='left',
+                baseline='middle',
+                fontSize=base_font_size,
+                dx=10
+            ).encode(
+                text=alt.Text('Value:Q', format=",.3f"),
+                color=alt.value("black")
+            )
+        )
+
+        final_chart = (
+            alt.layer(
+                models_metrics_chart, text, data=filtered_metrics_df
+            ).properties(
+                width=500,
+                height=100
+            ).facet(
+                row=alt.Row('Metric:N', title=metrics_title)
+            ).configure(
+                padding={'top':  33},
+            ).configure_headerRow(
+                labelAngle=0,
+                labelPadding=10,
+                labelAlign='left',
+                labelFontSize=base_font_size,
+                titleFontSize=base_font_size + 2
+            ).configure_axis(
+                labelFontSize=base_font_size, titleFontSize=base_font_size + 2
+            )
+        )
+
+        return final_chart

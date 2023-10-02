@@ -4,6 +4,7 @@ import altair as alt
 import seaborn as sns
 
 from matplotlib import pyplot as plt
+from IPython.display import display
 
 from virny.utils.common_helpers import check_substring_in_list
 
@@ -80,7 +81,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         Number of models to visualize
 
     """
-    font_increase = 2
+    font_increase = 4
     matrix_width = 20
     matrix_height = model_metrics_matrix.shape[0] // 2
     fig = plt.figure(figsize=(matrix_width, matrix_height))
@@ -90,7 +91,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     ax.set(xlabel="", ylabel="")
     ax.xaxis.tick_top()
     ax.tick_params(labelsize=16 + font_increase)
-    fig.subplots_adjust(left=0.25, right=1., top=0.9)
+    fig.subplots_adjust(left=0.27, right=0.99, top=0.92)
 
     cbar = ax.collections[0].colorbar
     model_ranks = [idx for idx in range(num_models)]
@@ -155,28 +156,28 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
     models_in_range_df['Alias'] = models_in_range_df['Metric_Group'].apply(get_column_alias)
     models_in_range_df['Title'] = models_in_range_df['Alias']
 
-    base_font_size = 25
+    base_font_size = 14
     bar_plot = alt.Chart(models_in_range_df).mark_bar().encode(
         x=alt.X("Title", type="nominal", title='Metric Group', axis=alt.Axis(labelAngle=-30),
                 sort=alt.Sort(order='ascending')),
         y=alt.Y("Number_of_Models", title="Number of Models", type="quantitative"),
         color=alt.Color('Model_Name', legend=alt.Legend(title='Model Name'))
+    ).configure(padding={'top':  33}
     ).configure_axis(
         labelFontSize=base_font_size + 2,
         titleFontSize=base_font_size + 4,
         labelFontWeight='normal',
         titleFontWeight='normal',
         labelLimit=300,
+        tickMinStep=1,
     ).configure_title(
         fontSize=base_font_size + 2
     ).configure_legend(
-        titleFontSize=base_font_size + 2,
-        labelFontSize=base_font_size,
+        titleFontSize=base_font_size + 4,
+        labelFontSize=base_font_size + 2,
         symbolStrokeWidth=4,
         labelLimit=300,
         titleLimit=220,
-        orient='none',
-        legendX=345, legendY=10,
     ).properties(width=650, height=450)
 
     return bar_plot
@@ -209,6 +210,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
 
     # Create a pandas condition for filtering based on the input value ranges
     models_in_range_df = pd.DataFrame()
+    model_names = pivoted_model_metrics_df['Model_Name'].unique()
     for idx, (metric_group, value_range) in enumerate(metrics_value_range_dct.items()):
         pd_condition = None
         if '&' not in metric_group:
@@ -233,6 +235,11 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
         num_satisfied_models_df = pivoted_model_metrics_df[pd_condition]['Model_Name'].value_counts().reset_index()
         num_satisfied_models_df.rename(columns = {'Model_Name': 'Number_of_Models'}, inplace = True)
         num_satisfied_models_df.rename(columns = {'index': 'Model_Name'}, inplace = True)
+        # If a constraint for a metric group is not satisfied, add zeros for all model names
+        if num_satisfied_models_df.shape[0] == 0:
+            num_satisfied_models_df = pd.DataFrame({'Model_Name': model_names,
+                                                    'Number_of_Models': [0] * len(model_names)})
+
         num_satisfied_models_df['Metric_Group'] = metric_group
         if idx == 0:
             models_in_range_df = num_satisfied_models_df
