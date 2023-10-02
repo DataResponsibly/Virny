@@ -326,7 +326,8 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix)
-        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models)
+        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank,
+                                                                        num_models, top_adjust=1.)
 
         return model_rank_heatmap
 
@@ -376,7 +377,8 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix)
-        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models)
+        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank,
+                                                                        num_models, top_adjust=0.78)
 
         return model_rank_heatmap
 
@@ -414,10 +416,9 @@ class MetricsInteractiveVisualizer:
         base_font_size = 16
         models_metrics_chart = (
             alt.Chart().mark_bar().encode(
-                alt.Y('Subgroup:N', axis=None, sort='descending'),
+                alt.Y('Subgroup:N', axis=None),
                 alt.X('Value:Q', axis=alt.Axis(grid=True), title=''),
                 alt.Color('Subgroup:N',
-                          sort='descending',
                           scale=alt.Scale(scheme="tableau20"),
                           legend=alt.Legend(title=metrics_type.capitalize(),
                                             labelFontSize=base_font_size,

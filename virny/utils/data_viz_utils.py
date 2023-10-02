@@ -60,7 +60,8 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
     return sorted_matrix_by_rank
 
 
-def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
+def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models: int,
+                                            top_adjust: float = 0.92):
     """
     This heatmap includes group fairness and stability metrics and defined models.
     Using it, you can visually compare the models across defined group metrics. On this plot,
@@ -79,6 +80,8 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         Matrix of model ranks per metric where indexes are group metric names and columns are model names
     num_models
         Number of models to visualize
+    top_adjust
+        Percentage of a top padding for the heatmap
 
     """
     font_increase = 4
@@ -90,8 +93,9 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
                      fmt='', annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 16 + font_increase})
     ax.set(xlabel="", ylabel="")
     ax.xaxis.tick_top()
+    ax.tick_params(axis='x', rotation=10)
     ax.tick_params(labelsize=16 + font_increase)
-    fig.subplots_adjust(left=0.27, right=0.99, top=0.92)
+    fig.subplots_adjust(left=0.3, right=0.99, top=0.8)
 
     cbar = ax.collections[0].colorbar
     model_ranks = [idx for idx in range(num_models)]
@@ -161,7 +165,7 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
         x=alt.X("Title", type="nominal", title='Metric Group', axis=alt.Axis(labelAngle=-30),
                 sort=alt.Sort(order='ascending')),
         y=alt.Y("Number_of_Models", title="Number of Models", type="quantitative"),
-        color=alt.Color('Model_Name', legend=alt.Legend(title='Model Name'))
+        color=alt.Color('Model_Type', legend=alt.Legend(title='Model Type'))
     ).configure(padding={'top':  33}
     ).configure_axis(
         labelFontSize=base_font_size + 2,
@@ -207,10 +211,12 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
     pivoted_model_metrics_df = all_metrics_for_all_models_df.pivot(columns='Metric', values='Value',
                                                                    index=[col for col in all_metrics_for_all_models_df.columns
                                                                           if col not in ('Metric', 'Value')]).reset_index()
+    # Create a Model_Type column to count the number of models that satisfied the constraints based on their model types
+    pivoted_model_metrics_df['Model_Type'] = pivoted_model_metrics_df['Model_Name'].str.split('__', expand=True)[0]
+    model_types = pivoted_model_metrics_df['Model_Type'].unique()
 
     # Create a pandas condition for filtering based on the input value ranges
     models_in_range_df = pd.DataFrame()
-    model_names = pivoted_model_metrics_df['Model_Name'].unique()
     for idx, (metric_group, value_range) in enumerate(metrics_value_range_dct.items()):
         pd_condition = None
         if '&' not in metric_group:
@@ -232,13 +238,13 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
                 else:
                     pd_condition &= (pivoted_model_metrics_df[metric] >= min_range_val) & (pivoted_model_metrics_df[metric] <= max_range_val)
 
-        num_satisfied_models_df = pivoted_model_metrics_df[pd_condition]['Model_Name'].value_counts().reset_index()
-        num_satisfied_models_df.rename(columns = {'Model_Name': 'Number_of_Models'}, inplace = True)
-        num_satisfied_models_df.rename(columns = {'index': 'Model_Name'}, inplace = True)
+        num_satisfied_models_df = pivoted_model_metrics_df[pd_condition]['Model_Type'].value_counts().reset_index()
+        num_satisfied_models_df.rename(columns = {'Model_Type': 'Number_of_Models'}, inplace = True)
+        num_satisfied_models_df.rename(columns = {'index': 'Model_Type'}, inplace = True)
         # If a constraint for a metric group is not satisfied, add zeros for all model names
         if num_satisfied_models_df.shape[0] == 0:
-            num_satisfied_models_df = pd.DataFrame({'Model_Name': model_names,
-                                                    'Number_of_Models': [0] * len(model_names)})
+            num_satisfied_models_df = pd.DataFrame({'Model_Type': model_types,
+                                                    'Number_of_Models': [0] * len(model_types)})
 
         num_satisfied_models_df['Metric_Group'] = metric_group
         if idx == 0:
