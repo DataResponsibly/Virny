@@ -109,8 +109,8 @@ class MetricsInteractiveVisualizer:
                             value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
                             scale=2
                         )
-                        group_stab_min_val = gr.Number(value=1.0, label="Min value", scale=1)
-                        group_stab_max_val = gr.Number(value=1.03, label="Max value", scale=1)
+                        group_stab_min_val = gr.Number(value=0.98, label="Min value", scale=1)
+                        group_stab_max_val = gr.Number(value=1.02, label="Max value", scale=1)
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Plot")
@@ -241,6 +241,29 @@ class MetricsInteractiveVisualizer:
     def stop_web_app(self):
         self.demo.close()
 
+    def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
+                                     selected_metric: str, selected_subgroup: str, defined_model_names: list):
+        results[subgroup_metric] = dict()
+
+        # Get distinct sorted model names
+        sorted_model_names_arr = self.sorted_model_metrics_df[
+            (self.sorted_model_metrics_df.Metric == selected_metric) &
+            (self.sorted_model_metrics_df.Subgroup == selected_subgroup)
+            ]['Model_Name'].values
+        sorted_model_names_arr = [model for model in sorted_model_names_arr if model in defined_model_names]
+
+        # Add values to a results dict
+        for idx, model_name in enumerate(sorted_model_names_arr):
+            metric_value = self.sorted_model_metrics_df[
+                (self.sorted_model_metrics_df.Metric == selected_metric) &
+                (self.sorted_model_metrics_df.Subgroup == selected_subgroup) &
+                (self.sorted_model_metrics_df.Model_Name == model_name)
+                ]['Value'].values[0]
+            metric_value = round(metric_value, 3)
+            results[subgroup_metric][model_name] = metric_value
+
+        return results
+
     def _create_bar_plot_for_model_selection(self, group_name, accuracy_metric, acc_min_val, acc_max_val,
                                              fairness_metric, fairness_min_val, fairness_max_val,
                                              subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
@@ -301,28 +324,16 @@ class MetricsInteractiveVisualizer:
         results = {}
         num_models = len(model_names)
         for metric in metrics_lst:
+            # Add an overall metric
+            subgroup_metric = metric + '_overall'
+            results = self.__filter_subgroup_metrics_df(results, subgroup_metric, metric,
+                                                        selected_subgroup='overall', defined_model_names=model_names)
+            # Add a subgroup metric
             for group in groups_lst:
                 for prefix in ['priv', 'dis']:
                     subgroup = group + '_' + prefix
                     subgroup_metric = metric + '_' + subgroup
-                    results[subgroup_metric] = dict()
-
-                    # Get distinct sorted model names
-                    sorted_model_names_arr = self.sorted_model_metrics_df[
-                        (self.sorted_model_metrics_df.Metric == metric) &
-                        (self.sorted_model_metrics_df.Subgroup == subgroup)
-                        ]['Model_Name'].values
-                    sorted_model_names_arr = [model for model in sorted_model_names_arr if model in model_names]
-
-                    # Add values to a results dict
-                    for idx, model_name in enumerate(sorted_model_names_arr):
-                        metric_value = self.sorted_model_metrics_df[
-                            (self.sorted_model_metrics_df.Metric == metric) &
-                            (self.sorted_model_metrics_df.Subgroup == subgroup) &
-                            (self.sorted_model_metrics_df.Model_Name == model_name)
-                            ]['Value'].values[0]
-                        metric_value = round(metric_value, 3)
-                        results[subgroup_metric][model_name] = metric_value
+                    results = self.__filter_subgroup_metrics_df(results, subgroup_metric, metric, subgroup, model_names)
 
         model_metrics_matrix = pd.DataFrame(results).T
         sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix)
