@@ -86,7 +86,7 @@ class MetricsInteractiveVisualizer:
                             scale=2
                         )
                         acc_min_val = gr.Number(value=0.7, label="Min value", scale=1)
-                        acc_max_val = gr.Number(value=0.85, label="Max value", scale=1)
+                        acc_max_val = gr.Number(value=1.0, label="Max value", scale=1)
                     with gr.Row():
                         fairness_metric = gr.Dropdown(
                             ['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity'],
@@ -102,7 +102,7 @@ class MetricsInteractiveVisualizer:
                             scale=2
                         )
                         subgroup_stab_min_val = gr.Number(value=0.9, label="Min value", scale=1)
-                        subgroup_stab_max_val = gr.Number(value=0.94, label="Max value", scale=1)
+                        subgroup_stab_max_val = gr.Number(value=1.0, label="Max value", scale=1)
                     with gr.Row():
                         group_stability_metrics = gr.Dropdown(
                             ['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity'],
