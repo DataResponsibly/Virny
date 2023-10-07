@@ -110,7 +110,8 @@ class MetricsInteractiveVisualizer:
                         group_stab_max_val = gr.Number(value=10.0, label="Max value", scale=1)
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
-                    bar_plot_for_model_selection = gr.Plot(label="Plot")
+                    bar_plot_for_model_selection = gr.Plot(label="Bar Chart")
+                    df_with_models_satisfied_all_constraints = gr.DataFrame(label='Models that satisfy all 4 constraints')
 
             btn_view1.click(self._create_bar_plot_for_model_selection,
                             inputs=[group_name,
@@ -118,7 +119,7 @@ class MetricsInteractiveVisualizer:
                                     fairness_metric, fairness_min_val, fairness_max_val,
                                     subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
                                     group_stability_metrics, group_stab_min_val, group_stab_max_val],
-                            outputs=[bar_plot_for_model_selection])
+                            outputs=[bar_plot_for_model_selection, df_with_models_satisfied_all_constraints])
             # ======================================= Overall Metrics Heatmap =======================================
             gr.Markdown(
                 """
@@ -145,7 +146,7 @@ class MetricsInteractiveVisualizer:
                     )
                     subgroup_btn_view2 = gr.Button("Submit")
                 with gr.Column(scale=2):
-                    subgroup_model_ranking_heatmap = gr.Plot(label="Plot")
+                    subgroup_model_ranking_heatmap = gr.Plot(label="Heatmap")
 
             subgroup_btn_view2.click(self._create_subgroup_model_rank_heatmap,
                                      inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
@@ -172,7 +173,7 @@ class MetricsInteractiveVisualizer:
                     )
                     group_btn_view2 = gr.Button("Submit")
                 with gr.Column(scale=2):
-                    group_model_ranking_heatmap = gr.Plot(label="Plot")
+                    group_model_ranking_heatmap = gr.Plot(label="Heatmap")
 
             group_btn_view2.click(self._create_group_model_rank_heatmap,
                                   inputs=[model_names, fairness_metrics, group_stability_metrics],
@@ -221,9 +222,9 @@ class MetricsInteractiveVisualizer:
                     group_btn_view3 = gr.Button("Submit")
             with gr.Row():
                 with gr.Column():
-                    subgroup_metrics_bar_chart = gr.Plot(label="Plot")
+                    subgroup_metrics_bar_chart = gr.Plot(label="Subgroup Bar Chart")
                 with gr.Column():
-                    group_metrics_bar_chart = gr.Plot(label="Plot")
+                    group_metrics_bar_chart = gr.Plot(label="Group Bar Chart")
 
             subgroup_btn_view3.click(self._create_subgroup_metrics_bar_chart_per_one_model,
                                      inputs=[subgroup_model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
@@ -326,6 +327,7 @@ class MetricsInteractiveVisualizer:
                                                         selected_subgroup='overall', defined_model_names=model_names)
 
         model_metrics_matrix = pd.DataFrame(results).T
+        model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
         sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix)
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix,
                                                                         sorted_matrix_by_rank, num_models)
@@ -377,6 +379,7 @@ class MetricsInteractiveVisualizer:
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
+        model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
         sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix)
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix,
                                                                         sorted_matrix_by_rank, num_models)

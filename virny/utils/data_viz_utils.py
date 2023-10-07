@@ -112,8 +112,9 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
 def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
                                         metrics_value_range_dct: dict, group: str):
     # Compute the number of models that satisfy the conditions
-    models_in_range_df = create_models_in_range_dct(all_subgroup_metrics_per_model_dct, all_group_metrics_per_model_dct,
-                                                    metrics_value_range_dct, group)
+    models_in_range_df, df_with_models_satisfied_all_constraints = (
+        create_models_in_range_dct(all_subgroup_metrics_per_model_dct, all_group_metrics_per_model_dct,
+                                   metrics_value_range_dct, group))
     # Replace metric groups on their aliases
     metric_name_to_alias_dct = {
         # C1
@@ -184,7 +185,7 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
         titleLimit=220,
     ).properties(width=650, height=450)
 
-    return bar_plot
+    return bar_plot, df_with_models_satisfied_all_constraints
 
 
 def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
@@ -217,6 +218,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
 
     # Create a pandas condition for filtering based on the input value ranges
     models_in_range_df = pd.DataFrame()
+    df_with_models_satisfied_all_constraints = pd.DataFrame()
     for idx, (metric_group, value_range) in enumerate(metrics_value_range_dct.items()):
         pd_condition = None
         if '&' not in metric_group:
@@ -253,4 +255,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
             # Concatenate based on rows
             models_in_range_df = pd.concat([models_in_range_df, num_satisfied_models_df], ignore_index=True, sort=False)
 
-    return models_in_range_df
+        if metric_group.count('&') == 3:
+            df_with_models_satisfied_all_constraints = pivoted_model_metrics_df[pd_condition][['Model_Type', 'Model_Name']]
+
+    return models_in_range_df, df_with_models_satisfied_all_constraints
