@@ -68,7 +68,7 @@ class MetricsInteractiveVisualizer:
             gr.Markdown(
                 """
                 ## Bar Chart for Model Selection
-                Select input arguments to create a bar chart for model selection.
+                Select input arguments to create a bar chart for model selection. Default values display the lowest and greatest limits of constraints.
                 """)
             with gr.Row():
                 with gr.Column(scale=2):
@@ -82,7 +82,7 @@ class MetricsInteractiveVisualizer:
                             value='Accuracy', multiselect=False, label="Constraint 1 (C1)",
                             scale=2
                         )
-                        acc_min_val = gr.Number(value=0.7, label="Min value", scale=1)
+                        acc_min_val = gr.Number(value=0.0, label="Min value", scale=1)
                         acc_max_val = gr.Number(value=1.0, label="Max value", scale=1)
                     with gr.Row():
                         fairness_metric = gr.Dropdown(
@@ -90,15 +90,15 @@ class MetricsInteractiveVisualizer:
                             value='Equalized_Odds_FPR', multiselect=False, label="Constraint 2 (C2)",
                             scale=2
                         )
-                        fairness_min_val = gr.Number(value=-0.15, label="Min value", scale=1)
-                        fairness_max_val = gr.Number(value=0.15, label="Max value", scale=1)
+                        fairness_min_val = gr.Number(value=-1.0, label="Min value", scale=1)
+                        fairness_max_val = gr.Number(value=1.0, label="Max value", scale=1)
                     with gr.Row():
                         subgroup_stability_metric = gr.Dropdown(
                             sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
                             value='Label_Stability', multiselect=False, label="Constraint 3 (C3)",
                             scale=2
                         )
-                        subgroup_stab_min_val = gr.Number(value=0.9, label="Min value", scale=1)
+                        subgroup_stab_min_val = gr.Number(value=0.0, label="Min value", scale=1)
                         subgroup_stab_max_val = gr.Number(value=1.0, label="Max value", scale=1)
                     with gr.Row():
                         group_stability_metrics = gr.Dropdown(
@@ -106,8 +106,8 @@ class MetricsInteractiveVisualizer:
                             value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
                             scale=2
                         )
-                        group_stab_min_val = gr.Number(value=0.98, label="Min value", scale=1)
-                        group_stab_max_val = gr.Number(value=1.02, label="Max value", scale=1)
+                        group_stab_min_val = gr.Number(value=0.1, label="Min value", scale=1)
+                        group_stab_max_val = gr.Number(value=10.0, label="Max value", scale=1)
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Plot")

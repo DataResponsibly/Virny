@@ -86,8 +86,10 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     matrix_height = model_metrics_matrix.shape[0] if model_metrics_matrix.shape[0] >= 3 \
         else model_metrics_matrix.shape[0] * 2.5
     fig = plt.figure(figsize=(matrix_width, matrix_height))
-    rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()[::-1]
-    ax = sns.heatmap(sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
+    rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()
+    # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
+    reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
+    ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
                      fmt='', annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 16 + font_increase})
     ax.set(xlabel="", ylabel="")
     ax.xaxis.tick_top()
@@ -97,7 +99,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
 
     cbar = ax.collections[0].colorbar
     model_ranks = [idx for idx in range(num_models)]
-    cbar.set_ticks([float(idx) for idx in model_ranks])
+    cbar.set_ticks([float(idx) * -1 for idx in model_ranks])
     tick_labels = [str(idx + 1) for idx in model_ranks]
     tick_labels[0] = tick_labels[0] + ', best'
     tick_labels[-1] = tick_labels[-1] + ', worst'
