@@ -123,7 +123,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     rank_colors = sns.color_palette("coolwarm", n_colors=num_ranks).as_hex()
     # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
     reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
-    ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
+    ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix.round(3), cmap=rank_colors,
                      fmt='', annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 16 + font_increase})
     ax.set(xlabel="", ylabel="")
     ax.xaxis.tick_top()

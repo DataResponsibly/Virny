@@ -260,7 +260,7 @@ class MetricsInteractiveVisualizer:
                 (self.sorted_model_metrics_df.Subgroup == selected_subgroup) &
                 (self.sorted_model_metrics_df.Model_Name == model_name)
                 ]['Value'].values[0]
-            metric_value = round(metric_value, 3)
+            metric_value = metric_value
             results[subgroup_metric][model_name] = metric_value
 
         return results
@@ -385,7 +385,7 @@ class MetricsInteractiveVisualizer:
                         (self.sorted_model_composed_metrics_df.Subgroup == group) &
                         (self.sorted_model_composed_metrics_df.Model_Name == model_name)
                         ]['Value'].values[0]
-                    metric_value = round(metric_value, 3)
+                    metric_value = metric_value
                     results[group_metric][model_name] = metric_value
 
         model_metrics_matrix = pd.DataFrame(results).T
