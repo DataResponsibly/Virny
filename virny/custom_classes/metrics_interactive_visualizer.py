@@ -2,6 +2,7 @@ import pandas as pd
 import gradio as gr
 import altair as alt
 
+from virny.utils.common_helpers import isfloat_regex, str_to_float
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection)
 
@@ -82,32 +83,32 @@ class MetricsInteractiveVisualizer:
                             value='Accuracy', multiselect=False, label="Constraint 1 (C1)",
                             scale=2
                         )
-                        acc_min_val = gr.Number(value=0.0, label="Min value", scale=1)
-                        acc_max_val = gr.Number(value=1.0, label="Max value", scale=1)
+                        acc_min_val = gr.Text(value="0.0", label="Min value", scale=1)
+                        acc_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         fairness_metric = gr.Dropdown(
                             sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
                             value='Equalized_Odds_FPR', multiselect=False, label="Constraint 2 (C2)",
                             scale=2
                         )
-                        fairness_min_val = gr.Number(value=-1.0, label="Min value", scale=1)
-                        fairness_max_val = gr.Number(value=1.0, label="Max value", scale=1)
+                        fairness_min_val = gr.Text(value="-1.0", label="Min value", scale=1)
+                        fairness_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         subgroup_stability_metric = gr.Dropdown(
                             sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
                             value='Label_Stability', multiselect=False, label="Constraint 3 (C3)",
                             scale=2
                         )
-                        subgroup_stab_min_val = gr.Number(value=0.0, label="Min value", scale=1)
-                        subgroup_stab_max_val = gr.Number(value=1.0, label="Max value", scale=1)
+                        subgroup_stab_min_val = gr.Text(value="0.0", label="Min value", scale=1)
+                        subgroup_stab_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         group_stability_metrics = gr.Dropdown(
                             sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
                             value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
                             scale=2
                         )
-                        group_stab_min_val = gr.Number(value=0.1, label="Min value", scale=1)
-                        group_stab_max_val = gr.Number(value=10.0, label="Max value", scale=1)
+                        group_stab_min_val = gr.Text(value="0.1", label="Min value", scale=1)
+                        group_stab_max_val = gr.Text(value="10.0", label="Max value", scale=1)
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Bar Chart")
@@ -132,6 +133,7 @@ class MetricsInteractiveVisualizer:
                         sorted(self.model_names), value=sorted(self.model_names)[:4], max_choices=5, multiselect=True,
                         label="Model Names", info="Select model names to display on the heatmap:",
                     )
+                    subgroup_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     accuracy_metrics = gr.Dropdown(
                         sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
                         value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
@@ -149,7 +151,7 @@ class MetricsInteractiveVisualizer:
                     subgroup_model_ranking_heatmap = gr.Plot(label="Heatmap")
 
             subgroup_btn_view2.click(self._create_subgroup_model_rank_heatmap,
-                                     inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
+                                     inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics, subgroup_tolerance],
                                      outputs=[subgroup_model_ranking_heatmap])
             # ======================================== Parity Metrics Heatmap ========================================
             gr.Markdown(
@@ -163,6 +165,7 @@ class MetricsInteractiveVisualizer:
                         sorted(self.model_names), value=sorted(self.model_names)[:4], max_choices=5, multiselect=True,
                         label="Model Names", info="Select model names to display on the heatmap:",
                     )
+                    group_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     fairness_metrics = gr.Dropdown(
                         sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
                         value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Parity Metrics", info="Select error parity metrics to display on the heatmap:",
@@ -176,7 +179,7 @@ class MetricsInteractiveVisualizer:
                     group_model_ranking_heatmap = gr.Plot(label="Heatmap")
 
             group_btn_view2.click(self._create_group_model_rank_heatmap,
-                                  inputs=[model_names, fairness_metrics, group_stability_metrics],
+                                  inputs=[model_names, fairness_metrics, group_stability_metrics, group_tolerance],
                                   outputs=[group_model_ranking_heatmap])
             # =============================== Subgroup and Group Metrics Bar Chart ===============================
             with gr.Row():
@@ -187,7 +190,7 @@ class MetricsInteractiveVisualizer:
                         """)
                     subgroup_model_names = gr.Dropdown(
                         sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False,
-                        label="Model Names", info="Select one model to display on the bar chart:",
+                        label="Model Name", info="Select one model to display on the bar chart:",
                     )
                     accuracy_metrics = gr.Dropdown(
                         sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
@@ -209,7 +212,7 @@ class MetricsInteractiveVisualizer:
                         """)
                     group_model_names = gr.Dropdown(
                         sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False,
-                        label="Model Names", info="Select one model to display on the bar chart:",
+                        label="Model Name", info="Select one model to display on the bar chart:",
                     )
                     fairness_metrics = gr.Dropdown(
                         sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
@@ -266,10 +269,10 @@ class MetricsInteractiveVisualizer:
                                              fairness_metric, fairness_min_val, fairness_max_val,
                                              subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
                                              group_stability_metrics, group_stab_min_val, group_stab_max_val):
-        accuracy_constraint = (accuracy_metric, acc_min_val, acc_max_val)
-        fairness_constraint = (fairness_metric, fairness_min_val, fairness_max_val)
-        subgroup_stability_constraint = (subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val)
-        group_stability_constraint = (group_stability_metrics, group_stab_min_val, group_stab_max_val)
+        accuracy_constraint = (accuracy_metric, str_to_float(acc_min_val, 'C1 min value'), str_to_float(acc_max_val, 'C2 max value'))
+        fairness_constraint = (fairness_metric, str_to_float(fairness_min_val, 'C2 min value'), str_to_float(fairness_max_val, 'C2 max value'))
+        subgroup_stability_constraint = (subgroup_stability_metric, str_to_float(subgroup_stab_min_val, 'C3 min value'), str_to_float(subgroup_stab_max_val, 'C3 max value'))
+        group_stability_constraint = (group_stability_metrics, str_to_float(group_stab_min_val, 'C4 min value'), str_to_float(group_stab_max_val, 'C4 max value'))
 
         # Create individual constraints
         metrics_value_range_dct = dict()
@@ -298,7 +301,8 @@ class MetricsInteractiveVisualizer:
                                                    group=group_name)
 
     def _create_subgroup_model_rank_heatmap(self, model_names: list, subgroup_accuracy_metrics_lst: list,
-                                            subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list):
+                                            subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list,
+                                            tolerance: str):
         """
         Create a group model rank heatmap.
 
@@ -312,8 +316,11 @@ class MetricsInteractiveVisualizer:
             A list of subgroup uncertainty metrics to visualize
         subgroup_stability_metrics_lst
             A list of subgroup stability metrics to visualize
+        tolerance
+            An acceptable value difference for metrics dense ranking
 
         """
+        tolerance = str_to_float(tolerance, 'Tolerance')
         metrics_lst = subgroup_accuracy_metrics_lst + subgroup_uncertainty_metrics + subgroup_stability_metrics_lst
 
         # Find metric values for each model based on metric, subgroup, and model names.
@@ -328,14 +335,13 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
-        sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix)
-        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix,
-                                                                        sorted_matrix_by_rank, num_models)
+        sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
+        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
 
         return model_rank_heatmap
 
     def _create_group_model_rank_heatmap(self, model_names: list, group_fairness_metrics_lst: list,
-                                         group_stability_metrics_lst: list):
+                                         group_stability_metrics_lst: list, tolerance: str):
         """
         Create a group model rank heatmap.
 
@@ -347,8 +353,12 @@ class MetricsInteractiveVisualizer:
             A list of group fairness metrics to visualize
         group_stability_metrics_lst
             A list of group stability metrics to visualize
+        tolerance
+            An acceptable value difference for metrics dense ranking
 
         """
+        tolerance = str_to_float(tolerance, 'Tolerance')
+
         groups_lst = self.sensitive_attributes_dct.keys()
         metrics_lst = group_fairness_metrics_lst + group_stability_metrics_lst
 
@@ -380,9 +390,8 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
-        sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix)
-        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix,
-                                                                        sorted_matrix_by_rank, num_models)
+        sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
+        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
 
         return model_rank_heatmap
 

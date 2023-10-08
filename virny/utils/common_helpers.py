@@ -1,4 +1,5 @@
 import os
+import re
 
 from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
@@ -69,6 +70,20 @@ def validate_config(config_obj):
                          'Refer to this function documentation for more details!')
 
     return True
+
+
+def isfloat_regex(string):
+    # We have defined a pattern for float value
+    pattern = r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$'
+    # Find the match and convert to boolean
+    return bool(re.match(pattern, string))
+
+
+def str_to_float(str_var: str, var_name: str):
+    if isfloat_regex(str_var):
+        return float(str_var)
+    else:
+        raise ValueError(f"{var_name} must be a float number with a '.' separator.")
 
 
 def reset_model_seed(model, new_seed, verbose):

@@ -4,7 +4,6 @@ import altair as alt
 import seaborn as sns
 
 from matplotlib import pyplot as plt
-from IPython.display import display
 
 from virny.utils.common_helpers import check_substring_in_list
 
@@ -33,7 +32,34 @@ def plot_generic(x, y, xlabel, ylabel, x_lim, y_lim, plot_title):
     plt.show()
 
 
-def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
+def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: str = 'dense'):
+    """
+    Rank a pandas series with defined tolerance.
+    Ref: https://stackoverflow.com/questions/72956450/pandas-ranking-with-tolerance
+
+    Parameters
+    ----------
+    pd_series
+        A pandas series to rank
+    tolerance
+        A float value for ranking
+    method
+        Ranking methods for numpy.rank()
+
+    Returns
+    -------
+    A pandas series with dense ranks for the input pd series.
+
+    """
+    tolerance += 1e-10 # Add 0.0000000001 for correct comparison of float numbers
+    vals = pd.Series(pd_series.unique()).sort_values()
+    vals.index = vals
+    vals = vals.mask(vals - vals.shift(1) <= tolerance, vals.shift(1))
+
+    return pd_series.map(vals).fillna(pd_series).rank(method=method)
+
+
+def create_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np.array:
     models_distances_matrix = model_metrics_matrix.copy(deep=True).T
     metric_names = models_distances_matrix.columns
     for metric_name in metric_names:
@@ -42,11 +68,15 @@ def create_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
         models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
 
     models_distances_matrix = models_distances_matrix.T
-    sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+    models_distances_df = pd.DataFrame(models_distances_matrix)
+    sorted_matrix_by_rank = models_distances_df.apply(
+        lambda row : rank_with_tolerance(row, tolerance, method='dense'), axis = 1
+    )
+
     return sorted_matrix_by_rank
 
 
-def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
+def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np.array:
     models_distances_matrix = model_metrics_matrix.copy(deep=True).T
     metric_names = models_distances_matrix.columns
     for metric_name in metric_names:
@@ -56,11 +86,15 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix) -> np.array:
         models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
 
     models_distances_matrix = models_distances_matrix.T
-    sorted_matrix_by_rank = np.argsort(np.argsort(models_distances_matrix, axis=1), axis=1)
+    models_distances_df = pd.DataFrame(models_distances_matrix)
+    sorted_matrix_by_rank = models_distances_df.apply(
+        lambda row : rank_with_tolerance(row, tolerance, method='dense'), axis = 1
+    )
+
     return sorted_matrix_by_rank
 
 
-def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, num_models: int):
+def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank):
     """
     This heatmap includes group fairness and stability metrics and defined models.
     Using it, you can visually compare the models across defined group metrics. On this plot,
@@ -77,16 +111,16 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         Matrix of model metrics values where indexes are group metric names and columns are model names
     sorted_matrix_by_rank
         Matrix of model ranks per metric where indexes are group metric names and columns are model names
-    num_models
-        Number of models to visualize
 
     """
     font_increase = 4
     matrix_width = 20
     matrix_height = model_metrics_matrix.shape[0] if model_metrics_matrix.shape[0] >= 3 \
         else model_metrics_matrix.shape[0] * 2.5
+    num_ranks = int(sorted_matrix_by_rank.values.max())
+
     fig = plt.figure(figsize=(matrix_width, matrix_height))
-    rank_colors = sns.color_palette("coolwarm", n_colors=num_models).as_hex()
+    rank_colors = sns.color_palette("coolwarm", n_colors=num_ranks).as_hex()
     # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
     reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
     ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix, cmap=rank_colors,
@@ -98,9 +132,9 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     fig.tight_layout()
 
     cbar = ax.collections[0].colorbar
-    model_ranks = [idx for idx in range(num_models)]
+    model_ranks = [idx + 1 for idx in range(num_ranks)]
     cbar.set_ticks([float(idx) * -1 for idx in model_ranks])
-    tick_labels = [str(idx + 1) for idx in model_ranks]
+    tick_labels = [str(idx) for idx in model_ranks]
     tick_labels[0] = tick_labels[0] + ', best'
     tick_labels[-1] = tick_labels[-1] + ', worst'
     cbar.set_ticklabels(tick_labels, fontsize=16 + font_increase)
