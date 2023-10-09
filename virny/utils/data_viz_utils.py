@@ -4,6 +4,7 @@ import altair as alt
 import seaborn as sns
 
 from matplotlib import pyplot as plt
+from altair.utils.schemapi import Undefined
 
 from virny.utils.common_helpers import check_substring_in_list
 
@@ -59,6 +60,26 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: s
     return pd_series.map(vals).fillna(pd_series).rank(method=method)
 
 
+def compute_proportions(protected_groups, X_data):
+    subgroup_proportions_dct = {'overall': 1.0}
+    for col_name in protected_groups.keys():
+        proportion = protected_groups[col_name].shape[0] / X_data.shape[0]
+        subgroup_proportions_dct[col_name] = proportion
+
+    return subgroup_proportions_dct
+
+
+def compute_base_rates(protected_groups, y_data):
+    overall_base_rate = y_data[y_data == 1].shape[0] / y_data.shape[0]
+    subgroup_base_rates_dct = {'overall': overall_base_rate}
+    for col_name in protected_groups.keys():
+        filtered_df = y_data.iloc[protected_groups[col_name].index].copy(deep=True)
+        base_rate = filtered_df[filtered_df == 1].shape[0] / filtered_df.shape[0]
+        subgroup_base_rates_dct[col_name] = base_rate
+
+    return subgroup_base_rates_dct
+
+
 def create_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np.array:
     models_distances_matrix = model_metrics_matrix.copy(deep=True).T
     metric_names = models_distances_matrix.columns
@@ -92,6 +113,55 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     )
 
     return sorted_matrix_by_rank
+
+
+def create_col_facet_bar_chart(df, x_col, y_col, col_facet_by, x_sort_by_lst=Undefined,
+                               col_facet_sort_by_lst=Undefined, color_legend_title=Undefined, facet_title=Undefined):
+    base_font_size = 16
+    bar_chart = (
+        alt.Chart().mark_bar().encode(
+            alt.X(f'{x_col}:N', axis=None, sort=x_sort_by_lst),
+            alt.Y(f'{y_col}:Q', axis=alt.Axis(grid=True), title=''),
+            alt.Color(f'{x_col}:N',
+                      scale=alt.Scale(scheme="tableau20"),
+                      sort=x_sort_by_lst,
+                      legend=alt.Legend(title=color_legend_title,
+                                        labelFontSize=base_font_size,
+                                        titleFontSize=base_font_size + 2,
+                                        orient='top'))
+        )
+    )
+
+    text_labels = (
+        bar_chart.mark_text(
+            baseline='middle',
+            fontSize=base_font_size,
+            dy=-10
+        ).encode(
+            text=alt.Text('Value:Q', format=",.3f"),
+            color=alt.value("black")
+        )
+    )
+
+    final_chart = (
+        alt.layer(
+            bar_chart, text_labels, data=df
+        ).properties(
+            width=100,
+            height=500
+        ).facet(
+            column=alt.Column(f'{col_facet_by}:N', title=facet_title, sort=col_facet_sort_by_lst)
+        ).configure(
+            padding={'top':  33},
+        ).configure_headerColumn(
+            labelFontSize=base_font_size,
+            titleFontSize=base_font_size + 2
+        ).configure_axis(
+            labelFontSize=base_font_size, titleFontSize=base_font_size + 2
+        )
+    )
+
+    return final_chart
 
 
 def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank):

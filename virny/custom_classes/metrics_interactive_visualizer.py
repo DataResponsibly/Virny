@@ -2,9 +2,11 @@ import pandas as pd
 import gradio as gr
 import altair as alt
 
-from virny.utils.common_helpers import isfloat_regex, str_to_float
+from virny.utils.common_helpers import str_to_float
+from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
-                                        create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection)
+                                        create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection,
+                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart)
 
 
 class MetricsInteractiveVisualizer:
@@ -13,6 +15,10 @@ class MetricsInteractiveVisualizer:
 
     Parameters
     ----------
+    X_data
+        An original features dataframe
+    y_data
+        An original target column pandas series
     model_metrics_dct
         Dictionary where keys are model names and values are dataframes of subgroup metrics for each model
     model_composed_metrics_df
@@ -22,13 +28,17 @@ class MetricsInteractiveVisualizer:
          and values are privilege values for these attributes
 
     """
-    def __init__(self, model_metrics_dct: dict, model_composed_metrics_df: pd.DataFrame,
-                 sensitive_attributes_dct: dict):
-        self.demo = None
-        self.max_groups = 8
+    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics_dct: dict,
+                 model_composed_metrics_df: pd.DataFrame, sensitive_attributes_dct: dict):
+        self.X_data = X_data
+        self.y_data = y_data
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.group_names = list(self.sensitive_attributes_dct.keys())
+
+        # Technical attributes
+        self.demo = None
+        self.max_groups = 8
 
         # Create one metrics df with all model_dfs
         models_metrics_df = pd.DataFrame()
@@ -68,18 +78,6 @@ class MetricsInteractiveVisualizer:
         k = int(k)
         return [gr.Textbox(value='', visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
 
-    def _test(self, grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8,
-              grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8):
-        grp_names = [grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8]
-        grp_names = [grp for grp in grp_names if grp != '' and grp is not None]
-        grp_dis_values = [grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8]
-        grp_dis_values = [grp for grp in grp_dis_values if grp != '' and grp is not None]
-
-        inp_str1 = ' '.join(grp_names) + '.'
-        inp_str2 = ' '.join(grp_dis_values) + '.'
-
-        return inp_str1 + ' | ' + inp_str2
-
     def start_web_app(self):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
             # ==================================== Dataset Statistics ====================================
@@ -105,12 +103,12 @@ class MetricsInteractiveVisualizer:
                     s.change(self.__variable_inputs, s, grp_dis_values)
                     btn_view0 = gr.Button("Submit")
                 with gr.Column(scale=3):
-                    test_output = gr.Text(label="Test")
+                    dataset_proportions_bar_chart = gr.Plot(label="Subgroup Proportions and Base Rates")
 
-            btn_view0.click(self._test,
+            btn_view0.click(self._create_dataset_proportions_bar_chart,
                             inputs=[grp_names[0], grp_names[1], grp_names[2], grp_names[3], grp_names[4], grp_names[5], grp_names[6], grp_names[7],
                                     grp_dis_values[0], grp_dis_values[1], grp_dis_values[2], grp_dis_values[3], grp_dis_values[4], grp_dis_values[5], grp_dis_values[6], grp_dis_values[7]],
-                            outputs=[test_output])
+                            outputs=[dataset_proportions_bar_chart])
             # ==================================== Bar Chart for Model Selection ====================================
             gr.Markdown(
                 """
@@ -310,6 +308,50 @@ class MetricsInteractiveVisualizer:
             results[subgroup_metric][model_name] = metric_value
 
         return results
+
+    def _create_dataset_proportions_bar_chart(self, grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8,
+                                              grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8):
+        grp_names = [grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8]
+        grp_names = [grp for grp in grp_names if grp != '' and grp is not None]
+        grp_dis_values = [grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8]
+        grp_dis_values = [grp for grp in grp_dis_values if grp != '' and grp is not None]
+
+        # Create a sensitive attrs dict
+        input_sensitive_attrs_dct = dict()
+        for grp_name, grp_dis_val in zip(grp_names, grp_dis_values):
+            if '&' in grp_name:
+                input_sensitive_attrs_dct[grp_name] = None
+            else:
+                converted_grp_dis_val = eval(grp_dis_val) if '[' in grp_dis_val else grp_dis_val
+                input_sensitive_attrs_dct[grp_name] = converted_grp_dis_val
+
+        # Partition on protected groups
+        protected_groups = create_test_protected_groups(self.X_data, self.X_data, input_sensitive_attrs_dct)
+
+        # Create a df with group proportions and group base rates
+        subgroup_proportions_dct = compute_proportions(protected_groups, self.X_data)
+        subgroup_base_rates_dct = compute_base_rates(protected_groups, self.y_data)
+        subgroup_relative_base_rates_dct = dict()
+        for subgroup in subgroup_proportions_dct.keys():
+            subgroup_relative_base_rates_dct[subgroup] = subgroup_base_rates_dct[subgroup] * subgroup_proportions_dct[subgroup]
+
+        stats_df = pd.DataFrame(columns=['Subgroup', 'Value', 'Statistics_Type'])
+        for subgroup in subgroup_proportions_dct.keys():
+            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_proportions_dct[subgroup], 'Proportion']
+            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_relative_base_rates_dct[subgroup], 'Base_Rate']
+
+        # Create a row facet bar chart
+        col_facet_sort_by_lst = ['overall'] + [grp for grp in stats_df.Subgroup.unique() if grp.lower() != 'overall']
+        col_facet_bar_chart = create_col_facet_bar_chart(stats_df,
+                                                         x_col='Statistics_Type',
+                                                         y_col='Value',
+                                                         col_facet_by='Subgroup',
+                                                         x_sort_by_lst=['Proportion', 'Base_Rate'],
+                                                         col_facet_sort_by_lst=col_facet_sort_by_lst,
+                                                         color_legend_title='Statistics Type',
+                                                         facet_title='')
+
+        return col_facet_bar_chart
 
     def _create_bar_plot_for_model_selection(self, group_name, accuracy_metric, acc_min_val, acc_max_val,
                                              fairness_metric, fairness_min_val, fairness_max_val,
