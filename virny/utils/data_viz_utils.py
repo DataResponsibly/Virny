@@ -54,7 +54,7 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: s
     tolerance += 1e-10 # Add 0.0000000001 for correct comparison of float numbers
     vals = pd.Series(pd_series.unique()).sort_values()
     vals.index = vals
-    vals = vals.mask(vals - vals.shift(1) <= tolerance, vals.shift(1))
+    vals = vals.mask(vals - vals.shift(1) < tolerance, vals.shift(1))
 
     return pd_series.map(vals).fillna(pd_series).rank(method=method)
 

@@ -25,6 +25,7 @@ class MetricsInteractiveVisualizer:
     def __init__(self, model_metrics_dct: dict, model_composed_metrics_df: pd.DataFrame,
                  sensitive_attributes_dct: dict):
         self.demo = None
+        self.max_groups = 8
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.group_names = list(self.sensitive_attributes_dct.keys())
@@ -63,8 +64,53 @@ class MetricsInteractiveVisualizer:
 
         return model_metrics_df[filtered_cols]
 
+    def __variable_inputs(self, k):
+        k = int(k)
+        return [gr.Textbox(value='', visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
+
+    def _test(self, grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8,
+              grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8):
+        grp_names = [grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8]
+        grp_names = [grp for grp in grp_names if grp != '' and grp is not None]
+        grp_dis_values = [grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8]
+        grp_dis_values = [grp for grp in grp_dis_values if grp != '' and grp is not None]
+
+        inp_str1 = ' '.join(grp_names) + '.'
+        inp_str2 = ' '.join(grp_dis_values) + '.'
+
+        return inp_str1 + ' | ' + inp_str2
+
     def start_web_app(self):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
+            # ==================================== Dataset Statistics ====================================
+            gr.Markdown(
+                """
+                ## Dataset Statistics
+                """)
+            with gr.Row():
+                with gr.Column(scale=2):
+                    default_val = 5
+                    s = gr.Slider(1, self.max_groups, value=default_val, step=1, label="How many groups to show:")
+                    grp_names = []
+                    grp_dis_values = []
+                    for i in range(self.max_groups):
+                        visibility = True if i + 1 <= default_val else False
+                        with gr.Row():
+                            grp_name = gr.Text(label=f"Group {i + 1}", interactive=True, visible=visibility)
+                            grp_dis_value = gr.Text(label="Disadvantage value", interactive=True, visible=visibility)
+                        grp_names.append(grp_name)
+                        grp_dis_values.append(grp_dis_value)
+
+                    s.change(self.__variable_inputs, s, grp_names)
+                    s.change(self.__variable_inputs, s, grp_dis_values)
+                    btn_view0 = gr.Button("Submit")
+                with gr.Column(scale=3):
+                    test_output = gr.Text(label="Test")
+
+            btn_view0.click(self._test,
+                            inputs=[grp_names[0], grp_names[1], grp_names[2], grp_names[3], grp_names[4], grp_names[5], grp_names[6], grp_names[7],
+                                    grp_dis_values[0], grp_dis_values[1], grp_dis_values[2], grp_dis_values[3], grp_dis_values[4], grp_dis_values[5], grp_dis_values[6], grp_dis_values[7]],
+                            outputs=[test_output])
             # ==================================== Bar Chart for Model Selection ====================================
             gr.Markdown(
                 """
