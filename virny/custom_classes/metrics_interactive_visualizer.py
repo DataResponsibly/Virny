@@ -76,7 +76,7 @@ class MetricsInteractiveVisualizer:
 
     def __variable_inputs(self, k):
         k = int(k)
-        return [gr.Textbox(value='', visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
+        return [gr.Textbox(visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
 
     def start_web_app(self):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
@@ -151,8 +151,8 @@ class MetricsInteractiveVisualizer:
                             value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
                             scale=2
                         )
-                        group_stab_min_val = gr.Text(value="0.1", label="Min value", scale=1)
-                        group_stab_max_val = gr.Text(value="10.0", label="Max value", scale=1)
+                        group_stab_min_val = gr.Text(value="0.7", label="Min value", scale=1)
+                        group_stab_max_val = gr.Text(value="1.5", label="Max value", scale=1)
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Bar Chart")
