@@ -119,7 +119,7 @@ class MetricsInteractiveVisualizer:
                 with gr.Column(scale=2):
                     group_name = gr.Dropdown(
                         self.group_names,
-                        value=self.group_names[0], multiselect=False, label="Group Name for Parity Metrics",
+                        value=self.group_names[0], multiselect=False, label="Group Name for Disparity Metrics",
                     )
                     with gr.Row():
                         accuracy_metric = gr.Dropdown(
@@ -197,11 +197,11 @@ class MetricsInteractiveVisualizer:
             subgroup_btn_view2.click(self._create_subgroup_model_rank_heatmap,
                                      inputs=[model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics, subgroup_tolerance],
                                      outputs=[subgroup_model_ranking_heatmap])
-            # ======================================== Parity Metrics Heatmap ========================================
+            # ======================================== Disparity Metrics Heatmap ========================================
             gr.Markdown(
                 """
-                ## Parity Metrics Heatmap
-                Select input arguments to create a parity metrics heatmap.
+                ## Disparity Metrics Heatmap
+                Select input arguments to create a disparity metrics heatmap.
                 """)
             with gr.Row():
                 with gr.Column(scale=1):
@@ -212,11 +212,11 @@ class MetricsInteractiveVisualizer:
                     group_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     fairness_metrics = gr.Dropdown(
                         sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
-                        value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Parity Metrics", info="Select error parity metrics to display on the heatmap:",
+                        value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
                     )
                     group_stability_metrics = gr.Dropdown(
                         sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
-                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Parity Metrics", info="Select stability parity metrics to display on the heatmap:",
+                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
                     )
                     group_btn_view2 = gr.Button("Submit")
                 with gr.Column(scale=2):
@@ -225,17 +225,26 @@ class MetricsInteractiveVisualizer:
             group_btn_view2.click(self._create_group_model_rank_heatmap,
                                   inputs=[model_names, fairness_metrics, group_stability_metrics, group_tolerance],
                                   outputs=[group_model_ranking_heatmap])
-            # =============================== Subgroup and Group Metrics Bar Chart ===============================
+            # ============================ Group Specific and Disparity Metrics Bar Charts ============================
+            with gr.Row():
+                # Scale column 1 to a half of a screen
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ## Group Specific and Disparity Metrics Bar Charts
+                        """)
+                    model_name_vw3 = gr.Dropdown(
+                        sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False, scale=1,
+                        label="Model Name", info="Select one model to display on the bar charts:",
+                    )
+                with gr.Column():
+                    pass
             with gr.Row():
                 with gr.Column():
                     gr.Markdown(
                         """
-                        ## Subgroup Metrics Bar Chart
+                        ### Group Specific Metrics
                         """)
-                    subgroup_model_names = gr.Dropdown(
-                        sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False,
-                        label="Model Name", info="Select one model to display on the bar chart:",
-                    )
                     accuracy_metrics = gr.Dropdown(
                         sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
                         value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
@@ -248,37 +257,32 @@ class MetricsInteractiveVisualizer:
                         sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
                         value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
-                    subgroup_btn_view3 = gr.Button("Submit")
+                    btn_view3 = gr.Button("Submit")
                 with gr.Column():
                     gr.Markdown(
                         """
-                        ## Group Metrics Bar Chart
+                        ### Disparity Metrics
                         """)
-                    group_model_names = gr.Dropdown(
-                        sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False,
-                        label="Model Name", info="Select one model to display on the bar chart:",
-                    )
                     fairness_metrics = gr.Dropdown(
                         sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
-                        value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Parity Metrics", info="Select error parity metrics to display on the heatmap:",
+                        value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
                     )
                     group_stability_metrics = gr.Dropdown(
                         sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
-                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Parity Metrics", info="Select stability parity metrics to display on the heatmap:",
+                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
                     )
-                    group_btn_view3 = gr.Button("Submit")
             with gr.Row():
                 with gr.Column():
-                    subgroup_metrics_bar_chart = gr.Plot(label="Subgroup Bar Chart")
+                    subgroup_metrics_bar_chart = gr.Plot(label="Group Specific Bar Chart")
                 with gr.Column():
-                    group_metrics_bar_chart = gr.Plot(label="Group Bar Chart")
+                    group_metrics_bar_chart = gr.Plot(label="Disparity Bar Chart")
 
-            subgroup_btn_view3.click(self._create_subgroup_metrics_bar_chart_per_one_model,
-                                     inputs=[subgroup_model_names, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
-                                     outputs=[subgroup_metrics_bar_chart])
-            group_btn_view3.click(self._create_group_metrics_bar_chart_per_one_model,
-                                  inputs=[group_model_names, fairness_metrics, group_stability_metrics],
-                                  outputs=[group_metrics_bar_chart])
+            btn_view3.click(self._create_subgroup_metrics_bar_chart_per_one_model,
+                            inputs=[model_name_vw3, accuracy_metrics, uncertainty_metrics, subgroup_stability_metrics],
+                            outputs=[subgroup_metrics_bar_chart])
+            btn_view3.click(self._create_group_metrics_bar_chart_per_one_model,
+                            inputs=[model_name_vw3, fairness_metrics, group_stability_metrics],
+                            outputs=[group_metrics_bar_chart])
 
         self.demo = demo
         self.demo.launch(inline=False, debug=True, show_error=True)
@@ -507,7 +511,7 @@ class MetricsInteractiveVisualizer:
             A metrics type ('subgroup' or 'group') to visualize
 
         """
-        metrics_title = f'{metrics_type.capitalize()} Metrics'
+        metrics_title = 'Disparity Metrics' if metrics_type == "group" else 'Group Specific Metrics'
         metrics_df = self.melted_model_composed_metrics_df if metrics_type == "group" else self.melted_model_metrics_df
         filtered_groups = [grp for grp in metrics_df.Subgroup.unique() if '_correct' not in grp and '_incorrect' not in grp]
         filtered_groups = [grp for grp in filtered_groups if grp.lower() != 'overall'] + ['overall']
@@ -523,7 +527,7 @@ class MetricsInteractiveVisualizer:
                 alt.Color('Subgroup:N',
                           scale=alt.Scale(scheme="tableau20"),
                           sort=filtered_groups,
-                          legend=alt.Legend(title=metrics_type.capitalize(),
+                          legend=alt.Legend(title='Disparity' if metrics_type == 'group' else 'Group',
                                             labelFontSize=base_font_size,
                                             titleFontSize=base_font_size + 2))
             )
