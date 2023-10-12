@@ -1,8 +1,6 @@
 wheel~=0.38.4
 twine~=4.0.2
-requests-toolbelt==1.0.0
 numpy~=1.24.2
-datapane~=0.15.5
 matplotlib~=3.6.2
 pandas~=1.5.2
 altair~=4.2.0
@@ -18,3 +16,5 @@ river==0.15.0
 python-dotenv~=1.0.0
 pytest~=7.2.2
 pymongo==4.3.3
+datapane~=0.16.0
+requests-toolbelt==1.0.0
