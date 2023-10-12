@@ -6,7 +6,8 @@ from virny.utils.common_helpers import str_to_float
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection,
-                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart)
+                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart,
+                                        create_row_facet_bar_chart)
 
 
 class MetricsInteractiveVisualizer:
@@ -102,8 +103,8 @@ class MetricsInteractiveVisualizer:
                     s.change(self.__variable_inputs, s, grp_names)
                     s.change(self.__variable_inputs, s, grp_dis_values)
                     btn_view0 = gr.Button("Submit")
-                with gr.Column(scale=3):
-                    dataset_proportions_bar_chart = gr.Plot(label="Subgroup Proportions and Base Rates")
+                with gr.Column(scale=4):
+                    dataset_proportions_bar_chart = gr.Plot(label="Group Proportions and Base Rates")
 
             btn_view0.click(self._create_dataset_proportions_bar_chart,
                             inputs=[grp_names[0], grp_names[1], grp_names[2], grp_names[3], grp_names[4], grp_names[5], grp_names[6], grp_names[7],
@@ -337,21 +338,25 @@ class MetricsInteractiveVisualizer:
         subgroup_base_rates_dct = compute_base_rates(protected_groups, self.y_data)
         subgroup_relative_base_rates_dct = dict()
         for subgroup in subgroup_proportions_dct.keys():
-            subgroup_relative_base_rates_dct[subgroup] = subgroup_base_rates_dct[subgroup] * subgroup_proportions_dct[subgroup]
+            pct = subgroup_base_rates_dct[subgroup]['percentage'] * subgroup_proportions_dct[subgroup]['percentage']
+            subgroup_relative_base_rates_dct[subgroup] = {'percentage': pct, 'num_rows': subgroup_base_rates_dct[subgroup]['num_rows']}
 
-        stats_df = pd.DataFrame(columns=['Subgroup', 'Value', 'Statistics_Type'])
+        stats_df = pd.DataFrame(columns=['Subgroup', 'Percentage', 'Num_Rows', 'Statistics_Type'])
         for subgroup in subgroup_proportions_dct.keys():
-            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_proportions_dct[subgroup], 'Proportion']
-            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_relative_base_rates_dct[subgroup], 'Base_Rate']
+            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_proportions_dct[subgroup]['percentage'],
+                                                 subgroup_proportions_dct[subgroup]['num_rows'], 'Proportion']
+            stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_relative_base_rates_dct[subgroup]['percentage'],
+                                                 subgroup_relative_base_rates_dct[subgroup]['num_rows'], 'Base_Rate']
 
         # Create a row facet bar chart
-        col_facet_sort_by_lst = ['overall'] + [grp for grp in stats_df.Subgroup.unique() if grp.lower() != 'overall']
+        facet_sort_by_lst = ['overall'] + [grp for grp in stats_df.Subgroup.unique() if grp.lower() != 'overall']
         col_facet_bar_chart = create_col_facet_bar_chart(stats_df,
                                                          x_col='Statistics_Type',
-                                                         y_col='Value',
-                                                         col_facet_by='Subgroup',
+                                                         y_col='Num_Rows',
+                                                         facet_column_name='Subgroup',
+                                                         text_labels_column='Percentage',
                                                          x_sort_by_lst=['Proportion', 'Base_Rate'],
-                                                         col_facet_sort_by_lst=col_facet_sort_by_lst,
+                                                         facet_sort_by_lst=facet_sort_by_lst,
                                                          color_legend_title='Statistics Type',
                                                          facet_title='')
 

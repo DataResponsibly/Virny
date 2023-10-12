@@ -61,21 +61,21 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: s
 
 
 def compute_proportions(protected_groups, X_data):
-    subgroup_proportions_dct = {'overall': 1.0}
+    subgroup_proportions_dct = {'overall': {'percentage': 1.0, 'num_rows': X_data.shape[0]}}
     for col_name in protected_groups.keys():
         proportion = protected_groups[col_name].shape[0] / X_data.shape[0]
-        subgroup_proportions_dct[col_name] = proportion
+        subgroup_proportions_dct[col_name] = {'percentage': proportion, 'num_rows': protected_groups[col_name].shape[0]}
 
     return subgroup_proportions_dct
 
 
 def compute_base_rates(protected_groups, y_data):
     overall_base_rate = y_data[y_data == 1].shape[0] / y_data.shape[0]
-    subgroup_base_rates_dct = {'overall': overall_base_rate}
+    subgroup_base_rates_dct = {'overall': {'percentage': overall_base_rate, 'num_rows': y_data[y_data == 1].shape[0]}}
     for col_name in protected_groups.keys():
         filtered_df = y_data.iloc[protected_groups[col_name].index].copy(deep=True)
         base_rate = filtered_df[filtered_df == 1].shape[0] / filtered_df.shape[0]
-        subgroup_base_rates_dct[col_name] = base_rate
+        subgroup_base_rates_dct[col_name] = {'percentage': base_rate, 'num_rows': filtered_df[filtered_df == 1].shape[0]}
 
     return subgroup_base_rates_dct
 
@@ -115,16 +115,93 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     return sorted_matrix_by_rank
 
 
-def create_col_facet_bar_chart(df, x_col, y_col, col_facet_by, x_sort_by_lst=Undefined,
-                               col_facet_sort_by_lst=Undefined, color_legend_title=Undefined, facet_title=Undefined):
+def create_col_facet_bar_chart(df, x_col, y_col, facet_column_name, text_labels_column, x_sort_by_lst=Undefined,
+                               facet_sort_by_lst=Undefined, color_legend_title=Undefined, facet_title=Undefined):
+    num_facets = len(df[facet_column_name].unique())
+    max_y_axis_limit = df[y_col].max()
     base_font_size = 16
+
+    # Set dynamic variables that adapt to the number of defined groups
+    dynamic_facet_width = 100
+    dynamic_label_angle = -20
+    dynamic_font_size = base_font_size
+    dynamic_top_padding = 40
+    dynamic_legend_y_padding = -140
+    if num_facets > 4 * 2 + 1 and num_facets <= 6 * 2 + 1:
+        dynamic_facet_width = 75
+        dynamic_label_angle = -25
+        dynamic_font_size -= 2
+        dynamic_top_padding = 40
+        dynamic_legend_y_padding = -160
+    elif num_facets > 6 * 2 + 1:
+        dynamic_facet_width = 50
+        dynamic_label_angle = -45
+        dynamic_font_size -= 4
+        dynamic_top_padding = 50
+        dynamic_legend_y_padding = -200
+
     bar_chart = (
         alt.Chart().mark_bar().encode(
             alt.X(f'{x_col}:N', axis=None, sort=x_sort_by_lst),
-            alt.Y(f'{y_col}:Q', axis=alt.Axis(grid=True), title=''),
+            alt.Y(f'{y_col}:Q', axis=alt.Axis(grid=True), title='', scale=alt.Scale(domain=[0, max_y_axis_limit])),
             alt.Color(f'{x_col}:N',
                       scale=alt.Scale(scheme="tableau20"),
                       sort=x_sort_by_lst,
+                      legend=alt.Legend(title=color_legend_title,
+                                        labelFontSize=base_font_size,
+                                        titleFontSize=base_font_size + 2,
+                                        orient='none',
+                                        legendX=0, legendY=dynamic_legend_y_padding,
+                                        direction='horizontal'))
+        )
+    )
+
+    text_labels = (
+        bar_chart.mark_text(
+            baseline='middle',
+            fontSize=dynamic_font_size,
+            dy=-10
+        ).encode(
+            text=alt.Text(f'{text_labels_column}:Q', format=",.2f"),
+            color=alt.value("black")
+        )
+    )
+
+    final_chart = (
+        alt.layer(
+            bar_chart, text_labels, data=df
+        ).properties(
+            width=dynamic_facet_width,
+            height=500
+        ).facet(
+            column=alt.Column(f'{facet_column_name}:N', title=facet_title,
+                              sort=facet_sort_by_lst, header=alt.Header(labelAngle=dynamic_label_angle,
+                                                                        labelAnchor='middle',
+                                                                        labelAlign='center',
+                                                                        labelPadding=-15))
+        ).configure(
+            padding={'top':  dynamic_top_padding},
+        ).configure_headerColumn(
+            labelFontSize=base_font_size,
+            titleFontSize=base_font_size + 2,
+        ).configure_axis(
+            labelFontSize=base_font_size, titleFontSize=base_font_size + 2
+        )
+    )
+
+    return final_chart
+
+
+def create_row_facet_bar_chart(df, x_col, y_col, facet_column_name, y_sort_by_lst=Undefined,
+                               facet_sort_by_lst=Undefined, color_legend_title=Undefined, facet_title=Undefined):
+    base_font_size = 16
+    bar_chart = (
+        alt.Chart().mark_bar().encode(
+            alt.Y(f'{y_col}:N', axis=None, sort=y_sort_by_lst),
+            alt.X(f'{x_col}:Q', axis=alt.Axis(grid=True), title=''),
+            alt.Color(f'{y_col}:N',
+                      scale=alt.Scale(scheme="tableau20"),
+                      sort=y_sort_by_lst,
                       legend=alt.Legend(title=color_legend_title,
                                         labelFontSize=base_font_size,
                                         titleFontSize=base_font_size + 2,
@@ -136,7 +213,7 @@ def create_col_facet_bar_chart(df, x_col, y_col, col_facet_by, x_sort_by_lst=Und
         bar_chart.mark_text(
             baseline='middle',
             fontSize=base_font_size,
-            dy=-10
+            dx=10
         ).encode(
             text=alt.Text('Value:Q', format=",.3f"),
             color=alt.value("black")
@@ -147,13 +224,13 @@ def create_col_facet_bar_chart(df, x_col, y_col, col_facet_by, x_sort_by_lst=Und
         alt.layer(
             bar_chart, text_labels, data=df
         ).properties(
-            width=100,
-            height=500
+            width=500,
+            height=100
         ).facet(
-            column=alt.Column(f'{col_facet_by}:N', title=facet_title, sort=col_facet_sort_by_lst)
+            row=alt.Row(f'{facet_column_name}:N', title=facet_title, sort=facet_sort_by_lst)
         ).configure(
             padding={'top':  33},
-        ).configure_headerColumn(
+        ).configure_headerRow(
             labelFontSize=base_font_size,
             titleFontSize=base_font_size + 2
         ).configure_axis(
