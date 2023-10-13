@@ -267,7 +267,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     num_ranks = int(sorted_matrix_by_rank.values.max())
 
     fig = plt.figure(figsize=(matrix_width, matrix_height))
-    rank_colors = sns.color_palette("coolwarm", n_colors=num_ranks).as_hex()
+    rank_colors = sns.color_palette("coolwarm_r", n_colors=num_ranks).as_hex()
     # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
     reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
     ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix.round(3), cmap=rank_colors,
@@ -281,11 +281,11 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     cbar = ax.collections[0].colorbar
     model_ranks = [idx + 1 for idx in range(num_ranks)]
     cbar.set_ticks([float(idx) * -1 for idx in model_ranks])
-    tick_labels = [str(idx) for idx in model_ranks]
-    tick_labels[0] = tick_labels[0] + ', best'
-    tick_labels[-1] = tick_labels[-1] + ', worst'
+    tick_labels = ['' for _ in model_ranks]
+    if len(tick_labels) > 1:
+        tick_labels[0] = 'Best'
+        tick_labels[-1] = 'Worst'
     cbar.set_ticklabels(tick_labels, fontsize=16 + font_increase)
-    cbar.set_label('Model Ranks', fontsize=18 + font_increase)
 
     return fig, ax
 

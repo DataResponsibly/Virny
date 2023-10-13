@@ -6,8 +6,7 @@ from virny.utils.common_helpers import str_to_float
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection,
-                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart,
-                                        create_row_facet_bar_chart)
+                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart)
 
 
 class MetricsInteractiveVisualizer:
@@ -423,7 +422,6 @@ class MetricsInteractiveVisualizer:
         # Find metric values for each model based on metric, subgroup, and model names.
         # Add the values to a results dict.
         results = {}
-        num_models = len(model_names)
         for metric in metrics_lst:
             # Add an overall metric
             subgroup_metric = metric
