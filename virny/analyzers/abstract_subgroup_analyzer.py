@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+from colorama import Fore
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 
@@ -70,7 +71,21 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
 
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
-                metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
+                if partition_indexes.shape[0] == 0:
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Error metrics are set to None.' + Fore.RESET)
+                    metrics_dct = {
+                        'TPR': None,
+                        'TNR': None,
+                        'PPV': None,
+                        'FNR': None,
+                        'FPR': None,
+                        'Accuracy': None,
+                        'F1': None,
+                        'Selection-Rate': None,
+                        'Positive-Rate': None,
+                    }
+                else:
+                    metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
                 metrics_dct['Sample_Size'] = len(partition_indexes)
                 results[group_partition_name] = metrics_dct
 
