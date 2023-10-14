@@ -82,7 +82,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                     for model_idx in models_predictions.keys()
                 }
                 if partition_indexes.shape[0] == 0:
-                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET)
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET, flush=True)
                     metrics_dct = {
                         'Jitter': None,
                         'Mean': None,
