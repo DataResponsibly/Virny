@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from colorama import Fore
 
 from virny.configs.constants import ComputationMode
 from virny.utils.stability_utils import count_prediction_stats, combine_bootstrap_predictions
@@ -80,8 +81,22 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                     model_idx: models_predictions[model_idx][partition_indexes].reset_index(drop=True)
                     for model_idx in models_predictions.keys()
                 }
-                metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
-                                                    group_models_predictions)
+                if partition_indexes.shape[0] == 0:
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET)
+                    metrics_dct = {
+                        'Jitter': None,
+                        'Mean': None,
+                        'Std': None,
+                        'IQR': None,
+                        'Aleatoric_Uncertainty': None,
+                        'Overall_Uncertainty': None,
+                        'Statistical_Bias': None,
+                        'Per_Sample_Accuracy': None,
+                        'Label_Stability': None,
+                    }
+                else:
+                    metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
+                                                        group_models_predictions)
                 results[group_partition_name] = metrics_dct
 
         return results
