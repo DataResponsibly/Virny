@@ -74,7 +74,7 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
                 if partition_indexes.shape[0] == 0:
-                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Error metrics are set to None.' + Fore.RESET)
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Error metrics are set to None.' + Fore.RESET, flush=True)
                     metrics_dct = {
                         'TPR': None,
                         'TNR': None,
