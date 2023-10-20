@@ -1,6 +1,7 @@
 """
 This module contains functions for computing subgroup variance and error metrics.
 """
+from virny.configs.constants import *
 from .accuracy_metrics import (
     mean_prediction,
     statistical_bias_from_predict_proba,
@@ -20,43 +21,6 @@ from .uncertainty_metrics import (
     aleatoric_uncertainty,
     overall_uncertainty,
 )
-
-
-# Accuracy metrics
-MEAN_PREDICTION = 'Mean_Prediction'
-STATISTICAL_BIAS = 'Statistical_Bias'
-
-# Stability metrics
-STD = 'Std'
-IQR = 'IQR'
-JITTER = 'Jitter'
-LABEL_STABILITY = 'Label_Stability'
-
-# Uncertainty metrics
-ALEATORIC_UNCERTAINTY = 'Aleatoric_Uncertainty'
-OVERALL_UNCERTAINTY = 'Overall_Uncertainty'
-
-# Error disparity metrics
-EQUALIZED_ODDS_TPR = 'Equalized_Odds_TPR'
-EQUALIZED_ODDS_TNR = 'Equalized_Odds_TNR'
-EQUALIZED_ODDS_FPR = 'Equalized_Odds_FPR'
-EQUALIZED_ODDS_FNR = 'Equalized_Odds_FNR'
-DISPARATE_IMPACT = 'Disparate_Impact'
-STATISTICAL_PARITY_DIFFERENCE = 'Statistical_Parity_Difference'
-ACCURACY_PARITY = 'Accuracy_Parity'
-
-# Stability disparity metrics
-LABEL_STABILITY_RATIO = 'Label_Stability_Ratio'
-IQR_PARITY = 'IQR_Parity'
-STD_PARITY = 'Std_Parity'
-STD_RATIO = 'Std_Ratio'
-JITTER_PARITY = 'Jitter_Parity'
-
-# Uncertainty disparity metrics
-OVERALL_UNCERTAINTY_PARITY = 'Overall_Uncertainty_Parity'
-OVERALL_UNCERTAINTY_RATIO = 'Overall_Uncertainty_Ratio'
-ALEATORIC_UNCERTAINTY_PARITY = 'Aleatoric_Uncertainty_Parity'
-ALEATORIC_UNCERTAINTY_RATIO = 'Aleatoric_Uncertainty_Ratio'
 
 METRIC_TO_FUNCTION = {
     # Accuracy metrics
