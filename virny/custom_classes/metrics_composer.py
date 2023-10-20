@@ -76,8 +76,12 @@ class MetricsComposer:
                 dis_group = sensitive_attr + '_dis'
                 priv_group = sensitive_attr + '_priv'
 
+                # Compute disparity metrics for each metric in cfm
                 groups_metrics_dct[sensitive_attr] = dict()
                 for metric_name in metric_names:
+                    # Skip a metric that does not have correspondent disparity metrics
+                    if metric_name not in self.disparity_metric_functions.keys():
+                        continue
                     disparity_metrics = self.disparity_metric_functions[metric_name]
                     for disparity_metric_name, disparity_metric_func in disparity_metrics:
                         groups_metrics_dct[sensitive_attr][disparity_metric_name] = (

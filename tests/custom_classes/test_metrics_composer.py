@@ -4,6 +4,7 @@ import pytest
 from tests import config_params, models_config, ROOT_DIR
 from virny.utils.custom_initializers import read_model_metric_dfs
 from virny.custom_classes.metrics_composer import MetricsComposer
+from virny.configs.constants import *
 
 
 @pytest.fixture(scope='module')
@@ -20,7 +21,7 @@ def test_compose_metrics_true1(models_metrics_dct, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (22, 5)
+    assert models_composed_metrics_df.shape == (24, 5)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race', 'sex&race'])
@@ -29,10 +30,11 @@ def test_compose_metrics_true1(models_metrics_dct, config_params):
     assert sorted(models_composed_metrics_df['Model_Name'].unique().tolist()) == sorted(['DecisionTreeClassifier', 'LogisticRegression'])
 
     # Check all metrics presence
-    assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Equalized_Odds_FNR',
-                                                                                     'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity',
-                                                                                     'Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity',
-                                                                                     'Std_Ratio', 'Jitter_Parity'])
+    assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
+        sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY,
+                LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
+    )
 
 
 def test_compose_metrics_true2(models_metrics_dct, config_params):
@@ -40,7 +42,7 @@ def test_compose_metrics_true2(models_metrics_dct, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (22, 4)
+    assert models_composed_metrics_df.shape == (24, 4)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race'])
@@ -49,7 +51,8 @@ def test_compose_metrics_true2(models_metrics_dct, config_params):
     assert sorted(models_composed_metrics_df['Model_Name'].unique().tolist()) == sorted(['DecisionTreeClassifier', 'LogisticRegression'])
 
     # Check all metrics presence
-    assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Equalized_Odds_FNR',
-                                                                                     'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity',
-                                                                                     'Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio',
-                                                                                     'Jitter_Parity'])
+    assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
+        sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY,
+                LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
+    )
