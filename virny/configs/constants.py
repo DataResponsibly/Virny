@@ -1,20 +1,4 @@
-import numpy as np
-
 from enum import Enum
-from dataclasses import dataclass
-
-
-@dataclass
-class CountPredictionStatsResponse:
-    jitter: float
-    means_lst: list
-    stds_lst: list
-    iqr_lst: list
-    mean_ensemble_entropy_lst: list
-    overall_entropy_lst: np.ndarray
-    statistical_bias_lst: np.ndarray
-    per_sample_accuracy_lst: list
-    label_stability_lst: list
 
 
 class ModelSetting(Enum):

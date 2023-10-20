@@ -94,7 +94,7 @@ def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
 
 
 def confusion_matrix_metrics(y_true, y_preds):
-    metrics = {}
+    metrics = dict()
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
 
     metrics['TPR'] = TP/(TP+FN)

@@ -1,9 +1,9 @@
-import numpy as np
 import pandas as pd
 from colorama import Fore
 
+from virny.metrics import METRIC_TO_FUNCTION
 from virny.configs.constants import ComputationMode
-from virny.utils.stability_utils import count_prediction_stats, combine_bootstrap_predictions
+from virny.utils.stability_utils import count_prediction_metrics, combine_bootstrap_predictions
 from virny.analyzers.abstract_subgroup_analyzer import AbstractSubgroupAnalyzer
 
 
@@ -83,17 +83,9 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                 }
                 if partition_indexes.shape[0] == 0:
                     print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET, flush=True)
-                    metrics_dct = {
-                        'Jitter': None,
-                        'Mean': None,
-                        'Std': None,
-                        'IQR': None,
-                        'Aleatoric_Uncertainty': None,
-                        'Overall_Uncertainty': None,
-                        'Statistical_Bias': None,
-                        'Per_Sample_Accuracy': None,
-                        'Label_Stability': None,
-                    }
+                    metrics_dct = dict()
+                    for metric in METRIC_TO_FUNCTION.keys():
+                        metrics_dct[metric] = None
                 else:
                     metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
                                                         group_models_predictions)
@@ -102,18 +94,8 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         return results
 
     def _compute_metrics(self, y_test: pd.DataFrame, group_models_predictions):
-        _, _, prediction_stats = count_prediction_stats(y_test, group_models_predictions)
-        return {
-            'Jitter': prediction_stats.jitter,
-            'Mean': np.mean(prediction_stats.means_lst),
-            'Std': np.mean(prediction_stats.stds_lst),
-            'IQR': np.mean(prediction_stats.iqr_lst),
-            'Aleatoric_Uncertainty': np.mean(prediction_stats.mean_ensemble_entropy_lst),
-            'Overall_Uncertainty': np.mean(prediction_stats.overall_entropy_lst),
-            'Statistical_Bias': np.mean(prediction_stats.statistical_bias_lst),
-            'Per_Sample_Accuracy': np.mean(prediction_stats.per_sample_accuracy_lst),
-            'Label_Stability': np.mean(prediction_stats.label_stability_lst),
-        }
+        _, prediction_metrics = count_prediction_metrics(y_test, group_models_predictions)
+        return prediction_metrics
 
     def compute_subgroup_metrics(self, models_predictions: dict, save_results: bool,
                                  result_filename: str = None, save_dir_path: str = None):

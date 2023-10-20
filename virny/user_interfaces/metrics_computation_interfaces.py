@@ -1,5 +1,4 @@
 import os
-import random
 import traceback
 import pandas as pd
 from river import base
@@ -116,8 +115,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
-                                                                              save_dir_path=None,
-                                                                              make_plots=False)
+                                                                              save_dir_path=None)
 
     # Compute error metrics for subgroups
     error_analyzer = SubgroupErrorAnalyzer(X_test=dataset.X_test,
@@ -552,7 +550,6 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                                   result_filename=None,
                                                                                   save_dir_path=None,
-                                                                                  make_plots=False,
                                                                                   with_fit=True if set_idx == 0 else False)
 
         # Compute accuracy metrics for subgroups
