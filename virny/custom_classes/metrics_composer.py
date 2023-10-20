@@ -38,8 +38,8 @@ class MetricsComposer:
             STD: [(STD_PARITY, self._difference_operation),
                   (STD_RATIO, self._ratio_operation)],
             # Uncertainty disparity metrics
-            OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_PARITY, self._difference_operation,
-                                   OVERALL_UNCERTAINTY_RATIO, self._ratio_operation)],
+            OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_PARITY, self._difference_operation),
+                                  (OVERALL_UNCERTAINTY_RATIO, self._ratio_operation)],
             ALEATORIC_UNCERTAINTY: [(ALEATORIC_UNCERTAINTY_PARITY, self._difference_operation),
                                     (ALEATORIC_UNCERTAINTY_RATIO, self._ratio_operation)]
         }
@@ -82,8 +82,8 @@ class MetricsComposer:
                     # Skip a metric that does not have correspondent disparity metrics
                     if metric_name not in self.disparity_metric_functions.keys():
                         continue
-                    disparity_metrics = self.disparity_metric_functions[metric_name]
-                    for disparity_metric_name, disparity_metric_func in disparity_metrics:
+
+                    for disparity_metric_name, disparity_metric_func in self.disparity_metric_functions[metric_name]:
                         groups_metrics_dct[sensitive_attr][disparity_metric_name] = (
                             disparity_metric_func(cfm, metric_name, dis_group, priv_group))
 
