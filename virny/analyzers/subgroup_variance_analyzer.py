@@ -118,7 +118,8 @@ class SubgroupVarianceAnalyzer:
         # Count and display fairness metrics
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
         self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
-            self.__overall_variance_analyzer.models_predictions, save_results, result_filename, save_dir_path
+            y_preds, self.__overall_variance_analyzer.models_predictions,
+            save_results, result_filename, save_dir_path
         )
 
         return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct)

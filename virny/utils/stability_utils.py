@@ -66,7 +66,10 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
     for metric in METRICS_FOR_LABELS:
         metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_labels)
 
-    y_preds = np.array([int(x<0.5) for x in results.mean().values])
+    if with_predict_proba:
+        y_preds = np.array([int(x<0.5) for x in results.mean().values])
+    else:
+        y_preds = np.array([int(x>0.5) for x in results.mean().values])
 
     return y_preds, metrics_dct
 

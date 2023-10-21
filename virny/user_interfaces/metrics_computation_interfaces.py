@@ -123,7 +123,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                            sensitive_attributes_dct=sensitive_attributes_dct,
                                            test_protected_groups=test_protected_groups,
                                            computation_mode=computation_mode)
-    dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
+    dtc_res = error_analyzer.compute_subgroup_metrics(y_preds=y_preds,
+                                                      models_predictions=dict(),
                                                       save_results=False,
                                                       result_filename=None,
                                                       save_dir_path=None)
