@@ -5,6 +5,7 @@ import pandas as pd
 from munch import DefaultMunch
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
 
 from virny.datasets.base import BaseDataLoader
 
@@ -64,7 +65,10 @@ def models_config():
         'LogisticRegression': LogisticRegression(C=1,
                                                  max_iter=50,
                                                  penalty='l2',
-                                                 solver='newton-cg')
+                                                 solver='newton-cg'),
+        'XGBClassifier': XGBClassifier(learning_rate=0.1,
+                                       n_estimators=200,
+                                       max_depth=7),
     }
 
 
