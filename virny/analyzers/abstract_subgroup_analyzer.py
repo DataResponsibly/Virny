@@ -104,7 +104,7 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
         Parameters
         ----------
         y_preds
-            Averaged predictions of the bootstrap
+            Averaged predictions of the bootstrap with y_true indexes
         models_predictions
             A dictionary of models predictions. Is not used in this function,
             but needed for function argument consistency.
@@ -116,19 +116,17 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
             [Optional] Location where to save the results file
 
         """
-        y_pred_all = pd.Series(y_preds, index=self.y_test.index)
-
         # Compute overall metrics
         results = dict()
-        metrics_dct = self._compute_metrics(self.y_test, y_pred_all)
+        metrics_dct = self._compute_metrics(self.y_test, y_preds)
         metrics_dct['Sample_Size'] = self.y_test.shape[0]
         results['overall'] = metrics_dct
 
         # Compute metrics for subgroups
         if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
-            results = self._partition_and_compute_metrics_for_error_analysis(y_pred_all, models_predictions, results)
+            results = self._partition_and_compute_metrics_for_error_analysis(y_preds, models_predictions, results)
         else:
-            results = self._partition_and_compute_metrics(y_pred_all, results)
+            results = self._partition_and_compute_metrics(y_preds, results)
 
         self.subgroup_metrics_dict = results
         if save_results:
