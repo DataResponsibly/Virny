@@ -133,6 +133,7 @@ class SubgroupVarianceAnalyzer:
 
         """
         y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(save_results=False, with_fit=with_fit)
+        y_preds = pd.Series(y_preds, index=y_test_true.index)
         self.overall_variance_metrics_dct = self.__overall_variance_analyzer.prediction_metrics
 
         # Count and display fairness metrics
