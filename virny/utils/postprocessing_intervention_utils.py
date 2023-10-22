@@ -1,10 +1,25 @@
 import copy
 
 import numpy as np
+import pandas as pd
 from aif360.datasets import BinaryLabelDataset
 
 
-def contruct_binary_label_dataset(X_sample, y_sample, target_column, sensitive_attribute):
+def construct_binary_label_dataset_from_samples(X_sample, y_sample, column_names, target_column, sensitive_attribute):
+    df = pd.DataFrame(X_sample, columns=column_names)
+    df[target_column] = y_sample
+
+    binary_label_dataset = BinaryLabelDataset(
+                                            df=df,
+                                            label_names=[target_column],
+                                            protected_attribute_names=[sensitive_attribute],
+                                            favorable_label=1,
+                                            unfavorable_label=0)
+    
+    return binary_label_dataset
+
+
+def contruct_binary_label_dataset_from_df(X_sample, y_sample, target_column, sensitive_attribute):
     df = X_sample
     df[target_column] = y_sample
 

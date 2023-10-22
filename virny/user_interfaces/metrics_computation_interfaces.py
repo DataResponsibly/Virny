@@ -55,6 +55,7 @@ def compute_model_metrics_with_config(base_model, model_name: str, dataset: Base
 
 def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                           sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
+                          postprocessor=None, postprocessing_sensitive_attribute: str = None,
                           model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
                           save_results_dir_path: str = None, verbose: int = 0):
     """
@@ -80,6 +81,11 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         Dataset name to name a result file with metrics
     base_model_name
         Model name to name a result file with metrics
+    postprocessor
+        [Optional] Postprocessor object with fit and predict methods
+        to apply postprocessing intervention for the base model after training.
+    postprocessing_sensitive_attribute
+        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
     save_results
         [Optional] If to save result metrics in a file
     model_setting
@@ -112,6 +118,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=test_protected_groups,
                                                           computation_mode=computation_mode,
+                                                          postprocessor=postprocessor,
+                                                          postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
@@ -150,6 +158,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
+                            postprocessor=None, postprocessing_sensitive_attribute: str = None,
                             save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
@@ -176,6 +185,11 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] Model type: 'batch' or incremental. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    postprocessor
+        [Optional] Postprocessor object with fit and predict methods 
+        to apply postprocessing intervention for the base model after training.
+    postprocessing_sensitive_attribute
+        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
     save_results
         [Optional] If to save result metrics in a file
     save_results_dir_path
@@ -204,6 +218,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      computation_mode=computation_mode,
                                                      dataset_name=dataset_name,
                                                      base_model_name=model_name,
+                                                     postprocessor=postprocessor,
+                                                     postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                      save_results=save_results,
                                                      save_results_dir_path=save_results_dir_path,
                                                      verbose=verbose)
