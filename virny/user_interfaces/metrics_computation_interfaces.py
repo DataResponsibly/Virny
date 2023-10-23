@@ -287,7 +287,9 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
 
 
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
-                                                 custom_tbl_fields_dct: dict, db_writer_func, verbose: int = 0) -> dict:
+                                                 custom_tbl_fields_dct: dict, db_writer_func, 
+                                                 postprocessor=None, postprocessing_sensitive_attribute: str = None,
+                                                 verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
@@ -306,6 +308,11 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
         Dictionary where keys are column names and values to add to inserted metrics during saving results to a database
     db_writer_func
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
+    postprocessor
+        [Optional] Postprocessor object with fit and predict methods
+        to apply postprocessing intervention for the base model after training.
+    postprocessing_sensitive_attribute
+        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -321,6 +328,8 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
+                                                 postprocessor=postprocessor,
+                                                 postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
                                                  verbose=verbose)
 
