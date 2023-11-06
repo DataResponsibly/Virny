@@ -82,10 +82,9 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     base_model_name
         Model name to name a result file with metrics
     postprocessor
-        [Optional] Postprocessor object with fit and predict methods
-        to apply postprocessing intervention for the base model after training.
+        [Optional] Postprocessor object to apply to model predictions before metrics computation
     postprocessing_sensitive_attribute
-        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
+        [Optional] Sensitive attribute name to apply postprocessor only to this attribute predictions
     save_results
         [Optional] If to save result metrics in a file
     model_setting
@@ -106,6 +105,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         print('\nProtected groups splits:')
         for g in test_protected_groups.keys():
             print(g, test_protected_groups[g].shape)
+
+    print("postprocessing_sensitive_attribute: ", postprocessing_sensitive_attribute)
 
     # Compute stability metrics for subgroups
     subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
@@ -186,10 +187,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     postprocessor
-        [Optional] Postprocessor object with fit and predict methods 
-        to apply postprocessing intervention for the base model after training.
+        [Optional] Postprocessor object to apply to model predictions before metrics computation
     postprocessing_sensitive_attribute
-        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
+        [Optional] Sensitive attribute name to apply postprocessor only to this attribute predictions
     save_results
         [Optional] If to save result metrics in a file
     save_results_dir_path
@@ -223,6 +223,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      save_results=save_results,
                                                      save_results_dir_path=save_results_dir_path,
                                                      verbose=verbose)
+            print("metrics_computation_interfaces.py: model_metrics_df: ", model_metrics_df)
             models_metrics_dct[model_name] = model_metrics_df
             if verbose >= 2:
                 print(f'\n[{model_name}] Metrics matrix:')
@@ -287,7 +288,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
 
 
 def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
-                                                 custom_tbl_fields_dct: dict, db_writer_func, 
+                                                 custom_tbl_fields_dct: dict, db_writer_func,
                                                  postprocessor=None, postprocessing_sensitive_attribute: str = None,
                                                  verbose: int = 0) -> dict:
     """
@@ -309,10 +310,9 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
     db_writer_func
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
     postprocessor
-        [Optional] Postprocessor object with fit and predict methods
-        to apply postprocessing intervention for the base model after training.
+        [Optional] Postprocessor object to apply to model predictions before metrics computation
     postprocessing_sensitive_attribute
-        [Optional] Sensitive attribute name to apply postprocessing intervention for the base model after training.
+        [Optional] Sensitive attribute name to apply postprocessor only to this attribute predictions
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -332,6 +332,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
                                                  verbose=verbose)
+    #print(models_metrics_dct)
 
     # Concatenate current run metrics with previous results and
     # create melted_model_metrics_df to save it in a database
@@ -360,6 +361,7 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                         value_name="Metric_Value")
         run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
 
+    #print(run_models_metrics_df)
     # Save results for this run in a database
     db_writer_func(run_models_metrics_df)
 

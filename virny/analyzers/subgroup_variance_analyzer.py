@@ -59,6 +59,7 @@ class SubgroupVarianceAnalyzer:
                                                                                        dataset_name=dataset_name,
                                                                                        target_column=dataset.target,
                                                                                        n_estimators=n_estimators,
+                                                                                       with_predict_proba=False,
                                                                                        verbose=verbose)
             else:
                 overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,

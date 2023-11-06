@@ -43,7 +43,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 dataset_name: str, n_estimators: int, verbose: int = 0):
+                 dataset_name: str, n_estimators: int, with_predict_proba: bool = True, verbose: int = 0):
         self.base_model = base_model
         self.base_model_name = base_model_name
         self.bootstrap_fraction = bootstrap_fraction
@@ -52,6 +52,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
         self.models_predictions = None
         self.prediction_metrics = None
+        self.with_predict_proba = with_predict_proba
 
         self._verbose = verbose
         self.__logger = get_logger(verbose)
@@ -90,7 +91,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.models_predictions = self.UQ_by_boostrap(boostrap_size, with_replacement=True, with_fit=with_fit)
 
         # Count metrics based on prediction proba results
-        y_preds, self.prediction_metrics = count_prediction_metrics(self.y_test.values, self.models_predictions)
+        y_preds, self.prediction_metrics = count_prediction_metrics(self.y_test.values, self.models_predictions, self.with_predict_proba)
         self.__logger.info(f'Successfully computed predict proba metrics')
 
         if save_results:
