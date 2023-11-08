@@ -1,6 +1,6 @@
 wheel~=0.38.4
 twine~=4.0.2
-numpy~=1.23
+numpy~=1.23.5
 matplotlib~=3.6.2
 pandas~=1.5.2
 altair~=4.2.0
