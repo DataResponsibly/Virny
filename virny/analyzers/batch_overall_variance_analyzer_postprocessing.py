@@ -1,3 +1,5 @@
+import gc
+
 import numpy as np
 import pandas as pd
 
@@ -65,6 +67,10 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             if with_fit:
                 X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
                 classifier = self._fit_model(classifier, X_sample, y_sample)
+                
+            # Force garbage collection to avoid out of memory error
+            if with_fit and ((idx + 1) % 10 == 0 or (idx + 1) == self.n_estimators):
+                gc.collect()
 
             train_binary_label_dataset_sample = construct_binary_label_dataset_from_samples(X_sample, y_sample, self.X_train.columns, self.target_column, self.sensitive_attribute)
             train_binary_label_dataset_sample_pred = predict_on_binary_label_dataset(classifier, train_binary_label_dataset_sample)
