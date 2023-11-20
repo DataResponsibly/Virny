@@ -55,6 +55,7 @@ class MetricsComposer:
                     'Accuracy_Parity': cfm[dis_group]['Accuracy'] - cfm[priv_group]['Accuracy'],
                     # Stability disparity metrics
                     'Label_Stability_Ratio': cfm[dis_group]['Label_Stability'] / cfm[priv_group]['Label_Stability'],
+                    'Label_Stability_Difference': cfm[dis_group]['Label_Stability'] - cfm[priv_group]['Label_Stability'],
                     'IQR_Parity': cfm[dis_group]['IQR'] - cfm[priv_group]['IQR'],
                     'Std_Parity': cfm[dis_group]['Std'] - cfm[priv_group]['Std'],
                     'Std_Ratio': cfm[dis_group]['Std'] / cfm[priv_group]['Std'],
