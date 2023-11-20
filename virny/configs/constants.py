@@ -54,6 +54,7 @@ ACCURACY_PARITY = 'Accuracy_Parity'
 
 # Stability disparity metrics
 LABEL_STABILITY_RATIO = 'Label_Stability_Ratio'
+LABEL_STABILITY_DIFFERENCE = 'Label_Stability_Difference'
 IQR_PARITY = 'IQR_Parity'
 STD_PARITY = 'Std_Parity'
 STD_RATIO = 'Std_Ratio'
