@@ -1,10 +1,11 @@
 import numpy as np
+import pandas as pd
 
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from tests import config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
+from tests import (config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class,
+                   COMPAS_y_test, COMPAS_RF_bootstrap_predictions, COMPAS_RF_expected_preds)
 from virny.utils.stability_utils import count_prediction_metrics, generate_bootstrap
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
 from virny.configs.constants import *
@@ -19,6 +20,7 @@ def test_count_prediction_metrics_true1():
 
     assert np.array_equal(y_preds, np.array([0, 0, 1, 1, 0, 1, 1, 0, 1, 1]))
 
+    # Check stability and uncertainty metrics
     alpha = 0.000_001
     assert abs(prediction_metrics[MEAN_PREDICTION] - 0.47000000000000003) < alpha
     assert abs(prediction_metrics[STATISTICAL_BIAS] - 0.42000000000000004) < alpha
@@ -30,7 +32,7 @@ def test_count_prediction_metrics_true1():
     assert abs(prediction_metrics[OVERALL_UNCERTAINTY] - 0.9560071897163649) < alpha
 
 
-def test_count_prediction_metrics_true2():
+def test_count_prediction_metrics_false1():
     y_test = np.array([0, 0, 1, 1, 0, 1, 0, 1, 1, 1])
     uq_results = np.array([[0.6, 0.7, 0.3, 0.4, 0.5, 0.3, 0.7, 0.6, 0.4, 0.4]])
 
@@ -41,6 +43,21 @@ def test_count_prediction_metrics_true2():
         actual = False
 
     assert actual == False
+
+
+def test_count_prediction_metrics_true2(COMPAS_y_test, COMPAS_RF_bootstrap_predictions, COMPAS_RF_expected_preds):
+    y_preds, prediction_metrics = count_prediction_metrics(COMPAS_y_test, COMPAS_RF_bootstrap_predictions)
+
+    alpha = 0.000_001
+    assert np.array_equal(y_preds, COMPAS_RF_expected_preds['1'].to_numpy())
+    assert abs(prediction_metrics[MEAN_PREDICTION] - 0.5233320457326472) < alpha
+    assert abs(prediction_metrics[STATISTICAL_BIAS] - 0.4044558084608265) < alpha
+    assert abs(prediction_metrics[JITTER] - 0.11221320346320351) < alpha
+    assert abs(prediction_metrics[LABEL_STABILITY] - 0.8408712121212122) < alpha
+    assert abs(prediction_metrics[STD] - 0.06812843675435999) < alpha
+    assert abs(prediction_metrics[IQR] - 0.08940024816894414) < alpha
+    assert abs(prediction_metrics[ALEATORIC_UNCERTAINTY] - 0.8369703514251653) < alpha
+    assert abs(prediction_metrics[OVERALL_UNCERTAINTY] - 0.8607514359506866) < alpha
 
 
 # ========================== Test generate_bootstrap ==========================
