@@ -1,10 +1,12 @@
 import os
 import pandas as pd
 
+from colorama import Fore
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 
-from virny.configs.constants import ComputationMode
+from virny.configs.constants import (ComputationMode, TPR, TNR, PPV, FPR, FNR, ACCURACY, F1,
+                                     SELECTION_RATE, POSITIVE_RATE)
 
 
 class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
@@ -47,7 +49,7 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
 
         return results
 
-    def _partition_and_compute_metrics_for_error_analysis(self, y_preds, results: dict):
+    def _partition_and_compute_metrics_for_error_analysis(self, y_preds, models_predictions: dict, results: dict):
         """
         Partition predictions on correct and incorrect and compute subgroup metrics for each of the partitions.
         Used for the 'error_analysis' mode.
@@ -72,13 +74,27 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
 
             # Compute metrics for each group partition
             for group_partition_name, partition_indexes in partition_indexes_dct.items():
-                metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
+                if partition_indexes.shape[0] == 0:
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Error metrics are set to None.' + Fore.RESET, flush=True)
+                    metrics_dct = {
+                        TPR: None,
+                        TNR: None,
+                        PPV: None,
+                        FNR: None,
+                        FPR: None,
+                        ACCURACY: None,
+                        F1: None,
+                        SELECTION_RATE: None,
+                        POSITIVE_RATE: None,
+                    }
+                else:
+                    metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])
                 metrics_dct['Sample_Size'] = len(partition_indexes)
                 results[group_partition_name] = metrics_dct
 
         return results
 
-    def compute_subgroup_metrics(self, y_preds, save_results: bool,
+    def compute_subgroup_metrics(self, y_preds, models_predictions: dict, save_results: bool,
                                  result_filename: str = None, save_dir_path: str = None):
         """
         Compute metrics for each subgroup in self.test_protected_groups using _compute_metrics method.
@@ -88,7 +104,10 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
         Parameters
         ----------
         y_preds
-            Models predictions
+            Averaged predictions of the bootstrap with y_true indexes
+        models_predictions
+            A dictionary of models predictions. Is not used in this function,
+            but needed for function argument consistency.
         save_results
             If to save results in a file
         result_filename
@@ -97,19 +116,17 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
             [Optional] Location where to save the results file
 
         """
-        y_pred_all = pd.Series(y_preds, index=self.y_test.index)
-
         # Compute overall metrics
         results = dict()
-        metrics_dct = self._compute_metrics(self.y_test, y_pred_all)
+        metrics_dct = self._compute_metrics(self.y_test, y_preds)
         metrics_dct['Sample_Size'] = self.y_test.shape[0]
         results['overall'] = metrics_dct
 
         # Compute metrics for subgroups
         if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
-            results = self._partition_and_compute_metrics_for_error_analysis(y_pred_all, results)
+            results = self._partition_and_compute_metrics_for_error_analysis(y_preds, models_predictions, results)
         else:
-            results = self._partition_and_compute_metrics(y_pred_all, results)
+            results = self._partition_and_compute_metrics(y_preds, results)
 
         self.subgroup_metrics_dict = results
         if save_results:

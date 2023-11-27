@@ -9,30 +9,6 @@ from altair.utils.schemapi import Undefined
 from virny.utils.common_helpers import check_substring_in_list
 
 
-def set_size(w,h, ax=None):
-    """ w, h: width, height in inches """
-    if not ax: ax=plt.gca()
-    l = ax.figure.subplotpars.left
-    r = ax.figure.subplotpars.right
-    t = ax.figure.subplotpars.top
-    b = ax.figure.subplotpars.bottom
-    figw = float(w)/(r-l)
-    figh = float(h)/(t-b)
-    ax.figure.set_size_inches(figw, figh)
-
-
-def plot_generic(x, y, xlabel, ylabel, x_lim, y_lim, plot_title):
-    sns.set_style("darkgrid")
-    plt.figure(figsize=(20,10))
-    plt.scatter(x, y)
-    plt.xlim(0, x_lim)
-    plt.ylim(0, y_lim)
-    plt.xlabel(xlabel, fontsize=14)
-    plt.ylabel(ylabel, fontsize=14)
-    plt.title(plot_title, fontsize=20)
-    plt.show()
-
-
 def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: str = 'dense'):
     """
     Rank a pandas series with defined tolerance.

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from sklearn.metrics import confusion_matrix
 from river import base
 
-from virny.configs.constants import INTERSECTION_SIGN, ModelSetting, ComputationMode
+from virny.configs.constants import *
 
 
 def validate_config(config_obj):
@@ -118,17 +118,17 @@ def check_substring_in_list(val_to_check: str, allowed_lst: list):
 
 
 def confusion_matrix_metrics(y_true, y_preds):
-    metrics = {}
+    metrics = dict()
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
 
-    metrics['TPR'] = TP/(TP+FN)
-    metrics['TNR'] = TN/(TN+FP)
-    metrics['PPV'] = TP/(TP+FP)
-    metrics['FNR'] = FN/(FN+TP)
-    metrics['FPR'] = FP/(FP+TN)
-    metrics['Accuracy'] = (TP+TN)/(TP+TN+FP+FN)
-    metrics['F1'] = (2*TP)/(2*TP+FP+FN)
-    metrics['Selection-Rate'] = (TP+FP)/(TP+FP+TN+FN)
-    metrics['Positive-Rate'] = (TP+FP)/(TP+FN)
+    metrics[TPR] = TP/(TP+FN)
+    metrics[TNR] = TN/(TN+FP)
+    metrics[PPV] = TP/(TP+FP)
+    metrics[FNR] = FN/(FN+TP)
+    metrics[FPR] = FP/(FP+TN)
+    metrics[ACCURACY] = (TP+TN)/(TP+TN+FP+FN)
+    metrics[F1] = (2*TP)/(2*TP+FP+FN)
+    metrics[SELECTION_RATE] = (TP+FP)/(TP+FP+TN+FN)
+    metrics[POSITIVE_RATE] = (TP+FP)/(TP+FN)
 
     return metrics

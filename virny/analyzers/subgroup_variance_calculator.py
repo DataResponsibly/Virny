@@ -1,8 +1,9 @@
-import numpy as np
 import pandas as pd
+from colorama import Fore
 
+from virny.metrics import METRIC_TO_FUNCTION, METRICS_FOR_LABELS
 from virny.configs.constants import ComputationMode
-from virny.utils.stability_utils import count_prediction_stats, combine_bootstrap_predictions
+from virny.utils.stability_utils import count_prediction_metrics, combine_bootstrap_predictions
 from virny.analyzers.abstract_subgroup_analyzer import AbstractSubgroupAnalyzer
 
 
@@ -27,8 +28,9 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
 
     """
     def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict,
-                 test_protected_groups=None, computation_mode: str = None):
+                 test_protected_groups=None, computation_mode: str = None, with_predict_proba: bool = True):
         super().__init__(X_test, y_test, sensitive_attributes_dct, test_protected_groups, computation_mode)
+        self.with_predict_proba = with_predict_proba
         self.overall_variance_metrics = None
         self.subgroup_variance_metrics_dict = None
 
@@ -47,7 +49,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
 
         return results
 
-    def _partition_and_compute_metrics_for_error_analysis(self, models_predictions, results: dict):
+    def _partition_and_compute_metrics_for_error_analysis(self, y_preds, models_predictions: dict, results: dict):
         """
         Partition predictions on correct and incorrect and compute subgroup metrics for each of the partitions.
         Used for the 'error_analysis' mode.
@@ -55,8 +57,6 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         :param models_predictions: a list of predictions
         :param results: a dict to add subgroup metrics for each partition
         """
-        # Create a 1D pandas series of predictions for the test set based on bootstrap predictions
-        y_preds = combine_bootstrap_predictions(models_predictions, self.y_test.index)
 
         # Partition and compute subgroup metrics
         for group_name in self.test_protected_groups.keys():
@@ -80,27 +80,25 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                     model_idx: models_predictions[model_idx][partition_indexes].reset_index(drop=True)
                     for model_idx in models_predictions.keys()
                 }
-                metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
-                                                    group_models_predictions)
+                if partition_indexes.shape[0] == 0:
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET, flush=True)
+                    metrics_dct = dict()
+                    metric_names = list(METRIC_TO_FUNCTION.keys()) if self.with_predict_proba else METRICS_FOR_LABELS
+                    for metric in metric_names:
+                        metrics_dct[metric] = None
+                else:
+                    metrics_dct = self._compute_metrics(self.y_test[partition_indexes].reset_index(drop=True),
+                                                        group_models_predictions)
                 results[group_partition_name] = metrics_dct
 
         return results
 
     def _compute_metrics(self, y_test: pd.DataFrame, group_models_predictions):
-        _, _, prediction_stats = count_prediction_stats(y_test, group_models_predictions)
-        return {
-            'Jitter': prediction_stats.jitter,
-            'Mean': np.mean(prediction_stats.means_lst),
-            'Std': np.mean(prediction_stats.stds_lst),
-            'IQR': np.mean(prediction_stats.iqr_lst),
-            'Aleatoric_Uncertainty': np.mean(prediction_stats.mean_ensemble_entropy_lst),
-            'Overall_Uncertainty': np.mean(prediction_stats.overall_entropy_lst),
-            'Statistical_Bias': np.mean(prediction_stats.statistical_bias_lst),
-            'Per_Sample_Accuracy': np.mean(prediction_stats.per_sample_accuracy_lst),
-            'Label_Stability': np.mean(prediction_stats.label_stability_lst),
-        }
+        _, prediction_metrics = count_prediction_metrics(y_test, group_models_predictions,
+                                                         with_predict_proba=self.with_predict_proba)
+        return prediction_metrics
 
-    def compute_subgroup_metrics(self, models_predictions: dict, save_results: bool,
+    def compute_subgroup_metrics(self, y_preds, models_predictions: dict, save_results: bool,
                                  result_filename: str = None, save_dir_path: str = None):
         """
         Compute variance metrics for subgroups.
@@ -130,7 +128,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
 
         # Compute stability metrics for subgroups
         if self.computation_mode == ComputationMode.ERROR_ANALYSIS.value:
-            results = self._partition_and_compute_metrics_for_error_analysis(models_predictions, results)
+            results = self._partition_and_compute_metrics_for_error_analysis(y_preds, models_predictions, results)
         else:
             results = self._partition_and_compute_metrics(models_predictions, results)
 

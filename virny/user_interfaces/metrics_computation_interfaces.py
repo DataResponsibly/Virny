@@ -1,5 +1,4 @@
 import os
-import random
 import traceback
 import pandas as pd
 from river import base
@@ -116,8 +115,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,
-                                                                              save_dir_path=None,
-                                                                              make_plots=False)
+                                                                              save_dir_path=None)
 
     # Compute error metrics for subgroups
     error_analyzer = SubgroupErrorAnalyzer(X_test=dataset.X_test,
@@ -125,7 +123,8 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
                                            sensitive_attributes_dct=sensitive_attributes_dct,
                                            test_protected_groups=test_protected_groups,
                                            computation_mode=computation_mode)
-    dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
+    dtc_res = error_analyzer.compute_subgroup_metrics(y_preds=y_preds,
+                                                      models_predictions=dict(),
                                                       save_results=False,
                                                       result_filename=None,
                                                       save_dir_path=None)
@@ -502,7 +501,8 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
     dataset
         BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
     extra_test_sets_lst
-        List of extra test sets like [(X_test1, y_test1), (X_test2, y_test2), ...] to compute metrics
+        List of extra test sets like [(X_test1, y_test1, init_features_df1), (X_test2, y_test2, init_features_df2), ...]
+         to compute metrics.
     bootstrap_fraction
         Fraction of a train set in range [0.0 - 1.0] to fit models in bootstrap
     sensitive_attributes_dct
@@ -534,10 +534,10 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                           computation_mode=computation_mode,
                                                           verbose=verbose)
 
-    test_sets_lst = [(dataset.X_test, dataset.y_test)] + extra_test_sets_lst
+    test_sets_lst = [(dataset.X_test, dataset.y_test, dataset.init_features_df)] + extra_test_sets_lst
     all_test_sets_metrics_lst = []
-    for set_idx, (new_X_test, new_y_test) in enumerate(test_sets_lst):
-        new_test_protected_groups = create_test_protected_groups(new_X_test, dataset.init_features_df, sensitive_attributes_dct)
+    for set_idx, (new_X_test, new_y_test, cur_init_features_df) in enumerate(test_sets_lst):
+        new_test_protected_groups = create_test_protected_groups(new_X_test, cur_init_features_df, sensitive_attributes_dct)
         if verbose >= 2:
             print(f'\nProtected groups splits for test set index #{set_idx}:')
             for g in new_test_protected_groups.keys():
@@ -551,7 +551,6 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
         y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                                   result_filename=None,
                                                                                   save_dir_path=None,
-                                                                                  make_plots=False,
                                                                                   with_fit=True if set_idx == 0 else False)
 
         # Compute accuracy metrics for subgroups

@@ -92,8 +92,8 @@ class SubgroupVarianceAnalyzer:
     def set_test_protected_groups(self, new_test_protected_groups):
         self.__subgroup_variance_calculator.test_protected_groups = new_test_protected_groups
 
-    def compute_metrics(self, save_results: bool, result_filename: str = None, save_dir_path: str = None,
-                        make_plots: bool = True, with_fit: bool = True):
+    def compute_metrics(self, save_results: bool, result_filename: str = None,
+                        save_dir_path: str = None, with_fit: bool = True):
         """
         Measure variance metrics for subgroups for the base model. Display variance plots for analysis if needed.
          Save results to a .csv file if needed.
@@ -108,19 +108,19 @@ class SubgroupVarianceAnalyzer:
             [Optional] Filename for results to save
         save_dir_path
             [Optional] Location where to save the results file
-        make_plots
-            If to display plots for analysis
         with_fit
             If to fit estimators in bootstrap
 
         """
-        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(make_plots, save_results=False, with_fit=with_fit)
-        self.overall_variance_metrics_dct = self.__overall_variance_analyzer.get_metrics_dict()
+        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(save_results=False, with_fit=with_fit)
+        y_preds = pd.Series(y_preds, index=y_test_true.index)
+        self.overall_variance_metrics_dct = self.__overall_variance_analyzer.prediction_metrics
 
         # Count and display fairness metrics
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
         self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
-            self.__overall_variance_analyzer.models_predictions, save_results, result_filename, save_dir_path
+            y_preds, self.__overall_variance_analyzer.models_predictions,
+            save_results, result_filename, save_dir_path
         )
 
         return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct)
