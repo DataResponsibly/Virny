@@ -32,7 +32,8 @@ class MetricsComposer:
             POSITIVE_RATE: [(STATISTICAL_PARITY_DIFFERENCE, self._difference_operation),
                             (DISPARATE_IMPACT, self._ratio_operation)],
             # Stability disparity metrics
-            LABEL_STABILITY: [(LABEL_STABILITY_RATIO, self._ratio_operation)],
+            LABEL_STABILITY: [(LABEL_STABILITY_RATIO, self._ratio_operation),
+                              (LABEL_STABILITY_DIFFERENCE, self._difference_operation)],
             JITTER: [(JITTER_PARITY, self._difference_operation)],
             IQR: [(IQR_PARITY, self._difference_operation)],
             STD: [(STD_PARITY, self._difference_operation),

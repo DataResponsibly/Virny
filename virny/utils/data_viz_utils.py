@@ -266,6 +266,32 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     return fig, ax
 
 
+def create_model_performance_summary_visualization(main_matrix, matrix_for_colors):
+    font_increase = 6
+    matrix_width = 20
+    matrix_height = main_matrix.shape[0] if main_matrix.shape[0] >= 3 else main_matrix.shape[0] * 2.5
+
+    fig = plt.figure(figsize=(matrix_width, matrix_height))
+    ax = sns.heatmap(matrix_for_colors, annot=main_matrix.round(3),
+                     cmap=["#EE8367", "#58D68D"], # [red, green]
+                     fmt='', linewidths=1.0,
+                     vmin=0, vmax=1,
+                     cbar_kws={"ticks":[0, 1]},
+                     annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 10 + font_increase})
+    ax.set(xlabel="", ylabel="")
+    ax.xaxis.tick_top()
+    ax.tick_params(axis='y', rotation=0)
+    ax.tick_params(labelsize=10 + font_increase)
+    fig.subplots_adjust(left=0.2, top=0.7)
+
+    cbar = ax.collections[0].colorbar
+    tick_labels = ['Failed', 'Passed']
+    cbar.set_ticks([0.25,0.75])
+    cbar.set_ticklabels(tick_labels, fontsize=10 + font_increase)
+
+    return fig, ax
+
+
 def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
                                         metrics_value_range_dct: dict, group: str):
     # Compute the number of models that satisfy the conditions

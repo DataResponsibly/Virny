@@ -1,12 +1,15 @@
 import pandas as pd
 import gradio as gr
 import altair as alt
+from pprint import pprint
 
+from virny.configs.constants import *
 from virny.utils.common_helpers import str_to_float
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection,
-                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart)
+                                        compute_proportions, compute_base_rates, create_col_facet_bar_chart,
+                                        create_model_performance_summary_visualization)
 
 
 class MetricsInteractiveVisualizer:
@@ -39,6 +42,14 @@ class MetricsInteractiveVisualizer:
         # Technical attributes
         self.demo = None
         self.max_groups = 8
+
+        # Metric names
+        self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY, POSITIVE_RATE]
+        self.all_stability_metrics = [STD, IQR, JITTER, LABEL_STABILITY]
+        self.all_uncertainty_metrics = [ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY]
+        self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY]
+        self.all_stability_disparity_metrics = [LABEL_STABILITY_RATIO, LABEL_STABILITY_DIFFERENCE, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY]
+        self.all_uncertainty_disparity_metrics = [OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO, ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO]
 
         # Create one metrics df with all model_dfs
         models_metrics_df = pd.DataFrame()
@@ -123,7 +134,7 @@ class MetricsInteractiveVisualizer:
                     )
                     with gr.Row():
                         accuracy_metric = gr.Dropdown(
-                            sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
+                            sorted(self.all_accuracy_metrics),
                             value='Accuracy', multiselect=False, label="Constraint 1 (C1)",
                             scale=2
                         )
@@ -131,7 +142,7 @@ class MetricsInteractiveVisualizer:
                         acc_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         fairness_metric = gr.Dropdown(
-                            sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
+                            sorted(self.all_error_disparity_metrics),
                             value='Equalized_Odds_FPR', multiselect=False, label="Constraint 2 (C2)",
                             scale=2
                         )
@@ -139,7 +150,7 @@ class MetricsInteractiveVisualizer:
                         fairness_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         subgroup_stability_metric = gr.Dropdown(
-                            sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
+                            sorted(self.all_stability_metrics),
                             value='Label_Stability', multiselect=False, label="Constraint 3 (C3)",
                             scale=2
                         )
@@ -147,7 +158,7 @@ class MetricsInteractiveVisualizer:
                         subgroup_stab_max_val = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         group_stability_metrics = gr.Dropdown(
-                            sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
+                            sorted(self.all_stability_disparity_metrics),
                             value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
                             scale=2
                         )
@@ -179,15 +190,15 @@ class MetricsInteractiveVisualizer:
                     )
                     subgroup_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     accuracy_metrics = gr.Dropdown(
-                        sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
+                        sorted(self.all_accuracy_metrics),
                         value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
                     )
                     uncertainty_metrics = gr.Dropdown(
-                        sorted(['Aleatoric_Uncertainty', 'Overall_Uncertainty']),
+                        sorted(self.all_uncertainty_metrics),
                         value=['Aleatoric_Uncertainty', 'Overall_Uncertainty'], multiselect=True, label="Uncertainty Metrics", info="Select uncertainty metrics to display on the heatmap:",
                     )
                     subgroup_stability_metrics = gr.Dropdown(
-                        sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
+                        sorted(self.all_stability_metrics),
                         value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
                     subgroup_btn_view2 = gr.Button("Submit")
@@ -211,11 +222,11 @@ class MetricsInteractiveVisualizer:
                     )
                     group_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     fairness_metrics = gr.Dropdown(
-                        sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
+                        sorted(self.all_error_disparity_metrics),
                         value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
                     )
                     group_stability_metrics = gr.Dropdown(
-                        sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
+                        sorted(self.all_stability_disparity_metrics),
                         value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
                     )
                     group_btn_view2 = gr.Button("Submit")
@@ -246,15 +257,15 @@ class MetricsInteractiveVisualizer:
                         ### Group Specific Metrics
                         """)
                     accuracy_metrics = gr.Dropdown(
-                        sorted(['Statistical_Bias', 'TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1']),
+                        sorted(self.all_accuracy_metrics),
                         value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
                     )
                     uncertainty_metrics = gr.Dropdown(
-                        sorted(['Aleatoric_Uncertainty', 'Overall_Uncertainty']),
+                        sorted(self.all_uncertainty_metrics),
                         value=['Aleatoric_Uncertainty', 'Overall_Uncertainty'], multiselect=True, label="Uncertainty Metrics", info="Select uncertainty metrics to display on the heatmap:",
                     )
                     subgroup_stability_metrics = gr.Dropdown(
-                        sorted(['Std', 'IQR', 'Jitter', 'Label_Stability']),
+                        sorted(self.all_stability_metrics),
                         value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
                     btn_view3 = gr.Button("Submit")
@@ -264,11 +275,11 @@ class MetricsInteractiveVisualizer:
                         ### Disparity Metrics
                         """)
                     fairness_metrics = gr.Dropdown(
-                        sorted(['Equalized_Odds_TPR', 'Equalized_Odds_FPR', 'Disparate_Impact', 'Statistical_Parity_Difference', 'Accuracy_Parity']),
+                        sorted(self.all_error_disparity_metrics),
                         value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
                     )
                     group_stability_metrics = gr.Dropdown(
-                        sorted(['Label_Stability_Ratio', 'IQR_Parity', 'Std_Parity', 'Std_Ratio', 'Jitter_Parity']),
+                        sorted(self.all_stability_disparity_metrics),
                         value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
                     )
             with gr.Row():
@@ -283,6 +294,90 @@ class MetricsInteractiveVisualizer:
             btn_view3.click(self._create_group_metrics_bar_chart_per_one_model,
                             inputs=[model_name_vw3, fairness_metrics, group_stability_metrics],
                             outputs=[group_metrics_bar_chart])
+            # ============================ Model Performance Summary ============================
+            with gr.Row():
+                # Scale column 1 to a half of a screen
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ## Model Performance Summary
+                        """)
+                    model_name_vw4 = gr.Dropdown(
+                        sorted(self.model_names), value=sorted(self.model_names)[0], multiselect=False, scale=1,
+                        label="Model Name", info="Select one model to generate a performance summary:",
+                    )
+                with gr.Column():
+                    pass
+            with gr.Row():
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ### Group Specific Metrics
+                        """)
+                    with gr.Row():
+                        accuracy_metric_vw4 = gr.Dropdown(
+                            sorted(self.all_accuracy_metrics),
+                            value=ACCURACY, multiselect=False, label="Accuracy Metric",
+                            scale=3
+                        )
+                        acc_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+                    with gr.Row():
+                        subgroup_stability_metric_vw4 = gr.Dropdown(
+                            sorted(self.all_stability_metrics),
+                            value=LABEL_STABILITY, multiselect=False, label="Stability Metric",
+                            scale=3
+                        )
+                        subgroup_stab_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+                    with gr.Row():
+                        subgroup_uncertainty_metric_vw4 = gr.Dropdown(
+                            sorted(self.all_uncertainty_metrics),
+                            value=ALEATORIC_UNCERTAINTY, multiselect=False, label="Uncertainty Metric",
+                            scale=3
+                        )
+                        subgroup_uncertainty_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+
+                    btn_view4 = gr.Button("Submit")
+                with gr.Column():
+                    gr.Markdown(
+                        """
+                        ### Disparity Metrics
+                        """)
+                    with gr.Row():
+                        fairness_metric_vw4 = gr.Dropdown(
+                            sorted(self.all_error_disparity_metrics),
+                            value=EQUALIZED_ODDS_FPR, multiselect=False, label="Error Disparity Metric",
+                            scale=2
+                        )
+                        fairness_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
+                        fairness_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
+                    with gr.Row():
+                        group_stability_metrics_vw4 = gr.Dropdown(
+                            sorted(self.all_stability_disparity_metrics),
+                            value=LABEL_STABILITY_RATIO, multiselect=False, label="Stability Disparity Metric",
+                            scale=2
+                        )
+                        group_stab_min_val_vw4 = gr.Text(value="0.7", label="Min value", scale=1)
+                        group_stab_max_val_vw4 = gr.Text(value="1.5", label="Max value", scale=1)
+                    with gr.Row():
+                        group_uncertainty_metrics_vw4 = gr.Dropdown(
+                            sorted(self.all_uncertainty_disparity_metrics),
+                            value=ALEATORIC_UNCERTAINTY_PARITY, multiselect=False, label="Uncertainty Disparity Metric",
+                            scale=2
+                        )
+                        group_uncertainty_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
+                        group_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
+            with gr.Row():
+                model_performance_summary = gr.Plot(label="Model Performance Summary")
+
+            btn_view4.click(self._create_model_performance_summary,
+                            inputs=[model_name_vw4,
+                                    accuracy_metric_vw4, acc_threshold_vw4,
+                                    subgroup_stability_metric_vw4, subgroup_stab_threshold_vw4,
+                                    subgroup_uncertainty_metric_vw4, subgroup_uncertainty_threshold_vw4,
+                                    fairness_metric_vw4, fairness_min_val_vw4, fairness_max_val_vw4,
+                                    group_stability_metrics_vw4, group_stab_min_val_vw4, group_stab_max_val_vw4,
+                                    group_uncertainty_metrics_vw4, group_uncertainty_min_val_vw4, group_uncertainty_max_val_vw4],
+                            outputs=[model_performance_summary])
 
         self.demo = demo
         self.demo.launch(inline=False, debug=True, show_error=True)
@@ -312,6 +407,24 @@ class MetricsInteractiveVisualizer:
             results[subgroup_metric][model_name] = metric_value
 
         return results
+
+    def __check_metric_constraints(self, model_performance_dct, input_constraint_dct):
+        model_metrics_constraints_check_dct = dict()
+        for metric_dim in model_performance_dct.keys():
+            model_metrics_constraints_check_dct[metric_dim] = dict()
+            for group in model_performance_dct[metric_dim]:
+                if group == 'Overall':
+                    constraint_type = 'overall'
+                    threshold = input_constraint_dct[metric_dim][constraint_type][1]
+                    check = 1 if model_performance_dct[metric_dim][group] >= threshold else 0
+                    model_metrics_constraints_check_dct[metric_dim][group] = check
+                else:
+                    constraint_type = 'disparity'
+                    min_val, max_val = input_constraint_dct[metric_dim][constraint_type][1]
+                    check = 1 if model_performance_dct[metric_dim][group] >= min_val and model_performance_dct[metric_dim][group] <= max_val else 0
+                    model_metrics_constraints_check_dct[metric_dim][group] = check
+
+        return model_metrics_constraints_check_dct
 
     def _create_dataset_proportions_bar_chart(self, grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8,
                                               grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8):
@@ -489,6 +602,68 @@ class MetricsInteractiveVisualizer:
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
 
         return model_rank_heatmap
+
+    def _create_model_performance_summary(self, model_name: str, accuracy_metric, acc_threshold,
+                                          stability_metric, stability_threshold,
+                                          uncertainty_metric, uncertainty_threshold,
+                                          fairness_metric, fairness_min_val, fairness_max_val,
+                                          group_stability_metrics, group_stab_min_val, group_stab_max_val,
+                                          group_uncertainty_metrics, group_uncertainty_min_val, group_uncertainty_max_val):
+        accuracy_constraint = (accuracy_metric, str_to_float(acc_threshold, 'Accuracy threshold'))
+        stability_constraint = (stability_metric, str_to_float(stability_threshold, 'Stability threshold'))
+        uncertainty_constraint = (uncertainty_metric, str_to_float(uncertainty_threshold, 'Uncertainty threshold'))
+        fairness_constraint = (fairness_metric, [str_to_float(fairness_min_val, 'Error disparity metric min value'),
+                                                 str_to_float(fairness_max_val, 'Error disparity metric max value')])
+        group_stability_constraint = (group_stability_metrics, [str_to_float(group_stab_min_val, 'Stability disparity min value'),
+                                                                str_to_float(group_stab_max_val, 'Stability disparity max value')])
+        group_uncertainty_constraint = (group_uncertainty_metrics, [str_to_float(group_uncertainty_min_val, 'Uncertainty disparity min value'),
+                                                                    str_to_float(group_uncertainty_max_val, 'Uncertainty disparity max value')])
+
+        input_constraints_dct = {
+            'Accuracy': {
+                'overall': accuracy_constraint,
+                'disparity': fairness_constraint,
+            },
+            'Stability': {
+                'overall': stability_constraint,
+                'disparity': group_stability_constraint,
+            },
+            'Uncertainty': {
+                'overall': uncertainty_constraint,
+                'disparity': group_uncertainty_constraint,
+            },
+        }
+
+        # Extract overall and disparity metrics from metrics dfs.
+        # Add the values to a results dict.
+        model_performance_dct = {}
+        for metric_dim in input_constraints_dct.keys():
+            model_performance_dct[metric_dim] = dict()
+            subgroup_metric = input_constraints_dct[metric_dim]['overall'][0]
+            model_performance_dct[metric_dim]['Overall'] = self.sorted_model_metrics_df[
+                (self.sorted_model_metrics_df.Metric == subgroup_metric) &
+                (self.sorted_model_metrics_df.Subgroup == 'overall') &
+                (self.sorted_model_metrics_df.Model_Name == model_name)
+                ]['Value'].values[0]
+
+            group_metric = input_constraints_dct[metric_dim]['disparity'][0]
+            for group_name in self.group_names:
+                model_performance_dct[metric_dim]['Disparity: ' + group_name] = self.sorted_model_composed_metrics_df[
+                    (self.sorted_model_composed_metrics_df.Metric == group_metric) &
+                    (self.sorted_model_composed_metrics_df.Subgroup == group_name) &
+                    (self.sorted_model_composed_metrics_df.Model_Name == model_name)
+                    ]['Value'].values[0]
+
+        metric_constraints_check_dct = self.__check_metric_constraints(model_performance_dct, input_constraints_dct)
+
+        model_metrics_matrix = pd.DataFrame(model_performance_dct).T
+        aligned_column_names = ['Overall'] + [col for col in model_metrics_matrix.columns if col != 'Overall']
+        model_metrics_matrix = model_metrics_matrix[aligned_column_names]
+        metric_constraints_check_matrix = pd.DataFrame(metric_constraints_check_dct).T
+        metric_constraints_check_matrix = metric_constraints_check_matrix[aligned_column_names]
+
+        model_performance_summary, _ = create_model_performance_summary_visualization(model_metrics_matrix, metric_constraints_check_matrix)
+        return model_performance_summary
 
     def _create_subgroup_metrics_bar_chart_per_one_model(self, model_name: str, subgroup_accuracy_metrics_lst: list,
                                                          subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list):
