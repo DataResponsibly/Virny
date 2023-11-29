@@ -316,25 +316,32 @@ class MetricsInteractiveVisualizer:
                         """)
                     with gr.Row():
                         accuracy_metric_vw4 = gr.Dropdown(
-                            sorted(self.all_accuracy_metrics),
+                            sorted([metric for metric in self.all_accuracy_metrics if metric != POSITIVE_RATE]),
                             value=ACCURACY, multiselect=False, label="Accuracy Metric",
-                            scale=3
+                            scale=2
                         )
-                        acc_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+                        accuracy_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
+                        accuracy_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         subgroup_stability_metric_vw4 = gr.Dropdown(
                             sorted(self.all_stability_metrics),
                             value=LABEL_STABILITY, multiselect=False, label="Stability Metric",
-                            scale=3
+                            scale=2
                         )
-                        subgroup_stab_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+                        subgroup_stab_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
+                        subgroup_stab_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         subgroup_uncertainty_metric_vw4 = gr.Dropdown(
                             sorted(self.all_uncertainty_metrics),
                             value=ALEATORIC_UNCERTAINTY, multiselect=False, label="Uncertainty Metric",
-                            scale=3
+                            scale=2
                         )
-                        subgroup_uncertainty_threshold_vw4 = gr.Text(value="0.0", label="Threshold", scale=2)
+                        subgroup_uncertainty_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
+                        subgroup_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
+                    with gr.Row():
+                        positive_rate_metric_vw4 = gr.Text(value=POSITIVE_RATE, label="Positive-Rate Metric", scale=2)
+                        positive_rate_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
+                        positive_rate_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
 
                     btn_view4 = gr.Button("Submit")
                 with gr.Column():
@@ -366,17 +373,27 @@ class MetricsInteractiveVisualizer:
                         )
                         group_uncertainty_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
                         group_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
+                    with gr.Row():
+                        group_positive_rate_metrics_vw4 = gr.Dropdown(
+                            sorted([DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE]),
+                            value=DISPARATE_IMPACT, multiselect=False, label="Positive-Rate Disparity Metric",
+                            scale=2
+                        )
+                        group_positive_rate_min_val_vw4 = gr.Text(value="0.7", label="Min value", scale=1)
+                        group_positive_rate_max_val_vw4 = gr.Text(value="1.5", label="Max value", scale=1)
             with gr.Row():
                 model_performance_summary = gr.Plot(label="Model Performance Summary")
 
             btn_view4.click(self._create_model_performance_summary,
                             inputs=[model_name_vw4,
-                                    accuracy_metric_vw4, acc_threshold_vw4,
-                                    subgroup_stability_metric_vw4, subgroup_stab_threshold_vw4,
-                                    subgroup_uncertainty_metric_vw4, subgroup_uncertainty_threshold_vw4,
+                                    accuracy_metric_vw4, accuracy_min_val_vw4, accuracy_max_val_vw4,
+                                    subgroup_stability_metric_vw4, subgroup_stab_min_val_vw4, subgroup_stab_max_val_vw4,
+                                    subgroup_uncertainty_metric_vw4, subgroup_uncertainty_min_val_vw4, subgroup_uncertainty_max_val_vw4,
+                                    positive_rate_metric_vw4, positive_rate_min_val_vw4, positive_rate_max_val_vw4,
                                     fairness_metric_vw4, fairness_min_val_vw4, fairness_max_val_vw4,
                                     group_stability_metrics_vw4, group_stab_min_val_vw4, group_stab_max_val_vw4,
-                                    group_uncertainty_metrics_vw4, group_uncertainty_min_val_vw4, group_uncertainty_max_val_vw4],
+                                    group_uncertainty_metrics_vw4, group_uncertainty_min_val_vw4, group_uncertainty_max_val_vw4,
+                                    group_positive_rate_metrics_vw4, group_positive_rate_min_val_vw4, group_positive_rate_max_val_vw4],
                             outputs=[model_performance_summary])
 
         self.demo = demo
@@ -413,16 +430,10 @@ class MetricsInteractiveVisualizer:
         for metric_dim in model_performance_dct.keys():
             model_metrics_constraints_check_dct[metric_dim] = dict()
             for group in model_performance_dct[metric_dim]:
-                if group == 'Overall':
-                    constraint_type = 'overall'
-                    threshold = input_constraint_dct[metric_dim][constraint_type][1]
-                    check = 1 if model_performance_dct[metric_dim][group] >= threshold else 0
-                    model_metrics_constraints_check_dct[metric_dim][group] = check
-                else:
-                    constraint_type = 'disparity'
-                    min_val, max_val = input_constraint_dct[metric_dim][constraint_type][1]
-                    check = 1 if model_performance_dct[metric_dim][group] >= min_val and model_performance_dct[metric_dim][group] <= max_val else 0
-                    model_metrics_constraints_check_dct[metric_dim][group] = check
+                constraint_type = 'overall' if group == 'Overall' else 'disparity'
+                min_val, max_val = input_constraint_dct[metric_dim][constraint_type][1]
+                check = 1 if model_performance_dct[metric_dim][group] >= min_val and model_performance_dct[metric_dim][group] <= max_val else 0
+                model_metrics_constraints_check_dct[metric_dim][group] = check
 
         return model_metrics_constraints_check_dct
 
@@ -603,21 +614,31 @@ class MetricsInteractiveVisualizer:
 
         return model_rank_heatmap
 
-    def _create_model_performance_summary(self, model_name: str, accuracy_metric, acc_threshold,
-                                          stability_metric, stability_threshold,
-                                          uncertainty_metric, uncertainty_threshold,
+    def _create_model_performance_summary(self, model_name: str, accuracy_metric, accuracy_min_val, accuracy_max_val,
+                                          stability_metric, stability_min_val, stability_max_val,
+                                          uncertainty_metric, uncertainty_min_val, uncertainty_max_val,
+                                          positive_rate_metric, positive_rate_min_val, positive_rate_max_val,
                                           fairness_metric, fairness_min_val, fairness_max_val,
-                                          group_stability_metrics, group_stab_min_val, group_stab_max_val,
-                                          group_uncertainty_metrics, group_uncertainty_min_val, group_uncertainty_max_val):
-        accuracy_constraint = (accuracy_metric, str_to_float(acc_threshold, 'Accuracy threshold'))
-        stability_constraint = (stability_metric, str_to_float(stability_threshold, 'Stability threshold'))
-        uncertainty_constraint = (uncertainty_metric, str_to_float(uncertainty_threshold, 'Uncertainty threshold'))
+                                          group_stability_metric, group_stab_min_val, group_stab_max_val,
+                                          group_uncertainty_metric, group_uncertainty_min_val, group_uncertainty_max_val,
+                                          group_positive_rate_metric, group_positive_rate_min_val, group_positive_rate_max_val):
+        accuracy_constraint = (accuracy_metric, [str_to_float(accuracy_min_val, 'Accuracy min value'),
+                                                 str_to_float(accuracy_max_val, 'Accuracy max value')])
+        stability_constraint = (stability_metric, [str_to_float(stability_min_val, 'Stability min value'),
+                                                   str_to_float(stability_max_val, 'Stability max value')])
+        uncertainty_constraint = (uncertainty_metric, [str_to_float(uncertainty_min_val, 'Uncertainty min value'),
+                                                       str_to_float(uncertainty_max_val, 'Uncertainty max value')])
+        positive_rate_constraint = (positive_rate_metric, [str_to_float(positive_rate_min_val, 'Positive-Rate min value'),
+                                                           str_to_float(positive_rate_max_val, 'Positive-Rate max value')])
+
         fairness_constraint = (fairness_metric, [str_to_float(fairness_min_val, 'Error disparity metric min value'),
                                                  str_to_float(fairness_max_val, 'Error disparity metric max value')])
-        group_stability_constraint = (group_stability_metrics, [str_to_float(group_stab_min_val, 'Stability disparity min value'),
-                                                                str_to_float(group_stab_max_val, 'Stability disparity max value')])
-        group_uncertainty_constraint = (group_uncertainty_metrics, [str_to_float(group_uncertainty_min_val, 'Uncertainty disparity min value'),
-                                                                    str_to_float(group_uncertainty_max_val, 'Uncertainty disparity max value')])
+        group_stability_constraint = (group_stability_metric, [str_to_float(group_stab_min_val, 'Stability disparity min value'),
+                                                               str_to_float(group_stab_max_val, 'Stability disparity max value')])
+        group_uncertainty_constraint = (group_uncertainty_metric, [str_to_float(group_uncertainty_min_val, 'Uncertainty disparity min value'),
+                                                                   str_to_float(group_uncertainty_max_val, 'Uncertainty disparity max value')])
+        group_positive_rate_constraint = (group_positive_rate_metric, [str_to_float(group_positive_rate_min_val, 'Positive-Rate disparity min value'),
+                                                                       str_to_float(group_positive_rate_max_val, 'Positive-Rate disparity max value')])
 
         input_constraints_dct = {
             'Accuracy': {
@@ -631,6 +652,10 @@ class MetricsInteractiveVisualizer:
             'Uncertainty': {
                 'overall': uncertainty_constraint,
                 'disparity': group_uncertainty_constraint,
+            },
+            'Positive-Rate': {
+                'overall': positive_rate_constraint,
+                'disparity': group_positive_rate_constraint,
             },
         }
 

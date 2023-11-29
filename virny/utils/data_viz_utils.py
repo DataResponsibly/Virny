@@ -77,8 +77,8 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     models_distances_matrix = model_metrics_matrix.copy(deep=True).T
     metric_names = models_distances_matrix.columns
     for metric_name in metric_names:
-        if check_substring_in_list(metric_name, ['TPR', 'TNR', 'PPV', 'Accuracy', 'F1', 'Label_Stability']):
-            # Cast a metric to a case when the closer value to zero is the better
+        if check_substring_in_list(metric_name, ['TPR', 'TNR', 'PPV', 'Accuracy', 'F1', 'Label_Stability', 'Positive-Rate']):
+            # Cast a metric to a case when the closer value to one is the better
             models_distances_matrix[metric_name] = 1 - models_distances_matrix[metric_name]
         models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
 
@@ -308,6 +308,7 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
         'PPV': 'C1',
         'Accuracy': 'C1',
         'F1': 'C1',
+        'Positive-Rate': 'C1',
         # C2
         'Equalized_Odds_TPR': 'C2',
         'Equalized_Odds_FPR': 'C2',
