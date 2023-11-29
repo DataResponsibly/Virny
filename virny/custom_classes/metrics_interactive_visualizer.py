@@ -102,11 +102,21 @@ class MetricsInteractiveVisualizer:
                     s = gr.Slider(1, self.max_groups, value=default_val, step=1, label="How many groups to show:")
                     grp_names = []
                     grp_dis_values = []
+                    sensitive_attr_items = list(self.sensitive_attributes_dct.items())
                     for i in range(self.max_groups):
                         visibility = True if i + 1 <= default_val else False
                         with gr.Row():
-                            grp_name = gr.Text(label=f"Group {i + 1}", interactive=True, visible=visibility)
-                            grp_dis_value = gr.Text(label="Disadvantage value", interactive=True, visible=visibility)
+                            if visibility and i + 1 <= len(sensitive_attr_items):
+                                grp, dis_value = sensitive_attr_items[i]
+                                if dis_value is None:
+                                    dis_value = '-'
+                                elif isinstance(dis_value, str):
+                                    dis_value = f"'{dis_value}'"
+                                grp_name = gr.Text(label=f"Group {i + 1}", value=grp, interactive=True, visible=visibility)
+                                grp_dis_value = gr.Text(label="Disadvantage value", value=dis_value, interactive=True, visible=visibility)
+                            else:
+                                grp_name = gr.Text(label=f"Group {i + 1}", interactive=True, visible=visibility)
+                                grp_dis_value = gr.Text(label="Disadvantage value", interactive=True, visible=visibility)
                         grp_names.append(grp_name)
                         grp_dis_values.append(grp_dis_value)
 
@@ -450,7 +460,7 @@ class MetricsInteractiveVisualizer:
             if '&' in grp_name:
                 input_sensitive_attrs_dct[grp_name] = None
             else:
-                converted_grp_dis_val = eval(grp_dis_val) if '[' in grp_dis_val else grp_dis_val
+                converted_grp_dis_val = eval(grp_dis_val)
                 input_sensitive_attrs_dct[grp_name] = converted_grp_dis_val
 
         # Partition on protected groups
