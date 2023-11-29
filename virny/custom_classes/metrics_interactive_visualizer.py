@@ -7,7 +7,7 @@ from virny.configs.constants import *
 from virny.utils.common_helpers import str_to_float
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
-                                        create_subgroup_sorted_matrix_by_rank, create_bar_plot_for_model_selection,
+                                        create_subgroup_sorted_matrix_by_rank, create_flexible_bar_plot_for_model_selection,
                                         compute_proportions, compute_base_rates, create_col_facet_bar_chart,
                                         create_model_performance_summary_visualization)
 
@@ -50,6 +50,9 @@ class MetricsInteractiveVisualizer:
         self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY]
         self.all_stability_disparity_metrics = [LABEL_STABILITY_RATIO, LABEL_STABILITY_DIFFERENCE, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY]
         self.all_uncertainty_disparity_metrics = [OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO, ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO]
+
+        self.all_overall_metrics = self.all_accuracy_metrics + self.all_stability_metrics + self.all_uncertainty_metrics
+        self.all_disparity_metrics = self.all_error_disparity_metrics + self.all_stability_disparity_metrics + self.all_uncertainty_disparity_metrics
 
         # Create one metrics df with all model_dfs
         models_metrics_df = pd.DataFrame()
@@ -143,37 +146,38 @@ class MetricsInteractiveVisualizer:
                         value=self.group_names[0], multiselect=False, label="Group Name for Disparity Metrics",
                     )
                     with gr.Row():
-                        accuracy_metric = gr.Dropdown(
-                            sorted(self.all_accuracy_metrics),
-                            value='Accuracy', multiselect=False, label="Constraint 1 (C1)",
+                        overall_metric1 = gr.Dropdown(
+                            sorted(self.all_overall_metrics),
+                            value='Accuracy', multiselect=False, label="Overall Constraint (C1)",
                             scale=2
                         )
-                        acc_min_val = gr.Text(value="0.0", label="Min value", scale=1)
-                        acc_max_val = gr.Text(value="1.0", label="Max value", scale=1)
+                        overall_metric_min_val1 = gr.Text(value="0.0", label="Min value", scale=1)
+                        overall_metric_max_val1 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
-                        fairness_metric = gr.Dropdown(
-                            sorted(self.all_error_disparity_metrics),
-                            value='Equalized_Odds_FPR', multiselect=False, label="Constraint 2 (C2)",
+                        disparity_metric1 = gr.Dropdown(
+                            sorted(self.all_disparity_metrics),
+                            value='Equalized_Odds_FPR', multiselect=False, label="Disparity Constraint (C2)",
                             scale=2
                         )
-                        fairness_min_val = gr.Text(value="-1.0", label="Min value", scale=1)
-                        fairness_max_val = gr.Text(value="1.0", label="Max value", scale=1)
+                        disparity_metric_min_val1 = gr.Text(value="-1.0", label="Min value", scale=1)
+                        disparity_metric_max_val1 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
-                        subgroup_stability_metric = gr.Dropdown(
-                            sorted(self.all_stability_metrics),
-                            value='Label_Stability', multiselect=False, label="Constraint 3 (C3)",
+                        overall_metric2 = gr.Dropdown(
+                            sorted(self.all_overall_metrics),
+                            value='Label_Stability', multiselect=False, label="Overall Constraint (C3)",
                             scale=2
                         )
-                        subgroup_stab_min_val = gr.Text(value="0.0", label="Min value", scale=1)
-                        subgroup_stab_max_val = gr.Text(value="1.0", label="Max value", scale=1)
+                        overall_metric_min_val2 = gr.Text(value="0.0", label="Min value", scale=1)
+                        overall_metric_max_val2 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
-                        group_stability_metrics = gr.Dropdown(
-                            sorted(self.all_stability_disparity_metrics),
-                            value='Label_Stability_Ratio', multiselect=False, label="Constraint 4 (C4)",
+                        disparity_metric2 = gr.Dropdown(
+                            sorted(self.all_disparity_metrics),
+                            value='Label_Stability_Ratio', multiselect=False, label="Disparity Constraint (C4)",
                             scale=2
                         )
-                        group_stab_min_val = gr.Text(value="0.7", label="Min value", scale=1)
-                        group_stab_max_val = gr.Text(value="1.5", label="Max value", scale=1)
+                        disparity_metric_min_val2 = gr.Text(value="0.7", label="Min value", scale=1)
+                        disparity_metric_max_val2 = gr.Text(value="1.5", label="Max value", scale=1)
+
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Bar Chart")
@@ -181,10 +185,10 @@ class MetricsInteractiveVisualizer:
 
             btn_view1.click(self._create_bar_plot_for_model_selection,
                             inputs=[group_name,
-                                    accuracy_metric, acc_min_val, acc_max_val,
-                                    fairness_metric, fairness_min_val, fairness_max_val,
-                                    subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
-                                    group_stability_metrics, group_stab_min_val, group_stab_max_val],
+                                    overall_metric1, overall_metric_min_val1, overall_metric_max_val1,
+                                    disparity_metric1, disparity_metric_min_val1, disparity_metric_max_val1,
+                                    overall_metric2, overall_metric_min_val2, overall_metric_max_val2,
+                                    disparity_metric2, disparity_metric_min_val2, disparity_metric_max_val2],
                             outputs=[bar_plot_for_model_selection, df_with_models_satisfied_all_constraints])
             # ======================================= Overall Metrics Heatmap =======================================
             gr.Markdown(
@@ -495,25 +499,31 @@ class MetricsInteractiveVisualizer:
 
         return col_facet_bar_chart
 
-    def _create_bar_plot_for_model_selection(self, group_name, accuracy_metric, acc_min_val, acc_max_val,
-                                             fairness_metric, fairness_min_val, fairness_max_val,
-                                             subgroup_stability_metric, subgroup_stab_min_val, subgroup_stab_max_val,
-                                             group_stability_metrics, group_stab_min_val, group_stab_max_val):
-        accuracy_constraint = (accuracy_metric, str_to_float(acc_min_val, 'C1 min value'), str_to_float(acc_max_val, 'C2 max value'))
-        fairness_constraint = (fairness_metric, str_to_float(fairness_min_val, 'C2 min value'), str_to_float(fairness_max_val, 'C2 max value'))
-        subgroup_stability_constraint = (subgroup_stability_metric, str_to_float(subgroup_stab_min_val, 'C3 min value'), str_to_float(subgroup_stab_max_val, 'C3 max value'))
-        group_stability_constraint = (group_stability_metrics, str_to_float(group_stab_min_val, 'C4 min value'), str_to_float(group_stab_max_val, 'C4 max value'))
+    def _create_bar_plot_for_model_selection(self, group_name, overall_metric1, overall_metric_min_val1, overall_metric_max_val1,
+                                             disparity_metric1, disparity_metric_min_val1, disparity_metric_max_val1,
+                                             overall_metric2, overall_metric_min_val2, overall_metric_max_val2,
+                                             disparity_metric2, disparity_metric_min_val2, disparity_metric_max_val2):
+        metric_name_to_alias_dct = {
+            overall_metric1: 'C1',
+            disparity_metric1: 'C2',
+            overall_metric2: 'C3',
+            disparity_metric2: 'C4',
+        }
+        overall_constraint1 = (overall_metric1, str_to_float(overall_metric_min_val1, 'C1 min value'), str_to_float(overall_metric_max_val1, 'C2 max value'))
+        disparity_constraint1 = (disparity_metric1, str_to_float(disparity_metric_min_val1, 'C2 min value'), str_to_float(disparity_metric_max_val1, 'C2 max value'))
+        overall_constraint2 = (overall_metric2, str_to_float(overall_metric_min_val2, 'C3 min value'), str_to_float(overall_metric_max_val2, 'C3 max value'))
+        disparity_constraint2 = (disparity_metric2, str_to_float(disparity_metric_min_val2, 'C4 min value'), str_to_float(disparity_metric_max_val2, 'C4 max value'))
 
         # Create individual constraints
         metrics_value_range_dct = dict()
-        for constraint in [accuracy_constraint, fairness_constraint, subgroup_stability_constraint, group_stability_constraint]:
+        for constraint in [overall_constraint1, disparity_constraint1, overall_constraint2, disparity_constraint2]:
             metrics_value_range_dct[constraint[0]] = [constraint[1], constraint[2]]
         # Create intersectional constraints
-        metrics_value_range_dct[f'{accuracy_constraint[0]}&{fairness_constraint[0]}'] = None
-        metrics_value_range_dct[f'{accuracy_constraint[0]}&{subgroup_stability_constraint[0]}'] = None
-        metrics_value_range_dct[f'{accuracy_constraint[0]}&{group_stability_constraint[0]}'] = None
-        metrics_value_range_dct[(f'{accuracy_constraint[0]}&{fairness_constraint[0]}'
-                                 f'&{subgroup_stability_constraint[0]}&{group_stability_constraint[0]}')] = None
+        metrics_value_range_dct[f'{overall_constraint1[0]}&{disparity_constraint1[0]}'] = None
+        metrics_value_range_dct[f'{overall_constraint1[0]}&{overall_constraint2[0]}'] = None
+        metrics_value_range_dct[f'{overall_constraint1[0]}&{disparity_constraint2[0]}'] = None
+        metrics_value_range_dct[(f'{overall_constraint1[0]}&{disparity_constraint1[0]}'
+                                 f'&{overall_constraint2[0]}&{disparity_constraint2[0]}')] = None
 
         melted_all_subgroup_metrics_per_model_dct = dict()
         for model_name in self.melted_model_metrics_df['Model_Name'].unique():
@@ -525,10 +535,11 @@ class MetricsInteractiveVisualizer:
             melted_all_group_metrics_per_model_dct[model_name] = (
                 self.melted_model_composed_metrics_df)[self.melted_model_composed_metrics_df.Model_Name == model_name]
 
-        return create_bar_plot_for_model_selection(melted_all_subgroup_metrics_per_model_dct,
-                                                   melted_all_group_metrics_per_model_dct,
-                                                   metrics_value_range_dct,
-                                                   group=group_name)
+        return create_flexible_bar_plot_for_model_selection(melted_all_subgroup_metrics_per_model_dct,
+                                                            melted_all_group_metrics_per_model_dct,
+                                                            metrics_value_range_dct,
+                                                            group=group_name,
+                                                            metric_name_to_alias_dct=metric_name_to_alias_dct)
 
     def _create_subgroup_model_rank_heatmap(self, model_names: list, subgroup_accuracy_metrics_lst: list,
                                             subgroup_uncertainty_metrics: list, subgroup_stability_metrics_lst: list,

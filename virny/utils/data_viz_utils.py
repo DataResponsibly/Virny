@@ -292,6 +292,58 @@ def create_model_performance_summary_visualization(main_matrix, matrix_for_color
     return fig, ax
 
 
+def create_flexible_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
+                                                 metrics_value_range_dct: dict, group: str, metric_name_to_alias_dct: dict):
+    # Compute the number of models that satisfy the conditions
+    models_in_range_df, df_with_models_satisfied_all_constraints = (
+        create_models_in_range_dct(all_subgroup_metrics_per_model_dct, all_group_metrics_per_model_dct,
+                                   metrics_value_range_dct, group))
+
+    def get_column_alias(metric_group):
+        if '&' not in metric_group:
+            alias = metric_name_to_alias_dct[metric_group]
+        else:
+            metrics = metric_group.split('&')
+            alias = None
+            for idx, metric in enumerate(metrics):
+                if idx == 0:
+                    alias = metric_name_to_alias_dct[metric]
+                else:
+                    alias += ' & ' + metric_name_to_alias_dct[metric]
+
+        return alias
+
+    # Replace metric groups on their aliases
+    models_in_range_df['Alias'] = models_in_range_df['Metric_Group'].apply(get_column_alias)
+    models_in_range_df['Title'] = models_in_range_df['Alias']
+
+    base_font_size = 14
+    bar_plot = alt.Chart(models_in_range_df).mark_bar().encode(
+        x=alt.X("Title", type="nominal", title='Metric Group', axis=alt.Axis(labelAngle=-30),
+                sort=alt.Sort(order='ascending')),
+        y=alt.Y("Number_of_Models", title="Number of Models", type="quantitative"),
+        color=alt.Color('Model_Type', legend=alt.Legend(title='Model Type'))
+    ).configure(padding={'top':  33}
+                ).configure_axis(
+        labelFontSize=base_font_size + 2,
+        titleFontSize=base_font_size + 4,
+        labelFontWeight='normal',
+        titleFontWeight='normal',
+        labelLimit=300,
+        tickMinStep=1,
+    ).configure_title(
+        fontSize=base_font_size + 2
+    ).configure_legend(
+        titleFontSize=base_font_size + 4,
+        labelFontSize=base_font_size + 2,
+        symbolStrokeWidth=4,
+        labelLimit=300,
+        titleLimit=220,
+    ).properties(width=650, height=450)
+
+    return bar_plot, df_with_models_satisfied_all_constraints
+
+
 def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
                                         metrics_value_range_dct: dict, group: str):
     # Compute the number of models that satisfy the conditions
@@ -323,6 +375,7 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
         # C4
         'IQR_Parity': 'C4',
         'Label_Stability_Ratio': 'C4',
+        'Label_Stability_Difference': 'C4',
         'Std_Parity': 'C4',
         'Std_Ratio': 'C4',
         'Jitter_Parity': 'C4',
