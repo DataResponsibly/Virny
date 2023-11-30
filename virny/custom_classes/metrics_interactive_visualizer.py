@@ -339,7 +339,7 @@ class MetricsInteractiveVisualizer:
                 with gr.Column():
                     gr.Markdown(
                         """
-                        ### Overall Metrics
+                        ### Overall Metric Constraints
                         """)
                     with gr.Row():
                         accuracy_metric_vw4 = gr.Dropdown(
@@ -366,7 +366,11 @@ class MetricsInteractiveVisualizer:
                         subgroup_uncertainty_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
                         subgroup_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
-                        positive_rate_metric_vw4 = gr.Text(value=POSITIVE_RATE, label="Positive-Rate Metric", scale=2)
+                        positive_rate_metric_vw4 = gr.Dropdown(
+                            [POSITIVE_RATE],
+                            value=POSITIVE_RATE, multiselect=False, label="Positive-Rate Metric",
+                            scale=2
+                        )
                         positive_rate_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
                         positive_rate_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
 
@@ -374,7 +378,7 @@ class MetricsInteractiveVisualizer:
                 with gr.Column():
                     gr.Markdown(
                         """
-                        ### Disparity Metrics
+                        ### Disparity Metric Constraints
                         """)
                     with gr.Row():
                         fairness_metric_vw4 = gr.Dropdown(
@@ -575,6 +579,8 @@ class MetricsInteractiveVisualizer:
 
         """
         tolerance = str_to_float(tolerance, 'Tolerance')
+        if tolerance < 0.001:
+            raise ValueError('Tolerance cannot be smaller than 0.001')
         metrics_lst = subgroup_accuracy_metrics_lst + subgroup_uncertainty_metrics + subgroup_stability_metrics_lst
 
         # Find metric values for each model based on metric, subgroup, and model names.
@@ -588,6 +594,7 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
+        model_metrics_matrix = model_metrics_matrix.round(3)  # round to make tolerance more precise
         sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
 
@@ -613,6 +620,8 @@ class MetricsInteractiveVisualizer:
 
         """
         tolerance = str_to_float(tolerance, 'Tolerance')
+        if tolerance < 0.001:
+            raise ValueError('Tolerance cannot be smaller than 0.001')
 
         groups_lst = self.sensitive_attributes_dct.keys()
         metrics_lst = group_fairness_metrics_lst + group_uncertainty_metrics + group_stability_metrics_lst
@@ -644,6 +653,7 @@ class MetricsInteractiveVisualizer:
 
         model_metrics_matrix = pd.DataFrame(results).T
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
+        model_metrics_matrix = model_metrics_matrix.round(3)  # round to make tolerance more precise
         sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
         model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
 

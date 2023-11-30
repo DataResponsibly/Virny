@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from altair.utils.schemapi import Undefined
 
 from virny.utils.common_helpers import check_substring_in_list
+from IPython.display import display
 
 
 def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: str = 'dense'):
@@ -243,7 +244,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     num_ranks = int(sorted_matrix_by_rank.values.max())
 
     fig = plt.figure(figsize=(matrix_width, matrix_height))
-    rank_colors = sns.color_palette("coolwarm_r", n_colors=num_ranks).as_hex()
+    rank_colors = sns.diverging_palette(13, 145, s=75, l=70, n=num_ranks).as_hex()
     # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
     reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
     ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix.round(3), cmap=rank_colors,
