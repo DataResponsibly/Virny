@@ -80,8 +80,10 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             models_predictions[idx] = postprocessor_fitted.predict(test_binary_label_dataset_pred).labels.ravel()
             self.models_lst[idx] = classifier
 
-            print("Postprocessor fitted params: ", postprocessor_fitted.model_params.x)
+            print("Postprocessor fitted params: ", postprocessor_fitted.model_params.x, flush=True)
             postprocessor_fitted.saved_params.append(postprocessor_fitted.model_params.x)
+        
+        print("Postprocessor fitted params: ", postprocessor_fitted.saved_params, flush=True)
             
         if self._verbose >= 1:
             print('\n', flush=True)
