@@ -3,7 +3,7 @@ import gc
 import pandas as pd
 
 from copy import deepcopy
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 from abc import ABCMeta, abstractmethod
 
 from virny.custom_classes.custom_logger import get_logger

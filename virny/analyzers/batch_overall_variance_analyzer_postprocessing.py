@@ -3,7 +3,7 @@ import gc
 import numpy as np
 import pandas as pd
 
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
 from virny.utils.postprocessing_intervention_utils import contruct_binary_label_dataset_from_df, construct_binary_label_dataset_from_samples, predict_on_binary_label_dataset
@@ -80,6 +80,9 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             models_predictions[idx] = postprocessor_fitted.predict(test_binary_label_dataset_pred).labels.ravel()
             self.models_lst[idx] = classifier
 
+            print("Postprocessor fitted params: ", postprocessor_fitted.model_params.x)
+            postprocessor_fitted.saved_params.append(postprocessor_fitted.model_params.x)
+            
         if self._verbose >= 1:
             print('\n', flush=True)
         self._AbstractOverallVarianceAnalyzer__logger.info('Successfully tested classifiers by bootstrap')

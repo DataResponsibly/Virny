@@ -1,5 +1,6 @@
 import os
 import traceback
+import numpy as np
 import pandas as pd
 from river import base
 from tqdm.notebook import tqdm
@@ -351,6 +352,14 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
         # Extend df with technical columns
         model_metrics_df['Tag'] = 'OK'
         model_metrics_df['Record_Create_Date_Time'] = datetime.now(timezone.utc)
+        
+        if postprocessor:
+            postprocessor_params = np.array(postprocessor.saved_params)
+            params_means = np.mean(postprocessor_params, axis=0)
+            params_stds = np.std(postprocessor_params, axis=0)
+            model_metrics_df['Postprocessor_coefs_means'] = [params_means.tolist()] * len(model_metrics_df)
+            model_metrics_df['Postprocessor_coefs_stds'] = [params_stds.tolist()] * len(model_metrics_df)
+        
         for column, value in custom_tbl_fields_dct.items():
             model_metrics_df[column] = value
 
