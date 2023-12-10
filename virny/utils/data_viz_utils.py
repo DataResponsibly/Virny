@@ -35,7 +35,9 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.001):
     for i in range(len(sorted_vals)):
         val = sorted_vals[i]
         rank = i + 1
-        bin_constraints_dct[rank] = [val - tolerance, val + tolerance]
+        bin_constraints_dct[rank] = [round(val - tolerance, 3), round(val + tolerance, 3)]
+
+    print(bin_constraints_dct)
 
     # Assign ranks for each pandas series value
     assigned_ranks_dct = dict()
