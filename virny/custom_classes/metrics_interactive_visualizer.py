@@ -215,7 +215,7 @@ class MetricsInteractiveVisualizer:
                     )
                     subgroup_stability_metrics = gr.Dropdown(
                         sorted(self.all_stability_metrics),
-                        value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
+                        value=['Std', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
                     subgroup_btn_view2 = gr.Button("Submit")
                 with gr.Column(scale=2):
@@ -288,7 +288,7 @@ class MetricsInteractiveVisualizer:
                     )
                     subgroup_stability_metrics = gr.Dropdown(
                         sorted(self.all_stability_metrics),
-                        value=['Jitter', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
+                        value=['Std', 'Label_Stability'], multiselect=True, label="Stability Metrics", info="Select stability metrics to display on the heatmap:",
                     )
                     btn_view3 = gr.Button("Submit")
                 with gr.Column():
@@ -579,8 +579,8 @@ class MetricsInteractiveVisualizer:
 
         """
         tolerance = str_to_float(tolerance, 'Tolerance')
-        if tolerance < 0.001:
-            raise ValueError('Tolerance cannot be smaller than 0.001')
+        if tolerance < 0.001 or tolerance > 0.2:
+            raise ValueError('Tolerance should be in the [0.001, 0.2] range')
         metrics_lst = subgroup_accuracy_metrics_lst + subgroup_uncertainty_metrics + subgroup_stability_metrics_lst
 
         # Find metric values for each model based on metric, subgroup, and model names.
@@ -620,8 +620,8 @@ class MetricsInteractiveVisualizer:
 
         """
         tolerance = str_to_float(tolerance, 'Tolerance')
-        if tolerance < 0.001:
-            raise ValueError('Tolerance cannot be smaller than 0.001')
+        if tolerance < 0.001 or tolerance > 0.2:
+            raise ValueError('Tolerance should be in the [0.001, 0.2] range')
 
         groups_lst = self.sensitive_attributes_dct.keys()
         metrics_lst = group_fairness_metrics_lst + group_uncertainty_metrics + group_stability_metrics_lst

@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 import altair as alt
@@ -10,7 +11,7 @@ from virny.utils.common_helpers import check_substring_in_list
 from IPython.display import display
 
 
-def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: str = 'dense'):
+def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.001):
     """
     Rank a pandas series with defined tolerance.
     Ref: https://stackoverflow.com/questions/72956450/pandas-ranking-with-tolerance
@@ -21,20 +22,41 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.01, method: s
         A pandas series to rank
     tolerance
         A float value for ranking
-    method
-        Ranking methods for numpy.rank()
 
     Returns
     -------
     A pandas series with dense ranks for the input pd series.
 
     """
-    tolerance += 1e-10 # Add 0.0000000001 for correct comparison of float numbers
-    vals = pd.Series(pd_series.unique()).sort_values()
-    vals.index = vals
-    vals = vals.mask(vals - vals.shift(1) < tolerance, vals.shift(1))
+    min_val, max_val = pd_series.min(), pd_series.max()
+    num_ranks = len(pd_series)
+    num_bins = math.ceil((max_val - min_val) / tolerance)
+    # The number of ranks cannot be smaller than 1 and greater than the number of compared models
+    if num_bins == 0:
+        num_bins = 1
+    elif num_bins > num_ranks:
+        num_bins = num_ranks
 
-    return pd_series.map(vals).fillna(pd_series).rank(method=method)
+    # Create a dictionary with bin constraints
+    bin_size = (max_val - min_val) / num_bins
+    bin_constraints_dct = dict()
+    min_bin_limit = min_val
+    for n_bin in range(num_bins):
+        rank = n_bin + 1
+        max_bin_limit = min_bin_limit + bin_size if n_bin + 1 < num_bins else max_val
+        bin_constraints_dct[rank] = [min_bin_limit, max_bin_limit]
+        min_bin_limit = max_bin_limit
+
+    print(bin_constraints_dct)
+
+    def get_rank_with_tolerance(val):
+        for n_bin in range(num_bins):
+            rank = n_bin + 1
+            min_constrain, max_constraint = bin_constraints_dct[rank]
+            if min_constrain <= val <= max_constraint:
+                return rank
+
+    return pd_series.apply(get_rank_with_tolerance).rank(method='dense')
 
 
 def compute_proportions(protected_groups, X_data):
@@ -68,7 +90,7 @@ def create_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np.array:
     models_distances_matrix = models_distances_matrix.T
     models_distances_df = pd.DataFrame(models_distances_matrix)
     sorted_matrix_by_rank = models_distances_df.apply(
-        lambda row : rank_with_tolerance(row, tolerance, method='dense'), axis = 1
+        lambda row : rank_with_tolerance(row, tolerance), axis = 1
     )
 
     return sorted_matrix_by_rank
@@ -86,7 +108,7 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     models_distances_matrix = models_distances_matrix.T
     models_distances_df = pd.DataFrame(models_distances_matrix)
     sorted_matrix_by_rank = models_distances_df.apply(
-        lambda row : rank_with_tolerance(row, tolerance, method='dense'), axis = 1
+        lambda row : rank_with_tolerance(row, tolerance), axis = 1
     )
 
     return sorted_matrix_by_rank
@@ -244,8 +266,12 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     num_ranks = int(sorted_matrix_by_rank.values.max())
 
     fig = plt.figure(figsize=(matrix_width, matrix_height))
-    rank_colors = sns.diverging_palette(13, 145, s=75, l=70, n=num_ranks).as_hex()
-    # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a coolwarm color scheme
+    # Set a green color when there is only one rank
+    if num_ranks == 1:
+        rank_colors = sns.diverging_palette(145, 13, s=75, l=70, n=num_ranks).as_hex()
+    else:
+        rank_colors = sns.diverging_palette(13, 145, s=75, l=70, n=num_ranks).as_hex()
+    # Convert ranks to minus ranks (1 --> -1; 4 --> -4) to align rank positions with a color scheme
     reversed_sorted_matrix_by_rank = sorted_matrix_by_rank * -1
     ax = sns.heatmap(reversed_sorted_matrix_by_rank, annot=model_metrics_matrix.round(3), cmap=rank_colors,
                      fmt='', annot_kws={'color': 'black', 'alpha': 0.7, 'fontsize': 16 + font_increase})
