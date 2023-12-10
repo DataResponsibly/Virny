@@ -28,33 +28,34 @@ def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.001):
     A pandas series with dense ranks for the input pd series.
 
     """
-    min_val, max_val = pd_series.min(), pd_series.max()
-    num_ranks = len(pd_series)
-    num_bins = math.ceil((max_val - min_val) / tolerance)
-    # The number of ranks cannot be smaller than 1 and greater than the number of compared models
-    if num_bins == 0:
-        num_bins = 1
-    elif num_bins > num_ranks:
-        num_bins = num_ranks
+    sorted_vals = sorted(pd_series.tolist())
 
     # Create a dictionary with bin constraints
-    bin_size = (max_val - min_val) / num_bins
     bin_constraints_dct = dict()
-    min_bin_limit = min_val
-    for n_bin in range(num_bins):
-        rank = n_bin + 1
-        max_bin_limit = min_bin_limit + bin_size if n_bin + 1 < num_bins else max_val
-        bin_constraints_dct[rank] = [min_bin_limit, max_bin_limit]
-        min_bin_limit = max_bin_limit
+    for i in range(len(sorted_vals)):
+        val = sorted_vals[i]
+        rank = i + 1
+        bin_constraints_dct[rank] = [val - tolerance, val + tolerance]
 
-    print(bin_constraints_dct)
+    # Assign ranks for each pandas series value
+    assigned_ranks_dct = dict()
+    for i in range(len(sorted_vals)):
+        val = sorted_vals[i]
+        max_rank = i + 1
+        actual_rank = None
+        for rank in bin_constraints_dct.keys():
+            min_limit, max_limit = bin_constraints_dct[rank]
+            if min_limit <= val <= max_limit:
+                actual_rank = rank
+                break
+
+        assigned_ranks_dct[str(round(val, 3))] = actual_rank
+        # Dynamically delete constraints from bin_constraints_dct to keep values in the same bin with tolerance
+        if actual_rank != max_rank:
+            del bin_constraints_dct[max_rank]
 
     def get_rank_with_tolerance(val):
-        for n_bin in range(num_bins):
-            rank = n_bin + 1
-            min_constrain, max_constraint = bin_constraints_dct[rank]
-            if min_constrain <= val <= max_constraint:
-                return rank
+        return assigned_ranks_dct[str(round(val, 3))]
 
     return pd_series.apply(get_rank_with_tolerance).rank(method='dense')
 
