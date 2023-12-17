@@ -471,9 +471,13 @@ class MetricsInteractiveVisualizer:
     def _create_dataset_proportions_bar_chart(self, grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8,
                                               grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8):
         grp_names = [grp_name1, grp_name2, grp_name3, grp_name4, grp_name5, grp_name6, grp_name7, grp_name8]
-        grp_names = [grp for grp in grp_names if grp != '' and grp is not None]
+        grp_names = [grp.strip() for grp in grp_names if grp != '' and grp is not None]
         grp_dis_values = [grp_dis_val1, grp_dis_val2, grp_dis_val3, grp_dis_val4, grp_dis_val5, grp_dis_val6, grp_dis_val7, grp_dis_val8]
-        grp_dis_values = [grp for grp in grp_dis_values if grp != '' and grp is not None]
+        grp_dis_values = [grp.strip() for grp in grp_dis_values if grp != '' and grp is not None]
+
+        if len(grp_names) != len(grp_dis_values):
+            raise ValueError("Numbers of sensitive attributes and their disadvantaged groups are different."
+                             "Please, put '-' as a disadvantaged value for intersectional sensitive attributes.")
 
         # Create a sensitive attrs dict
         input_sensitive_attrs_dct = dict()
@@ -481,8 +485,11 @@ class MetricsInteractiveVisualizer:
             if '&' in grp_name:
                 input_sensitive_attrs_dct[grp_name] = None
             else:
-                converted_grp_dis_val = eval(grp_dis_val)
-                input_sensitive_attrs_dct[grp_name] = converted_grp_dis_val
+                try:
+                    converted_grp_dis_val = eval(grp_dis_val)
+                    input_sensitive_attrs_dct[grp_name] = converted_grp_dis_val
+                except Exception as _:
+                    raise ValueError(f"Type casting error with the {grp_dis_val} value. Use quotes for string disavantaged values.")
 
         # Partition on protected groups
         protected_groups = create_test_protected_groups(self.X_data, self.X_data, input_sensitive_attrs_dct)

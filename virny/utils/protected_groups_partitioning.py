@@ -70,8 +70,16 @@ def create_test_protected_groups(X_test: pd.DataFrame, init_features_df: pd.Data
 
     """
     plain_sensitive_attributes = [attr for attr in sensitive_attributes_dct.keys() if INTERSECTION_SIGN not in attr]
-    X_test_with_sensitive_attrs = init_features_df[plain_sensitive_attributes].loc[X_test.index]
 
+    # Check spelling of sensitive attributes
+    attrs_with_errors = []
+    for attr in plain_sensitive_attributes:
+        if attr not in init_features_df.columns:
+            attrs_with_errors.append(attr)
+    if len(attrs_with_errors) > 0:
+        raise ValueError(f"At least one of sensitive attributes is not in dataset columns. Check spelling of {attrs_with_errors} attributes.")
+
+    X_test_with_sensitive_attrs = init_features_df[plain_sensitive_attributes].loc[X_test.index]
     groups = dict()
     for attr in sensitive_attributes_dct.keys():
         attr = attr.strip()
