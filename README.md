@@ -28,7 +28,6 @@
 </p>
 
 
-
 ## 📜 Description
 
 **Virny** is a Python library for auditing model stability and fairness. The Virny library was
