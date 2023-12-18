@@ -9,13 +9,12 @@ def construct_binary_label_dataset_from_samples(X_sample, y_sample, column_names
     df = pd.DataFrame(X_sample, columns=column_names)
     df[target_column] = y_sample
 
-    binary_label_dataset = BinaryLabelDataset(
-                                            df=df,
-                                            label_names=[target_column],
-                                            protected_attribute_names=[sensitive_attribute],
-                                            favorable_label=1,
-                                            unfavorable_label=0)
-    
+    binary_label_dataset = BinaryLabelDataset(df=df,
+                                              label_names=[target_column],
+                                              protected_attribute_names=[sensitive_attribute],
+                                              favorable_label=1,
+                                              unfavorable_label=0)
+
     return binary_label_dataset
 
 
@@ -23,19 +22,18 @@ def contruct_binary_label_dataset_from_df(X_sample, y_sample, target_column, sen
     df = X_sample
     df[target_column] = y_sample
 
-    binary_label_dataset = BinaryLabelDataset(
-                                            df=df,
-                                            label_names=[target_column],
-                                            protected_attribute_names=[sensitive_attribute],
-                                            favorable_label=1,
-                                            unfavorable_label=0)
-    
+    binary_label_dataset = BinaryLabelDataset(df=df,
+                                              label_names=[target_column],
+                                              protected_attribute_names=[sensitive_attribute],
+                                              favorable_label=1,
+                                              unfavorable_label=0)
+
     return binary_label_dataset
 
 
 def predict_on_binary_label_dataset(model, orig_dataset, threshold=0.5):
     orig_dataset_pred = copy.deepcopy(orig_dataset)
-    
+
     fav_idx = np.where(model.classes_ == orig_dataset.favorable_label)[0][0]
     y_pred_prob = model.predict_proba(orig_dataset.features)[:, fav_idx]
     orig_dataset.scores = y_pred_prob.reshape(-1, 1)
