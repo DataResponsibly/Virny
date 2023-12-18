@@ -463,6 +463,9 @@ class MetricsInteractiveVisualizer:
             for group in model_performance_dct[metric_dim]:
                 constraint_type = 'overall' if group == 'Overall' else 'disparity'
                 min_val, max_val = input_constraint_dct[metric_dim][constraint_type][1]
+                if min_val > max_val:
+                    raise ValueError(f'Max value for the {metric_dim} {constraint_type} dimension should be greater than min value.')
+
                 check = 1 if model_performance_dct[metric_dim][group] >= min_val and model_performance_dct[metric_dim][group] <= max_val else 0
                 model_metrics_constraints_check_dct[metric_dim][group] = check
 
@@ -533,10 +536,10 @@ class MetricsInteractiveVisualizer:
             overall_metric2: 'C3',
             disparity_metric2: 'C4',
         }
-        overall_constraint1 = (overall_metric1, str_to_float(overall_metric_min_val1, 'C1 min value'), str_to_float(overall_metric_max_val1, 'C2 max value'))
-        disparity_constraint1 = (disparity_metric1, str_to_float(disparity_metric_min_val1, 'C2 min value'), str_to_float(disparity_metric_max_val1, 'C2 max value'))
-        overall_constraint2 = (overall_metric2, str_to_float(overall_metric_min_val2, 'C3 min value'), str_to_float(overall_metric_max_val2, 'C3 max value'))
-        disparity_constraint2 = (disparity_metric2, str_to_float(disparity_metric_min_val2, 'C4 min value'), str_to_float(disparity_metric_max_val2, 'C4 max value'))
+        overall_constraint1 = (overall_metric1, str_to_float(overall_metric_min_val1, 'Overall Constraint (C1) min value'), str_to_float(overall_metric_max_val1, 'Overall Constraint (C1) max value'))
+        disparity_constraint1 = (disparity_metric1, str_to_float(disparity_metric_min_val1, 'Disparity Constraint (C2) min value'), str_to_float(disparity_metric_max_val1, 'Disparity Constraint (C2) max value'))
+        overall_constraint2 = (overall_metric2, str_to_float(overall_metric_min_val2, 'Overall Constraint (C3) min value'), str_to_float(overall_metric_max_val2, 'Overall Constraint (C3) max value'))
+        disparity_constraint2 = (disparity_metric2, str_to_float(disparity_metric_min_val2, 'Disparity Constraint (C4) min value'), str_to_float(disparity_metric_max_val2, 'Disparity Constraint (C4) max value'))
 
         # Create individual constraints
         metrics_value_range_dct = dict()

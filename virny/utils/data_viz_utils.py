@@ -489,7 +489,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
         if '&' not in metric_group:
             min_range_val, max_range_val = value_range
             if max_range_val < min_range_val:
-                raise ValueError('The second element in the input range must be greater than the first element, '
+                raise ValueError('The second value in the input range must be greater than the first value, '
                                  'so to be in the following format -- (min_range_val, max_range_val)')
             metric = metric_group
             pd_condition = (pivoted_model_metrics_df[metric] >= min_range_val) & (pivoted_model_metrics_df[metric] <= max_range_val)
@@ -498,7 +498,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
             for idx, metric in enumerate(metrics):
                 min_range_val, max_range_val = metrics_value_range_dct[metric]
                 if max_range_val < min_range_val:
-                    raise ValueError('The second element in the input range must be greater than the first element, '
+                    raise ValueError('The second value in the input range must be greater than the first value, '
                                      'so to be in the following format -- (min_range_val, max_range_val)')
                 if idx == 0:
                     pd_condition = (pivoted_model_metrics_df[metric] >= min_range_val) & (pivoted_model_metrics_df[metric] <= max_range_val)
