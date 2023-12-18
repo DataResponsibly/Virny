@@ -1,9 +1,10 @@
 import pandas as pd
 
-from virny.configs.constants import ModelSetting
+from virny.configs.constants import ModelSetting, ComputationMode
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
+from virny.analyzers.batch_overall_variance_analyzer_postprocessing import BatchOverallVarianceAnalyzerPostProcessing
 from virny.analyzers.incremental_overall_variance_analyzer import IncrementalOverallVarianceAnalyzer
 
 
@@ -42,19 +43,36 @@ class SubgroupVarianceAnalyzer:
     """
     def __init__(self, model_setting: ModelSetting, n_estimators: int, base_model, base_model_name: str,
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
-                 sensitive_attributes_dct: dict, test_protected_groups: dict, computation_mode: str = None, verbose: int = 0):
+                 sensitive_attributes_dct: dict, test_protected_groups: dict, postprocessor=None,
+                 postprocessing_sensitive_attribute : str = None, computation_mode: str = None, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
-            overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
-                                                                     base_model_name=base_model_name,
-                                                                     bootstrap_fraction=bootstrap_fraction,
-                                                                     X_train=dataset.X_train_val,
-                                                                     y_train=dataset.y_train_val,
-                                                                     X_test=dataset.X_test,
-                                                                     y_test=dataset.y_test,
-                                                                     dataset_name=dataset_name,
-                                                                     target_column=dataset.target,
-                                                                     n_estimators=n_estimators,
-                                                                     verbose=verbose)
+            if computation_mode == ComputationMode.POSTPROCESSING_INTERVENTION.value:
+                overall_variance_analyzer = BatchOverallVarianceAnalyzerPostProcessing(postprocessor=postprocessor,
+                                                                                       sensitive_attribute=postprocessing_sensitive_attribute,
+                                                                                       base_model=base_model,
+                                                                                       base_model_name=base_model_name,
+                                                                                       bootstrap_fraction=bootstrap_fraction,
+                                                                                       X_train=dataset.X_train_val,
+                                                                                       y_train=dataset.y_train_val,
+                                                                                       X_test=dataset.X_test,
+                                                                                       y_test=dataset.y_test,
+                                                                                       dataset_name=dataset_name,
+                                                                                       target_column=dataset.target,
+                                                                                       n_estimators=n_estimators,
+                                                                                       with_predict_proba=False,
+                                                                                       verbose=verbose)
+            else:
+                overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
+                                                                        base_model_name=base_model_name,
+                                                                        bootstrap_fraction=bootstrap_fraction,
+                                                                        X_train=dataset.X_train_val,
+                                                                        y_train=dataset.y_train_val,
+                                                                        X_test=dataset.X_test,
+                                                                        y_test=dataset.y_test,
+                                                                        dataset_name=dataset_name,
+                                                                        target_column=dataset.target,
+                                                                        n_estimators=n_estimators,
+                                                                        verbose=verbose)
         elif model_setting == ModelSetting.INCREMENTAL:
             overall_variance_analyzer = IncrementalOverallVarianceAnalyzer(base_model=base_model,
                                                                            base_model_name=base_model_name,
@@ -75,11 +93,14 @@ class SubgroupVarianceAnalyzer:
         self.base_model_name = overall_variance_analyzer.base_model_name
 
         self.__overall_variance_analyzer = overall_variance_analyzer
+
+        with_predict_proba = False if computation_mode == ComputationMode.POSTPROCESSING_INTERVENTION.value else True
         self.__subgroup_variance_calculator = SubgroupVarianceCalculator(X_test=dataset.X_test,
                                                                          y_test=dataset.y_test,
                                                                          sensitive_attributes_dct=sensitive_attributes_dct,
                                                                          test_protected_groups=test_protected_groups,
-                                                                         computation_mode=computation_mode)
+                                                                         computation_mode=computation_mode,
+                                                                         with_predict_proba=with_predict_proba)
         self.overall_variance_metrics_dct = dict()
         self.subgroup_variance_metrics_dct = dict()
 
@@ -92,8 +113,8 @@ class SubgroupVarianceAnalyzer:
     def set_test_protected_groups(self, new_test_protected_groups):
         self.__subgroup_variance_calculator.test_protected_groups = new_test_protected_groups
 
-    def compute_metrics(self, save_results: bool, result_filename: str = None, save_dir_path: str = None,
-                        make_plots: bool = True, with_fit: bool = True):
+    def compute_metrics(self, save_results: bool, result_filename: str = None,
+                        save_dir_path: str = None, with_fit: bool = True):
         """
         Measure variance metrics for subgroups for the base model. Display variance plots for analysis if needed.
          Save results to a .csv file if needed.
@@ -108,19 +129,19 @@ class SubgroupVarianceAnalyzer:
             [Optional] Filename for results to save
         save_dir_path
             [Optional] Location where to save the results file
-        make_plots
-            If to display plots for analysis
         with_fit
             If to fit estimators in bootstrap
 
         """
-        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(make_plots, save_results=False, with_fit=with_fit)
-        self.overall_variance_metrics_dct = self.__overall_variance_analyzer.get_metrics_dict()
+        y_preds, y_test_true = self.__overall_variance_analyzer.compute_metrics(save_results=False, with_fit=with_fit)
+        y_preds = pd.Series(y_preds, index=y_test_true.index)
+        self.overall_variance_metrics_dct = self.__overall_variance_analyzer.prediction_metrics
 
         # Count and display fairness metrics
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
         self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
-            self.__overall_variance_analyzer.models_predictions, save_results, result_filename, save_dir_path
+            y_preds, self.__overall_variance_analyzer.models_predictions,
+            save_results, result_filename, save_dir_path
         )
 
         return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct)
