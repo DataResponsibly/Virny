@@ -107,8 +107,6 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
         for g in test_protected_groups.keys():
             print(g, test_protected_groups[g].shape)
 
-    print("postprocessing_sensitive_attribute: ", postprocessing_sensitive_attribute)
-
     # Compute stability metrics for subgroups
     subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
                                                           n_estimators=n_estimators,
@@ -224,7 +222,6 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                      save_results=save_results,
                                                      save_results_dir_path=save_results_dir_path,
                                                      verbose=verbose)
-            print("metrics_computation_interfaces.py: model_metrics_df: ", model_metrics_df)
             models_metrics_dct[model_name] = model_metrics_df
             if verbose >= 2:
                 print(f'\n[{model_name}] Metrics matrix:')
@@ -333,7 +330,6 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
                                                  verbose=verbose)
-    #print(models_metrics_dct)
 
     # Concatenate current run metrics with previous results and
     # create melted_model_metrics_df to save it in a database
@@ -370,7 +366,6 @@ def compute_metrics_multiple_runs_with_db_writer(dataset: BaseFlowDataset, confi
                                                         value_name="Metric_Value")
         run_models_metrics_df = pd.concat([run_models_metrics_df, melted_model_metrics_df])
 
-    #print(run_models_metrics_df)
     # Save results for this run in a database
     db_writer_func(run_models_metrics_df)
 

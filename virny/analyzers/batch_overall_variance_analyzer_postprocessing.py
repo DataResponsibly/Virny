@@ -6,7 +6,9 @@ import pandas as pd
 from tqdm import tqdm
 
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
-from virny.utils.postprocessing_intervention_utils import contruct_binary_label_dataset_from_df, construct_binary_label_dataset_from_samples, predict_on_binary_label_dataset
+from virny.utils.postprocessing_intervention_utils import (contruct_binary_label_dataset_from_df,
+                                                           construct_binary_label_dataset_from_samples,
+                                                           predict_on_binary_label_dataset)
 from virny.utils.stability_utils import generate_bootstrap
 
 
@@ -55,12 +57,14 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         if self._verbose >= 1:
             print('\n', flush=True)
         self._AbstractOverallVarianceAnalyzer__logger.info('Start classifiers testing by bootstrap')
+
         # Remove a progress bar for UQ without estimators fitting
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
                  colour="blue",
                  mininterval=10)
+
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
@@ -90,4 +94,3 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         self._AbstractOverallVarianceAnalyzer__logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions
-        
