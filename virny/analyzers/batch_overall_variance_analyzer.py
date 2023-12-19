@@ -37,7 +37,8 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
     """
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 target_column: str, dataset_name: str, n_estimators: int, verbose: int = 0):
+                 target_column: str, dataset_name: str, n_estimators: int, 
+                 with_predict_proba: bool = True, verbose: int = 0):
         super().__init__(base_model=base_model,
                          base_model_name=base_model_name,
                          bootstrap_fraction=bootstrap_fraction,
@@ -47,6 +48,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
                          y_test=y_test,
                          dataset_name=dataset_name,
                          n_estimators=n_estimators,
+                         with_predict_proba=with_predict_proba,
                          verbose=verbose)
         self.target_column = target_column
 
