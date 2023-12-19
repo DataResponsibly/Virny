@@ -104,7 +104,7 @@ class MetricsInteractiveVisualizer:
         k = int(k)
         return [gr.Textbox(visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
 
-    def create_web_app(self):
+    def create_web_app(self, start_app=True):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
             # ==================================== Dataset Statistics ====================================
             gr.Markdown(
@@ -440,7 +440,10 @@ class MetricsInteractiveVisualizer:
                             outputs=[model_performance_summary])
 
         self.demo = demo
-        return self.demo
+        if start_app:
+            self.demo.launch(inline=False, debug=True, show_error=True)
+        else:
+            return self.demo
 
     def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
                                      selected_metric: str, selected_subgroup: str, defined_model_names: list):
