@@ -3,26 +3,10 @@ import os
 import pandas as pd
 import pytest
 
-from tests import config_params, models_config, ROOT_DIR
+from tests import config_params, models_config, ROOT_DIR, compare_metric_dfs
 from virny.utils.custom_initializers import read_model_metric_dfs
 from virny.custom_classes.metrics_composer import MetricsComposer
 from virny.configs.constants import *
-
-
-def compare_composed_metric_dfs(expected_composed_metrics_df, actual_composed_metrics_df,
-                                model_name, composed_metrics_lst, groups, alpha=0.000_001):
-    for metric_name in composed_metrics_lst:
-        for group in groups:
-            expected_metric_val = expected_composed_metrics_df[
-                (expected_composed_metrics_df['Model_Name'] == model_name) &
-                (expected_composed_metrics_df['Metric'] == metric_name)
-            ][group].values[0]
-            actual_metric_val = actual_composed_metrics_df[
-                (actual_composed_metrics_df['Model_Name'] == model_name) &
-                (actual_composed_metrics_df['Metric'] == metric_name)
-            ][group].values[0]
-
-            assert abs(expected_metric_val - actual_metric_val) < alpha, f"Assert for {metric_name} metric and {group} group"
 
 
 @pytest.fixture(scope='module')
@@ -47,7 +31,7 @@ def test_compose_metrics_true1(models_metrics_dct1, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (24, 5)
+    assert models_composed_metrics_df.shape == (26, 5)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race', 'sex&race'])
@@ -58,7 +42,7 @@ def test_compose_metrics_true1(models_metrics_dct1, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY,
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
                 LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
     )
 
@@ -68,7 +52,7 @@ def test_compose_metrics_true2(models_metrics_dct1, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (24, 4)
+    assert models_composed_metrics_df.shape == (26, 4)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race'])
@@ -79,7 +63,7 @@ def test_compose_metrics_true2(models_metrics_dct1, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY,
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
                 LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
     )
 
@@ -89,7 +73,7 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (32, 5)
+    assert models_composed_metrics_df.shape == (34, 5)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race', 'sex&race'])
@@ -100,7 +84,7 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY,
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
                 LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY,
                 ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO,
                 OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO])
@@ -109,33 +93,33 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
     expected_composed_metrics_df = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'composed_metrics',
                                                             'Multiple_Models_Interface_Use_Case.csv'), header=0)
     # Check error disparity metrics
-    compare_composed_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
-                                actual_composed_metrics_df=models_composed_metrics_df,
-                                model_name='XGBClassifier',
-                                groups=['sex', 'race', 'sex&race'],
-                                composed_metrics_lst=[EQUALIZED_ODDS_TPR,
-                                                      EQUALIZED_ODDS_TNR,
-                                                      EQUALIZED_ODDS_FPR,
-                                                      EQUALIZED_ODDS_FNR,
-                                                      DISPARATE_IMPACT,
-                                                      STATISTICAL_PARITY_DIFFERENCE,
-                                                      ACCURACY_PARITY])
+    compare_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
+                       actual_composed_metrics_df=models_composed_metrics_df,
+                       model_name='XGBClassifier',
+                       groups=['sex', 'race', 'sex&race'],
+                       metrics_lst=[EQUALIZED_ODDS_TPR,
+                                    EQUALIZED_ODDS_TNR,
+                                    EQUALIZED_ODDS_FPR,
+                                    EQUALIZED_ODDS_FNR,
+                                    DISPARATE_IMPACT,
+                                    STATISTICAL_PARITY_DIFFERENCE,
+                                    ACCURACY_PARITY])
     # Check stability disparity metrics
-    compare_composed_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
-                                actual_composed_metrics_df=models_composed_metrics_df,
-                                model_name='XGBClassifier',
-                                groups=['sex', 'race', 'sex&race'],
-                                composed_metrics_lst=[LABEL_STABILITY_RATIO,
-                                                      IQR_PARITY,
-                                                      STD_PARITY,
-                                                      STD_RATIO,
-                                                      JITTER_PARITY])
+    compare_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
+                       actual_composed_metrics_df=models_composed_metrics_df,
+                       model_name='XGBClassifier',
+                       groups=['sex', 'race', 'sex&race'],
+                       metrics_lst=[LABEL_STABILITY_RATIO,
+                                    IQR_PARITY,
+                                    STD_PARITY,
+                                    STD_RATIO,
+                                    JITTER_PARITY])
     # Check uncertainty disparity metrics
-    compare_composed_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
-                                actual_composed_metrics_df=models_composed_metrics_df,
-                                model_name='XGBClassifier',
-                                groups=['sex', 'race', 'sex&race'],
-                                composed_metrics_lst=[OVERALL_UNCERTAINTY_PARITY,
-                                                      OVERALL_UNCERTAINTY_RATIO,
-                                                      ALEATORIC_UNCERTAINTY_PARITY,
-                                                      ALEATORIC_UNCERTAINTY_RATIO])
+    compare_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
+                       actual_composed_metrics_df=models_composed_metrics_df,
+                       model_name='XGBClassifier',
+                       groups=['sex', 'race', 'sex&race'],
+                       metrics_lst=[OVERALL_UNCERTAINTY_PARITY,
+                                    OVERALL_UNCERTAINTY_RATIO,
+                                    ALEATORIC_UNCERTAINTY_PARITY,
+                                    ALEATORIC_UNCERTAINTY_RATIO])

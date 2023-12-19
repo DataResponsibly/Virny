@@ -118,8 +118,8 @@ def check_substring_in_list(val_to_check: str, allowed_lst: list):
 
 
 def confusion_matrix_metrics(y_true, y_preds):
-    metrics = dict()
-    TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
+    metrics = {}
+    TN, FP, FN, TP = confusion_matrix(y_true, y_preds, labels=[0, 1]).ravel()
 
     metrics[TPR] = TP/(TP+FN)
     metrics[TNR] = TN/(TN+FP)

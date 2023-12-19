@@ -8,6 +8,36 @@ from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, A
 from virny.datasets.base import BaseDataLoader
 
 
+class CreditCardDefaultDataset(BaseDataLoader):
+
+    def __init__(self, dataset_path: str = None):
+        if dataset_path is None:
+            filename = 'credit_card_default_clean.csv'
+            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
+        df = pd.read_csv(dataset_path)
+        target = 'default_payment'
+        numerical_columns = [
+            "limit_bal", "age", 
+            "bill_amt1", "bill_amt2", "bill_amt3", 
+            "bill_amt4", "bill_amt5", "bill_amt6", 
+            "pay_amt1", "pay_amt2", "pay_amt3", 
+            "pay_amt4", "pay_amt5", "pay_amt6"
+        ]
+        categorical_columns = [
+            "sex", "education", "marriage",
+            "pay_0", "pay_2", "pay_3",
+            "pay_4", "pay_5", "pay_6"
+        ]
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+        
+
 class CreditDataset(BaseDataLoader):
     """
     Dataset class for the Credit dataset that contains sensitive attributes among feature columns.
