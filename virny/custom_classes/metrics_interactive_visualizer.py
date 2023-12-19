@@ -116,22 +116,24 @@ class MetricsInteractiveVisualizer:
     def create_web_app(self):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
             # ==================================== Dataset Selection ====================================
-            gr.Markdown(
-                """
-                ## Dataset Selection
-                """)
             with gr.Row():
                 with gr.Column():
+                    gr.Markdown(
+                        """
+                        ## Dataset Selection
+                        """)
                     selected_dataset_name = gr.Radio(
                         choices=[(self.dataset_names[0].replace('_', ' '), self.dataset_names[0]),
                                  (self.dataset_names[1].replace('_', ' '), self.dataset_names[1]),
                                  (self.dataset_names[2].replace('_', ' '), self.dataset_names[2])],
                         label="Select a Dataset for Demo")
-                with gr.Column():
+
                     reload_page_btn = gr.Button("Submit")
 
-            reload_page_btn.click(self._set_new_dataset,
-                                  inputs=[selected_dataset_name])
+                with gr.Column():
+                    pass
+
+            reload_page_btn.click(self._set_new_dataset, inputs=[selected_dataset_name])
 
             # ==================================== Dataset Statistics ====================================
             gr.Markdown(
