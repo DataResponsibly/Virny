@@ -2,8 +2,6 @@ import os
 import re
 
 from datetime import datetime, timezone
-from sklearn.metrics import confusion_matrix
-from river import base
 
 from virny.configs.constants import *
 
@@ -14,7 +12,7 @@ def validate_config(config_obj):
 
     Extra details:
     * config_obj.model_setting is an optional argument that defines a type of models to use
-      to compute fairness and stability metrics. Should be 'batch' or 'incremental'. Default: 'batch'.
+      to compute fairness and stability metrics. Default: 'batch'.
 
     * config_obj.computation_mode is an optional argument that defines a non-default mode for metrics computation.
       Currently, only 'error_analysis' mode is supported.
@@ -87,11 +85,7 @@ def str_to_float(str_var: str, var_name: str):
 
 
 def reset_model_seed(model, new_seed, verbose):
-    if isinstance(model, base.Classifier): # For incremental models
-        model.seed = new_seed
-        if verbose >= 1:
-            print('Model seed: ', model.seed)
-    elif 'random_state' in model.get_params():
+    if 'random_state' in model.get_params():
         model.set_params(random_state=new_seed)
         if verbose >= 1:
             print('Model seed: ', model.get_params().get('random_state', None))
@@ -115,20 +109,3 @@ def check_substring_in_list(val_to_check: str, allowed_lst: list):
         if allowed_val.lower() in val_to_check:
             return True
     return False
-
-
-def confusion_matrix_metrics(y_true, y_preds):
-    metrics = {}
-    TN, FP, FN, TP = confusion_matrix(y_true, y_preds, labels=[0, 1]).ravel()
-
-    metrics[TPR] = TP/(TP+FN)
-    metrics[TNR] = TN/(TN+FP)
-    metrics[PPV] = TP/(TP+FP)
-    metrics[FNR] = FN/(FN+TP)
-    metrics[FPR] = FP/(FP+TN)
-    metrics[ACCURACY] = (TP+TN)/(TP+TN+FP+FN)
-    metrics[F1] = (2*TP)/(2*TP+FP+FN)
-    metrics[SELECTION_RATE] = (TP+FP)/(TP+FP+TN+FN)
-    metrics[POSITIVE_RATE] = (TP+FP)/(TP+FN)
-
-    return metrics

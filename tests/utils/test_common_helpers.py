@@ -3,7 +3,8 @@ from munch import DefaultMunch
 from sklearn.model_selection import train_test_split
 
 from tests import config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
-from virny.utils.common_helpers import validate_config, confusion_matrix_metrics
+from virny.metrics.accuracy_metrics import confusion_matrix_metrics
+from virny.utils.common_helpers import validate_config
 
 
 def test_validate_config_true1(config_params):

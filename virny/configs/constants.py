@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ModelSetting(Enum):
-    INCREMENTAL = "incremental"
     BATCH = "batch"
 
 

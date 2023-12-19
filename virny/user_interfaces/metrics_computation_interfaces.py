@@ -2,7 +2,6 @@ import os
 import traceback
 import numpy as np
 import pandas as pd
-from river import base
 from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 from IPython.display import display
@@ -89,7 +88,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     save_results
         [Optional] If to save result metrics in a file
     model_setting
-        [Optional] Model type: 'batch' or 'incremental'. Default: 'batch'.
+        [Optional] Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
@@ -142,10 +141,7 @@ def compute_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDatase
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Name'] = base_model_name
-    if isinstance(base_model, base.Classifier): # skip for incremental models
-        metrics_df['Model_Params'] = None
-    else:
-        metrics_df['Model_Params'] = str(base_model.get_params())
+    metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics
@@ -182,7 +178,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
     model_setting
-        [Optional] Model type: 'batch' or incremental. Default: 'batch'.
+        [Optional] Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     postprocessor
@@ -471,7 +467,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
     model_setting
-        Model type: 'batch' or incremental.
+        Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose
@@ -544,7 +540,7 @@ def compute_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
     base_model_name
         Model name to name a result file with metrics
     model_setting
-        Model type: 'batch' or incremental.
+        Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     verbose

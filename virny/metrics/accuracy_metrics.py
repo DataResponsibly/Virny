@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.metrics import confusion_matrix
+
+from virny.configs.constants import *
+
 
 def mean_prediction(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> float:
     return np.mean(uq_predict_probas.mean().values)
@@ -31,3 +35,20 @@ def statistical_bias(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> f
         [statistical_bias_from_predict_proba(x, y_true) for x, y_true in np.column_stack((main_predictions, y_true))]
     )
     return np.mean(statistical_bias_lst)
+
+
+def confusion_matrix_metrics(y_true, y_preds):
+    metrics = {}
+    TN, FP, FN, TP = confusion_matrix(y_true, y_preds, labels=[0, 1]).ravel()
+
+    metrics[TPR] = TP/(TP+FN)
+    metrics[TNR] = TN/(TN+FP)
+    metrics[PPV] = TP/(TP+FP)
+    metrics[FNR] = FN/(FN+TP)
+    metrics[FPR] = FP/(FP+TN)
+    metrics[ACCURACY] = (TP+TN)/(TP+TN+FP+FN)
+    metrics[F1] = (2*TP)/(2*TP+FP+FN)
+    metrics[SELECTION_RATE] = (TP+FP)/(TP+FP+TN+FN)
+    metrics[POSITIVE_RATE] = (TP+FP)/(TP+FN)
+
+    return metrics
