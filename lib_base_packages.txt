@@ -5,11 +5,11 @@ altair~=4.2.0
 scikit-learn~=1.2.0
 tqdm~=4.64.1
 sklearn-utils
+gradio==4.10.0
 seaborn~=0.12.1
 folktables~=0.0.11
 munch~=2.5.0
 PyYAML~=6.0
 river==0.15.0
-datapane~=0.16.0
 requests-toolbelt==1.0.0
 colorama~=0.4.6
