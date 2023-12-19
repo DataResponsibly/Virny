@@ -5,6 +5,7 @@ from pprint import pprint
 
 from virny.configs.constants import *
 from virny.utils.common_helpers import str_to_float
+from virny.custom_classes.metrics_composer import MetricsComposer
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_flexible_bar_plot_for_model_selection,
@@ -24,20 +25,20 @@ class MetricsInteractiveVisualizer:
         An original target column pandas series
     model_metrics_dct
         Dictionary where keys are model names and values are dataframes of subgroup metrics for each model
-    model_composed_metrics_df
-        Dataframe of all model composed metrics
     sensitive_attributes_dct
         A dictionary where keys are sensitive attributes names (including attributes intersections),
          and values are privilege values for these attributes
 
     """
     def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics_dct: dict,
-                 model_composed_metrics_df: pd.DataFrame, sensitive_attributes_dct: dict):
+                 sensitive_attributes_dct: dict):
         self.X_data = X_data
         self.y_data = y_data
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.group_names = list(self.sensitive_attributes_dct.keys())
+
+        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
 
         # Technical attributes
         self.demo = None
