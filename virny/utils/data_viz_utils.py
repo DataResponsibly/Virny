@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from altair.utils.schemapi import Undefined
 
 from virny.utils.common_helpers import check_substring_in_list
-from IPython.display import display
 
 
 def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.001):
