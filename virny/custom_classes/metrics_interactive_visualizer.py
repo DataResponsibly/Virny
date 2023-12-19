@@ -5,6 +5,7 @@ from pprint import pprint
 
 from virny.configs.constants import *
 from virny.utils.common_helpers import str_to_float
+from virny.custom_classes.metrics_composer import MetricsComposer
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization, create_sorted_matrix_by_rank,
                                         create_subgroup_sorted_matrix_by_rank, create_flexible_bar_plot_for_model_selection,
@@ -22,17 +23,28 @@ class MetricsInteractiveVisualizer:
         An original features dataframe
     y_data
         An original target column pandas series
-    model_metrics_dct
-        Dictionary where keys are model names and values are dataframes of subgroup metrics for each model
-    model_composed_metrics_df
-        Dataframe of all model composed metrics
+    model_metrics
+        A dictionary or a dataframe where keys are model names and values are dataframes of subgroup metrics for each model
     sensitive_attributes_dct
         A dictionary where keys are sensitive attributes names (including attributes intersections),
          and values are privilege values for these attributes
 
     """
-    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics_dct: dict,
-                 model_composed_metrics_df: pd.DataFrame, sensitive_attributes_dct: dict):
+    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics, sensitive_attributes_dct: dict):
+        # Preprocessed variables
+        if isinstance(model_metrics, dict):
+            model_metrics_dct = model_metrics
+        elif isinstance(model_metrics, pd.DataFrame):
+            model_names = model_metrics['Model_Name'].unique()
+            model_metrics_dct = dict()
+            for model_name in model_names:
+                model_metrics_dct[model_name] = model_metrics[model_metrics['Model_Name'] == model_name]
+        else:
+            raise ValueError('model_metrics argument must be a dictionary or a pandas dataframe of metrics.')
+
+        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
+
+        # Attributes from input arguments
         self.X_data = X_data
         self.y_data = y_data
         self.model_names = list(model_metrics_dct.keys())
