@@ -440,7 +440,7 @@ class MetricsInteractiveVisualizer:
                             outputs=[model_performance_summary])
 
         self.demo = demo
-        self.demo.launch(inline=False, debug=True, show_error=True)
+        return self.demo
 
     def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
                                      selected_metric: str, selected_subgroup: str, defined_model_names: list):
