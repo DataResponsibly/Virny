@@ -23,22 +23,33 @@ class MetricsInteractiveVisualizer:
         An original features dataframe
     y_data
         An original target column pandas series
-    model_metrics_dct
-        Dictionary where keys are model names and values are dataframes of subgroup metrics for each model
+    model_metrics
+        A dictionary or a dataframe where keys are model names and values are dataframes of subgroup metrics for each model
     sensitive_attributes_dct
         A dictionary where keys are sensitive attributes names (including attributes intersections),
          and values are privilege values for these attributes
 
     """
-    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics_dct: dict,
-                 sensitive_attributes_dct: dict):
+    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics, sensitive_attributes_dct: dict):
+        # Preprocessed variables
+        if isinstance(model_metrics, dict):
+            model_metrics_dct = model_metrics
+        elif isinstance(model_metrics, pd.DataFrame):
+            model_names = model_metrics['Model_Name'].unique()
+            model_metrics_dct = dict()
+            for model_name in model_names:
+                model_metrics_dct[model_name] = model_metrics[model_metrics['Model_Name'] == model_name]
+        else:
+            raise ValueError('model_metrics argument must be a dictionary or a pandas dataframe of metrics.')
+
+        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
+
+        # Attributes from input arguments
         self.X_data = X_data
         self.y_data = y_data
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.group_names = list(self.sensitive_attributes_dct.keys())
-
-        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
 
         # Technical attributes
         self.demo = None
