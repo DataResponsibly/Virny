@@ -1,3 +1,4 @@
+import js2py
 import pandas as pd
 import gradio as gr
 import altair as alt
@@ -30,19 +31,10 @@ class MetricsInteractiveVisualizer:
          and values are privilege values for these attributes
 
     """
-    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics, sensitive_attributes_dct: dict):
+    def __init__(self, X_data: pd.DataFrame, y_data: pd.DataFrame, model_metrics,
+                 sensitive_attributes_dct: dict, extra_datasets_dct: dict = None):
         # Preprocessed variables
-        if isinstance(model_metrics, dict):
-            model_metrics_dct = model_metrics
-        elif isinstance(model_metrics, pd.DataFrame):
-            model_names = model_metrics['Model_Name'].unique()
-            model_metrics_dct = dict()
-            for model_name in model_names:
-                model_metrics_dct[model_name] = model_metrics[model_metrics['Model_Name'] == model_name]
-        else:
-            raise ValueError('model_metrics argument must be a dictionary or a pandas dataframe of metrics.')
-
-        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
+        model_metrics_dct, model_composed_metrics_df = self._preprocess_model_metrics(model_metrics, sensitive_attributes_dct)
 
         # Attributes from input arguments
         self.X_data = X_data
@@ -50,6 +42,8 @@ class MetricsInteractiveVisualizer:
         self.model_names = list(model_metrics_dct.keys())
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.group_names = list(self.sensitive_attributes_dct.keys())
+        self.extra_datasets_dct = extra_datasets_dct
+        self.dataset_names = list(self.extra_datasets_dct.keys())
 
         # Technical attributes
         self.demo = None
@@ -89,6 +83,21 @@ class MetricsInteractiveVisualizer:
                                                                                     value_name="Value")
         self.sorted_model_composed_metrics_df = self.melted_model_composed_metrics_df.sort_values(by=['Value'])
 
+    def _preprocess_model_metrics(self, model_metrics, sensitive_attributes_dct):
+        if isinstance(model_metrics, dict):
+            model_metrics_dct = model_metrics
+        elif isinstance(model_metrics, pd.DataFrame):
+            model_names = model_metrics['Model_Name'].unique()
+            model_metrics_dct = dict()
+            for model_name in model_names:
+                model_metrics_dct[model_name] = model_metrics[model_metrics['Model_Name'] == model_name]
+        else:
+            raise ValueError('model_metrics argument must be a dictionary or a pandas dataframe of metrics.')
+
+        model_composed_metrics_df = MetricsComposer(model_metrics_dct, sensitive_attributes_dct).compose_metrics()
+
+        return model_metrics_dct, model_composed_metrics_df
+
     def _align_input_metric_df(self, model_metrics_df: pd.DataFrame, allowed_cols: list, sensitive_attrs: list):
         # Filter columns in the input dataframe based on allowed_cols and sensitive_attrs
         filtered_cols = allowed_cols
@@ -106,6 +115,24 @@ class MetricsInteractiveVisualizer:
 
     def create_web_app(self):
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
+            # ==================================== Dataset Selection ====================================
+            gr.Markdown(
+                """
+                ## Dataset Selection
+                """)
+            with gr.Row():
+                with gr.Column():
+                    selected_dataset_name = gr.Radio(
+                        choices=[(self.dataset_names[0].replace('_', ' '), self.dataset_names[0]),
+                                 (self.dataset_names[1].replace('_', ' '), self.dataset_names[1]),
+                                 (self.dataset_names[2].replace('_', ' '), self.dataset_names[2])],
+                        label="Select a Dataset for Demo")
+                with gr.Column():
+                    reload_page_btn = gr.Button("Submit")
+
+            reload_page_btn.click(self._set_new_dataset,
+                                  inputs=[selected_dataset_name])
+
             # ==================================== Dataset Statistics ====================================
             gr.Markdown(
                 """
@@ -441,6 +468,44 @@ class MetricsInteractiveVisualizer:
 
         self.demo = demo
         self.demo.launch(inline=False, debug=True, show_error=True)
+
+    def _set_new_dataset(self, dataset_name):
+        dataset_configs = self.extra_datasets_dct[dataset_name]
+
+        # Assign input dataset configs
+        self.X_data = dataset_configs['data_loader'].X_data
+        self.y_data = dataset_configs['data_loader'].y_data
+        self.sensitive_attributes_dct = dataset_configs['sensitive_attributes_dct']
+        model_metrics_dct, model_composed_metrics_df = self._preprocess_model_metrics(dataset_configs['model_metrics'],
+                                                                                      self.sensitive_attributes_dct)
+
+        self.group_names = list(self.sensitive_attributes_dct.keys())
+        self.model_names = list(model_metrics_dct.keys())
+
+        # Create one metrics df with all model_dfs
+        models_metrics_df = pd.DataFrame()
+        for model_name in model_metrics_dct.keys():
+            model_metrics_df = model_metrics_dct[model_name]
+            models_metrics_df = pd.concat([models_metrics_df, model_metrics_df])
+
+        models_metrics_df = models_metrics_df.reset_index(drop=True)
+
+        self.models_metrics_dct = model_metrics_dct
+        self.models_metrics_df = self._align_input_metric_df(models_metrics_df, allowed_cols=["Metric", "Model_Name", "overall"],
+                                                             sensitive_attrs=list(self.sensitive_attributes_dct.keys()))
+        self.model_composed_metrics_df =  self._align_input_metric_df(model_composed_metrics_df, allowed_cols=["Metric", "Model_Name"],
+                                                                      sensitive_attrs=list(self.sensitive_attributes_dct.keys()))
+
+        self.melted_model_metrics_df = self.models_metrics_df.melt(id_vars=["Metric", "Model_Name"],
+                                                                   var_name="Subgroup",
+                                                                   value_name="Value")
+        self.sorted_model_metrics_df = self.melted_model_metrics_df.sort_values(by=['Value'])
+        self.melted_model_composed_metrics_df = self.model_composed_metrics_df.melt(id_vars=["Metric", "Model_Name"],
+                                                                                    var_name="Subgroup",
+                                                                                    value_name="Value")
+        self.sorted_model_composed_metrics_df = self.melted_model_composed_metrics_df.sort_values(by=['Value'])
+
+        js2py.eval_js("window.location.reload()")
 
     def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
                                      selected_metric: str, selected_subgroup: str, defined_model_names: list):
