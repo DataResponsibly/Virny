@@ -1,5 +1,6 @@
 import traceback
 import pandas as pd
+from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
@@ -124,11 +125,11 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # Set a specific tqdm type for Jupyter notebooks and python modules
-    if notebook_logs_stdout:
-        from tqdm.notebook import tqdm
-    else:
-        from tqdm import tqdm
+    # # Set a specific tqdm type for Jupyter notebooks and python modules
+    # if notebook_logs_stdout:
+    #     from tqdm.notebook import tqdm
+    # else:
+    #     from tqdm import tqdm
 
     models_metrics_dct = dict()
     num_models = len(models_config)

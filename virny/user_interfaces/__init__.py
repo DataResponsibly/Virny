@@ -7,7 +7,6 @@ This module contains user interfaces for metrics computation.
 from .multiple_models_api import (
     compute_metrics_with_config,
     run_metrics_computation,
-    compute_one_model_metrics_with_config,
     compute_one_model_metrics
 )
 from .multiple_models_with_db_writer_api import compute_metrics_with_db_writer
@@ -21,7 +20,6 @@ from .multiple_models_with_multiple_test_sets_api import (
 __all__ = [
     "compute_metrics_with_config",
     "run_metrics_computation",
-    "compute_one_model_metrics_with_config",
     "compute_one_model_metrics",
     "compute_metrics_with_db_writer",
     "compute_metrics_with_multiple_test_sets",

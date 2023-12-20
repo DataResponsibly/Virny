@@ -1,6 +1,7 @@
 import os
 import traceback
 import pandas as pd
+from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
@@ -121,11 +122,11 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # Set a specific tqdm type for Jupyter notebooks and python modules
-    if notebook_logs_stdout:
-        from tqdm.notebook import tqdm
-    else:
-        from tqdm import tqdm
+    # # Set a specific tqdm type for Jupyter notebooks and python modules
+    # if notebook_logs_stdout:
+    #     from tqdm.notebook import tqdm
+    # else:
+    #     from tqdm import tqdm
 
     models_metrics_dct = dict()
     num_models = len(models_config)
@@ -134,6 +135,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                       desc="Analyze models in one run",
                                       colour="red"):
         if verbose >= 1:
+            # print('\n\n', flush=True)
+            print('\n\n')
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
@@ -162,45 +165,6 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             print('\n\n\n')
 
     return models_metrics_dct
-
-
-def compute_one_model_metrics_with_config(base_model, model_name: str, dataset: BaseFlowDataset, config, save_results_dir_path: str,
-                                          save_results: bool = True, verbose: int = 0) -> pd.DataFrame:
-    """
-    Compute subgroup metrics for the base model. Arguments are defined as an input config object.
-    Save results in `save_results_dir_path` folder.
-
-    Return a dataframe of model metrics.
-
-    Parameters
-    ----------
-    base_model
-        Base model for metrics computation
-    model_name
-        Model name to name a result file with metrics
-    dataset
-        BaseFlowDataset object that contains all needed attributes like target, features, numerical_columns etc.
-    config
-        Object that contains bootstrap_fraction, dataset_name, n_estimators, sensitive_attributes_dct attributes
-    save_results_dir_path
-        Location where to save result files with metrics
-    save_results
-        [Optional] If to save result metrics in a file
-    verbose
-        [Optional] Level of logs printing. The greater level provides more logs.
-            As for now, 0, 1, 2 levels are supported.
-
-    """
-    return compute_one_model_metrics(base_model=base_model,
-                                     n_estimators=config.n_estimators,
-                                     dataset=dataset,
-                                     bootstrap_fraction=config.bootstrap_fraction,
-                                     sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                     dataset_name=config.dataset_name,
-                                     base_model_name=model_name,
-                                     save_results=save_results,
-                                     save_results_dir_path=save_results_dir_path,
-                                     verbose=verbose)
 
 
 def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,

@@ -1,6 +1,7 @@
 import os
 import gc
 import pandas as pd
+from tqdm.notebook import tqdm
 
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod
@@ -119,14 +120,15 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
         if self._verbose >= 1:
-            print('\n', flush=True)
+            # print('\n', flush=True)
+            print('\n')
         self._logger.info('Start classifiers testing by bootstrap')
 
-        # Remove a progress bar for UQ without estimators fitting
-        if self._notebook_logs_stdout:
-            from tqdm.notebook import tqdm
-        else:
-            from tqdm import tqdm
+        # # Remove a progress bar for UQ without estimators fitting
+        # if self._notebook_logs_stdout:
+        #     from tqdm.notebook import tqdm
+        # else:
+        #     from tqdm import tqdm
 
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
@@ -147,7 +149,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                 gc.collect()
 
         if self._verbose >= 1:
-            print('\n', flush=True)
+            # print('\n', flush=True)
+            print('\n')
         self._logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions
