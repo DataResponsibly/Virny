@@ -1,15 +1,12 @@
 import gc
-
-import numpy as np
 import pandas as pd
-
 from tqdm import tqdm
 
+from virny.utils.stability_utils import generate_bootstrap
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
-from virny.utils.postprocessing_intervention_utils import (contruct_binary_label_dataset_from_df,
+from virny.utils.postprocessing_intervention_utils import (construct_binary_label_dataset_from_df,
                                                            construct_binary_label_dataset_from_samples,
                                                            predict_on_binary_label_dataset)
-from virny.utils.stability_utils import generate_bootstrap
 
 
 class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
@@ -33,7 +30,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         
         self.postprocessor = postprocessor
         self.sensitive_attribute = sensitive_attribute
-        self.test_binary_label_dataset = contruct_binary_label_dataset_from_df(X_test, y_test, target_column, sensitive_attribute)
+        self.test_binary_label_dataset = construct_binary_label_dataset_from_df(X_test, y_test, target_column, sensitive_attribute)
         
     def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool, with_fit: bool = True) -> dict:
         """
@@ -56,7 +53,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
         if self._verbose >= 1:
             print('\n', flush=True)
-        self._AbstractOverallVarianceAnalyzer__logger.info('Start classifiers testing by bootstrap')
+        self._logger.info('Start classifiers testing by bootstrap')
 
         # Remove a progress bar for UQ without estimators fitting
         cycle_range = range(self.n_estimators) if with_fit is False else \
@@ -83,14 +80,9 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             
             models_predictions[idx] = postprocessor_fitted.predict(test_binary_label_dataset_pred).labels.ravel()
             self.models_lst[idx] = classifier
-
-            print("Postprocessor fitted params: ", postprocessor_fitted.model_params.x, flush=True)
-            postprocessor_fitted.saved_params.append(postprocessor_fitted.model_params.x)
-        
-        print("Postprocessor fitted params: ", postprocessor_fitted.saved_params, flush=True)
             
         if self._verbose >= 1:
             print('\n', flush=True)
-        self._AbstractOverallVarianceAnalyzer__logger.info('Successfully tested classifiers by bootstrap')
+        self._logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions

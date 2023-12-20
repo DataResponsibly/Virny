@@ -55,7 +55,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.with_predict_proba = with_predict_proba
 
         self._verbose = verbose
-        self.__logger = get_logger(verbose)
+        self._logger = get_logger(verbose)
 
         self.X_train = X_train
         self.y_train = y_train
@@ -92,7 +92,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
         # Count metrics based on prediction proba results
         y_preds, self.prediction_metrics = count_prediction_metrics(self.y_test.values, self.models_predictions, self.with_predict_proba)
-        self.__logger.info(f'Successfully computed predict proba metrics')
+        self._logger.info(f'Successfully computed predict proba metrics')
 
         if save_results:
             self.save_metrics_to_file()
@@ -119,7 +119,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
         if self._verbose >= 1:
             print('\n', flush=True)
-        self.__logger.info('Start classifiers testing by bootstrap')
+        self._logger.info('Start classifiers testing by bootstrap')
         # Remove a progress bar for UQ without estimators fitting
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
@@ -140,7 +140,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
         if self._verbose >= 1:
             print('\n', flush=True)
-        self.__logger.info('Successfully tested classifiers by bootstrap')
+        self._logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions
 

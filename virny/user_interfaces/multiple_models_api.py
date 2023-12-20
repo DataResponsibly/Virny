@@ -13,7 +13,7 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, verbose: int = 0) -> dict:
+                                save_results_dir_path: str, postprocessor=None, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
@@ -30,6 +30,8 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         Dictionary where keys are model names, and values are initialized models
     save_results_dir_path
         Location where to save result files with metrics
+    postprocessor
+        [Optional] Postprocessor object to apply to model predictions before metrics computation
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -37,6 +39,11 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
     """
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
+
+    # Check if a type of postprocessing_sensitive_attribute is not NoneType.
+    # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
+    postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \
+        if type(config.postprocessing_sensitive_attribute) != type(None) else None
 
     model_metrics_dct = dict()
     models_metrics_dct = run_metrics_computation(dataset=dataset,
@@ -47,6 +54,8 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
+                                                 postprocessor=postprocessor,
+                                                 postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
                                                  verbose=verbose)
 
