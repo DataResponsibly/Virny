@@ -1,7 +1,6 @@
 import os
 import traceback
 import pandas as pd
-from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
@@ -13,7 +12,8 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, postprocessor=None, verbose: int = 0) -> dict:
+                                save_results_dir_path: str, postprocessor=None,
+                                notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results in `save_results_dir_path` folder.
@@ -32,6 +32,9 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         Location where to save result files with metrics
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -57,6 +60,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
+                                                 notebook_logs_stdout=notebook_logs_stdout,
                                                  verbose=verbose)
 
     # Concatenate with previous results and save them in an overwrite mode each time for backups
@@ -74,7 +78,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
                             postprocessor=None, postprocessing_sensitive_attribute: str = None,
-                            save_results: bool = True, save_results_dir_path: str = None, verbose: int = 0) -> dict:
+                            save_results: bool = True, save_results_dir_path: str = None,
+                            notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
@@ -108,11 +113,20 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] If to save result metrics in a file
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
 
     """
+    # Set a specific tqdm type for Jupyter notebooks and python modules
+    if notebook_logs_stdout:
+        from tqdm.notebook import tqdm
+    else:
+        from tqdm import tqdm
+
     models_metrics_dct = dict()
     num_models = len(models_config)
     for model_idx, model_name in tqdm(enumerate(models_config.keys()),
@@ -136,6 +150,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                          postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                          save_results=save_results,
                                                          save_results_dir_path=save_results_dir_path,
+                                                         notebook_logs_stdout=notebook_logs_stdout,
                                                          verbose=verbose)
             models_metrics_dct[model_name] = model_metrics_df
 
@@ -192,7 +207,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
                               sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
                               postprocessor=None, postprocessing_sensitive_attribute: str = None,
                               model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
-                              save_results_dir_path: str = None, verbose: int = 0):
+                              save_results_dir_path: str = None, notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
     Save results in `save_results_dir_path` folder.
@@ -228,6 +243,9 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -254,6 +272,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
                                                           computation_mode=computation_mode,
                                                           postprocessor=postprocessor,
                                                           postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
+                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
                                                                               result_filename=None,

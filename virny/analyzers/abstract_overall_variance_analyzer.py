@@ -3,7 +3,6 @@ import gc
 import pandas as pd
 
 from copy import deepcopy
-from tqdm import tqdm
 from abc import ABCMeta, abstractmethod
 
 from virny.custom_classes.custom_logger import get_logger
@@ -43,7 +42,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 dataset_name: str, n_estimators: int, with_predict_proba: bool = True, verbose: int = 0):
+                 dataset_name: str, n_estimators: int, with_predict_proba: bool = True,
+                 notebook_logs_stdout: bool = False, verbose: int = 0):
         self.base_model = base_model
         self.base_model_name = base_model_name
         self.bootstrap_fraction = bootstrap_fraction
@@ -54,6 +54,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.prediction_metrics = None
         self.with_predict_proba = with_predict_proba
 
+        self._notebook_logs_stdout = notebook_logs_stdout
         self._verbose = verbose
         self._logger = get_logger(verbose)
 
@@ -120,12 +121,19 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         if self._verbose >= 1:
             print('\n', flush=True)
         self._logger.info('Start classifiers testing by bootstrap')
+
         # Remove a progress bar for UQ without estimators fitting
+        if self._notebook_logs_stdout:
+            from tqdm.notebook import tqdm
+        else:
+            from tqdm import tqdm
+
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
                  colour="blue",
                  mininterval=10)
+
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]

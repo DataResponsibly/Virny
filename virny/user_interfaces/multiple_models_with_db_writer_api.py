@@ -7,7 +7,7 @@ from virny.user_interfaces.multiple_models_api import run_metrics_computation
 
 def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
                                    custom_tbl_fields_dct: dict, db_writer_func,
-                                   postprocessor=None, verbose: int = 0) -> dict:
+                                   postprocessor=None, notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
@@ -28,6 +28,9 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -51,6 +54,7 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
+                                                 notebook_logs_stdout=notebook_logs_stdout,
                                                  verbose=verbose)
 
     # Concatenate current run metrics with previous results and

@@ -1,6 +1,5 @@
 import gc
 import pandas as pd
-from tqdm import tqdm
 
 from virny.utils.stability_utils import generate_bootstrap
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -14,7 +13,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                  base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
                  target_column: str, dataset_name: str, n_estimators: int, 
-                 with_predict_proba: bool = True, verbose: int = 0):
+                 with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
         super().__init__(base_model=base_model,
                          base_model_name=base_model_name,
                          bootstrap_fraction=bootstrap_fraction,
@@ -26,6 +25,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                          dataset_name=dataset_name,
                          n_estimators=n_estimators,
                          with_predict_proba=with_predict_proba,
+                         notebook_logs_stdout=notebook_logs_stdout,
                          verbose=verbose)
         
         self.postprocessor = postprocessor
@@ -56,6 +56,11 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         self._logger.info('Start classifiers testing by bootstrap')
 
         # Remove a progress bar for UQ without estimators fitting
+        if self._notebook_logs_stdout:
+            from tqdm.notebook import tqdm
+        else:
+            from tqdm import tqdm
+
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",

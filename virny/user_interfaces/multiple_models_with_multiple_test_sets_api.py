@@ -1,6 +1,5 @@
 import traceback
 import pandas as pd
-from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
@@ -12,7 +11,7 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test_sets_lst,
                                             config, models_config: dict, custom_tbl_fields_dct: dict,
-                                            db_writer_func, verbose: int = 0):
+                                            db_writer_func, notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Arguments are defined as an input config object. Save results to a database after each run
@@ -35,6 +34,9 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
         Dictionary where keys are column names and values to add to inserted metrics during saving results to a database
     db_writer_func
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -49,6 +51,7 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
                                                                          sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                                          model_setting=config.model_setting,
                                                                          computation_mode=config.computation_mode,
+                                                                         notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
 
     # Concatenate current run metrics with previous results and
@@ -84,7 +87,8 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
                                                     sensitive_attributes_dct: dict, model_setting: str = ModelSetting.BATCH.value,
-                                                    computation_mode: str = None, verbose: int = 0) -> dict:
+                                                    computation_mode: str = None, notebook_logs_stdout: bool = False,
+                                                    verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
@@ -112,11 +116,20 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
 
     """
+    # Set a specific tqdm type for Jupyter notebooks and python modules
+    if notebook_logs_stdout:
+        from tqdm.notebook import tqdm
+    else:
+        from tqdm import tqdm
+
     models_metrics_dct = dict()
     num_models = len(models_config)
     for model_idx, model_name in tqdm(enumerate(models_config.keys()),
@@ -137,6 +150,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                                                       computation_mode=computation_mode,
                                                                                       dataset_name=dataset_name,
                                                                                       base_model_name=model_name,
+                                                                                      notebook_logs_stdout=notebook_logs_stdout,
                                                                                       verbose=verbose)
             models_metrics_dct[model_name] = model_metrics_dfs_lst
         except Exception as err:
@@ -154,7 +168,8 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                       bootstrap_fraction: float, sensitive_attributes_dct: dict,
                                                       dataset_name: str, base_model_name: str,
                                                       model_setting: str = ModelSetting.BATCH.value,
-                                                      computation_mode: str = None, verbose: int = 0):
+                                                      computation_mode: str = None, notebook_logs_stdout: bool = False,
+                                                      verbose: int = 0):
     """
     Compute subgroup metrics for the base model based on dataset.X_test and each extra test set in extra_test_sets_lst.
     Save results in `save_results_dir_path` folder.
@@ -185,6 +200,9 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
         Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -201,6 +219,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=dict(),  # stub for this attribute
                                                           computation_mode=computation_mode,
+                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                           verbose=verbose)
 
     test_sets_lst = [(dataset.X_test, dataset.y_test, dataset.init_features_df)] + extra_test_sets_lst
