@@ -1,4 +1,5 @@
 import gc
+import sys
 import pandas as pd
 
 from virny.utils.stability_utils import generate_bootstrap
@@ -65,7 +66,8 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
                  colour="blue",
-                 mininterval=10)
+                 mininterval=10,
+                 file=sys.stdout)
 
         # Train and test each estimator in models_predictions
         for idx in cycle_range:

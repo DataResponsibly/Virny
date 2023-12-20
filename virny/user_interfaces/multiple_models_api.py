@@ -1,4 +1,5 @@
 import os
+import sys
 import traceback
 import pandas as pd
 from datetime import datetime, timezone
@@ -136,7 +137,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     for model_idx, model_name in tqdm(enumerate(models_config.keys()),
                                       total=num_models,
                                       desc="Analyze multiple models",
-                                      colour="red"):
+                                      colour="red",
+                                      file=sys.stdout):
         if verbose >= 1:
             print('\n\n', flush=True)
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
