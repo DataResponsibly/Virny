@@ -4,9 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from datetime import datetime, timezone
 
-from virny.configs.constants import ReportType
 from virny.utils.data_viz_utils import create_sorted_matrix_by_rank
 
 
