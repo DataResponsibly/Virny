@@ -1,6 +1,5 @@
 import traceback
 import pandas as pd
-from tqdm.notebook import tqdm
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
@@ -40,9 +39,13 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
          False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
-            As for now, 0, 1, 2 levels are supported.
+            As for now, 0, 1, 2 levels are supported. Currently, verbose works only with notebook_logs_stdout = False.
 
     """
+    # Currently, verbose works only with notebook_logs_stdout = False
+    if notebook_logs_stdout:
+        verbose = 0
+
     models_metrics_dct = run_metrics_computation_with_multiple_test_sets(dataset=dataset,
                                                                          bootstrap_fraction=config.bootstrap_fraction,
                                                                          dataset_name=config.dataset_name,
@@ -125,17 +128,17 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
             As for now, 0, 1, 2 levels are supported.
 
     """
-    # # Set a specific tqdm type for Jupyter notebooks and python modules
-    # if notebook_logs_stdout:
-    #     from tqdm.notebook import tqdm
-    # else:
-    #     from tqdm import tqdm
+    # Set a specific tqdm type for Jupyter notebooks and python modules
+    if notebook_logs_stdout:
+        from tqdm.notebook import tqdm
+    else:
+        from tqdm import tqdm
 
     models_metrics_dct = dict()
     num_models = len(models_config)
     for model_idx, model_name in tqdm(enumerate(models_config.keys()),
                                       total=num_models,
-                                      desc="Analyze models in one run",
+                                      desc="Analyze multiple models",
                                       colour="red"):
         if verbose >= 1:
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)

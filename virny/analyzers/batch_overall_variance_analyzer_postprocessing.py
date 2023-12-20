@@ -1,6 +1,5 @@
 import gc
 import pandas as pd
-from tqdm.notebook import tqdm
 
 from virny.utils.stability_utils import generate_bootstrap
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -53,15 +52,14 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         """
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
         if self._verbose >= 1:
-            # print('\n', flush=True)
-            print('\n')
+            print('\n', flush=True)
         self._logger.info('Start classifiers testing by bootstrap')
 
-        # # Remove a progress bar for UQ without estimators fitting
-        # if self._notebook_logs_stdout:
-        #     from tqdm.notebook import tqdm
-        # else:
-        #     from tqdm import tqdm
+        # Remove a progress bar for UQ without estimators fitting
+        if self._notebook_logs_stdout:
+            from tqdm.notebook import tqdm
+        else:
+            from tqdm import tqdm
 
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
@@ -89,8 +87,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             self.models_lst[idx] = classifier
             
         if self._verbose >= 1:
-            # print('\n', flush=True)
-            print('\n')
+            print('\n', flush=True)
         self._logger.info('Successfully tested classifiers by bootstrap')
 
         return models_predictions

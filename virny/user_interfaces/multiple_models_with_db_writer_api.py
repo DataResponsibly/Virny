@@ -33,9 +33,13 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
          False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
-            As for now, 0, 1, 2 levels are supported.
+            As for now, 0, 1, 2 levels are supported. Currently, verbose works only with notebook_logs_stdout = False.
 
     """
+    # Currently, verbose works only with notebook_logs_stdout = False
+    if notebook_logs_stdout:
+        verbose = 0
+
     # Check if a type of postprocessing_sensitive_attribute is not NoneType.
     # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
     postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \

@@ -81,8 +81,7 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
                     for model_idx in models_predictions.keys()
                 }
                 if partition_indexes.shape[0] == 0:
-                    # print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET, flush=True)
-                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET)
+                    print(Fore.YELLOW + f'WARNING: "{group_partition_name}" group is empty. Stability metrics are set to None.' + Fore.RESET, flush=True)
                     metrics_dct = dict()
                     metric_names = list(METRIC_TO_FUNCTION.keys()) if self.with_predict_proba else METRICS_FOR_LABELS
                     for metric in metric_names:
