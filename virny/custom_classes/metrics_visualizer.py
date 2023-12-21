@@ -205,7 +205,7 @@ class MetricsVisualizer:
         fig.tight_layout()
 
     def create_overall_metric_heatmap(self, model_names: list, metrics_lst: list,
-                                      tolerance: float = 0.001, figsize_scale: tuple = (0.75, 0.6), font_increase: int = -2):
+                                      tolerance: float = 0.001, figsize_scale: tuple = (0.7, 0.5), font_increase: int = -3):
         """
         Create a heatmap for overall metrics.
 
@@ -244,7 +244,7 @@ class MetricsVisualizer:
                                                                         font_increase=font_increase)
 
     def create_disparity_metric_heatmap(self, model_names: list, metrics_lst: list, groups_lst: list,
-                                        tolerance: float = 0.001, figsize_scale: tuple = (0.75, 0.6), font_increase: int = -2):
+                                        tolerance: float = 0.001, figsize_scale: tuple = (0.7, 0.5), font_increase: int = -3):
         """
         Create a heatmap for disparity metrics.
 
