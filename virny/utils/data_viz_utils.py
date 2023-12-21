@@ -279,6 +279,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
     ax.xaxis.tick_top()
     ax.tick_params(axis='x', rotation=10)
     ax.tick_params(labelsize=16 + font_increase)
+    ax.set_yticklabels(ax.get_yticklabels(), rotation = 0)
     fig.tight_layout()
 
     cbar = ax.collections[0].colorbar
