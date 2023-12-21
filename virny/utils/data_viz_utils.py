@@ -240,7 +240,8 @@ def create_row_facet_bar_chart(df, x_col, y_col, facet_column_name, y_sort_by_ls
     return final_chart
 
 
-def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, figsize_scale: float = 1.0):
+def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank,
+                                            figsize_scale: float = 1.0, font_increase: int = 4):
     """
     This heatmap includes group fairness and stability metrics and defined models.
     Using it, you can visually compare the models across defined group metrics. On this plot,
@@ -259,9 +260,10 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         Matrix of model ranks per metric where indexes are group metric names and columns are model names
     figsize_scale
         [Optional] A scale factor for a heatmap size.
+    font_increase
+        [Optional] An integer to increase or decrease the plot font.
 
     """
-    font_increase = 4
     matrix_width = 20
     matrix_height = model_metrics_matrix.shape[0] if model_metrics_matrix.shape[0] >= 3 \
         else model_metrics_matrix.shape[0] * 2.5
