@@ -1,0 +1,4 @@
+Dataset_Name,Model_Name,F1_Score,Accuracy_Score,Model_Best_Params
+Law_School,DecisionTreeClassifier,0.5243,0.8877,"{'criterion': 'gini', 'max_depth': 20, 'max_features': 'sqrt', 'min_samples_split': 0.1}"
+Law_School,LogisticRegression,0.6606,0.8994,"{'C': 100, 'max_iter': 250, 'penalty': 'l2', 'solver': 'newton-cg'}"
+Law_School,RandomForestClassifier,0.6531,0.8953,"{'max_depth': 10, 'max_features': 0.6, 'min_samples_leaf': 1, 'n_estimators': 50}"
