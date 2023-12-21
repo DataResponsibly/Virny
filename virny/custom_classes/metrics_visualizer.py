@@ -204,7 +204,8 @@ class MetricsVisualizer:
         fig = ax.get_figure()
         fig.tight_layout()
 
-    def create_overall_metric_heatmap(self, model_names: list, metrics_lst: list, tolerance: float = 0.001):
+    def create_overall_metric_heatmap(self, model_names: list, metrics_lst: list,
+                                      tolerance: float = 0.001, figsize_scale: float = 1.0):
         """
         Create a heatmap for overall metrics.
 
@@ -215,7 +216,9 @@ class MetricsVisualizer:
         metrics_lst
             List of group metric names to visualize
         tolerance
-            An acceptable value difference for metrics dense ranking
+            [Optional] An acceptable value difference for metrics dense ranking
+        figsize_scale
+            [Optional] A scale factor for a heatmap size.
 
         """
         if tolerance < 0.001 or tolerance > 0.2:
@@ -234,10 +237,11 @@ class MetricsVisualizer:
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
         model_metrics_matrix = model_metrics_matrix.round(3)  # round to make tolerance more precise
         sorted_matrix_by_rank = create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
-        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
+        model_rank_heatmap, _ = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank,
+                                                                        figsize_scale=figsize_scale)
 
     def create_disparity_metric_heatmap(self, model_names: list, metrics_lst: list, groups_lst: list,
-                                        tolerance: float = 0.001):
+                                        tolerance: float = 0.001, figsize_scale: float = 1.0):
         """
         Create a heatmap for disparity metrics.
 
@@ -250,7 +254,9 @@ class MetricsVisualizer:
         groups_lst
             List of sensitive attributes
         tolerance
-            An acceptable value difference for metrics dense ranking
+            [Optional] An acceptable value difference for metrics dense ranking
+        figsize_scale
+            [Optional] A scale factor for a heatmap size.
 
         """
         if tolerance < 0.001 or tolerance > 0.2:
@@ -281,4 +287,5 @@ class MetricsVisualizer:
         model_metrics_matrix = model_metrics_matrix[sorted(model_metrics_matrix.columns)]
         model_metrics_matrix = model_metrics_matrix.round(3)  # round to make tolerance more precise
         sorted_matrix_by_rank = create_sorted_matrix_by_rank(model_metrics_matrix, tolerance)
-        model_rank_heatmap = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank)
+        model_rank_heatmap = create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank,
+                                                                     figsize_scale=figsize_scale)

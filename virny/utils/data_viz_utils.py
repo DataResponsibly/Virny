@@ -240,7 +240,7 @@ def create_row_facet_bar_chart(df, x_col, y_col, facet_column_name, y_sort_by_ls
     return final_chart
 
 
-def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank):
+def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_by_rank, figsize_scale: float = 1.0):
     """
     This heatmap includes group fairness and stability metrics and defined models.
     Using it, you can visually compare the models across defined group metrics. On this plot,
@@ -257,6 +257,8 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         Matrix of model metrics values where indexes are group metric names and columns are model names
     sorted_matrix_by_rank
         Matrix of model ranks per metric where indexes are group metric names and columns are model names
+    figsize_scale
+        [Optional] A scale factor for a heatmap size.
 
     """
     font_increase = 4
@@ -265,7 +267,7 @@ def create_model_rank_heatmap_visualization(model_metrics_matrix, sorted_matrix_
         else model_metrics_matrix.shape[0] * 2.5
     num_ranks = int(sorted_matrix_by_rank.values.max())
 
-    fig = plt.figure(figsize=(matrix_width, matrix_height))
+    fig = plt.figure(figsize=(matrix_width * figsize_scale, matrix_height * figsize_scale))
     # Set a green color when there is only one rank
     if num_ranks == 1:
         rank_colors = sns.diverging_palette(145, 13, s=75, l=70, n=num_ranks).as_hex()
