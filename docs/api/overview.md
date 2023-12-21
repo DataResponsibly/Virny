@@ -53,8 +53,6 @@ The purpose is to provide sample datasets for functionality testing and show exa
 - [LawSchoolDataset](../datasets/LawSchoolDataset)
 - [RicciDataset](../datasets/RicciDataset)
 
-## incremental_ml
-
 
 ## metrics
 

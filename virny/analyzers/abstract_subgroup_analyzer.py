@@ -45,7 +45,9 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
     def _partition_and_compute_metrics(self, y_pred_all, results: dict):
         for group_name in self.test_protected_groups.keys():
             X_test_group = self.test_protected_groups[group_name]
-            results[group_name] = self._compute_metrics(self.y_test[X_test_group.index], y_pred_all[X_test_group.index])
+            metrics_dct = self._compute_metrics(self.y_test[X_test_group.index], y_pred_all[X_test_group.index])
+            metrics_dct['Sample_Size'] = X_test_group.shape[0]
+            results[group_name] = metrics_dct
 
         return results
 

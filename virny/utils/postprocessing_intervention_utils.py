@@ -18,7 +18,7 @@ def construct_binary_label_dataset_from_samples(X_sample, y_sample, column_names
     return binary_label_dataset
 
 
-def contruct_binary_label_dataset_from_df(X_sample, y_sample, target_column, sensitive_attribute):
+def construct_binary_label_dataset_from_df(X_sample, y_sample, target_column, sensitive_attribute):
     df = X_sample
     df[target_column] = y_sample
 

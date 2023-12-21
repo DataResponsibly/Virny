@@ -1,7 +1,6 @@
 import pandas as pd
 import gradio as gr
 import altair as alt
-from pprint import pprint
 
 from virny.configs.constants import *
 from virny.utils.common_helpers import str_to_float

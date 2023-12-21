@@ -1,7 +1,7 @@
 import pandas as pd
 
 from virny.analyzers.abstract_subgroup_analyzer import AbstractSubgroupAnalyzer
-from virny.utils.common_helpers import confusion_matrix_metrics
+from virny.metrics.accuracy_metrics import confusion_matrix_metrics
 
 
 class SubgroupErrorAnalyzer(AbstractSubgroupAnalyzer):
