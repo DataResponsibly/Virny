@@ -205,7 +205,7 @@ class MetricsVisualizer:
         fig.tight_layout()
 
     def create_overall_metric_heatmap(self, model_names: list, metrics_lst: list,
-                                      tolerance: float = 0.001, figsize_scale: float = 1.0, font_increase: int = 4):
+                                      tolerance: float = 0.001, figsize_scale: tuple = (1.0, 1.0), font_increase: int = 4):
         """
         Create a heatmap for overall metrics.
 
@@ -218,7 +218,7 @@ class MetricsVisualizer:
         tolerance
             [Optional] An acceptable value difference for metrics dense ranking
         figsize_scale
-            [Optional] A scale factor for a heatmap size.
+            [Optional] Scale factors for a heatmap size. The first element is a scale factor for a plot width, the second one is for height.
         font_increase
             [Optional] An integer to increase or decrease the plot font.
 
@@ -244,7 +244,7 @@ class MetricsVisualizer:
                                                                         font_increase=font_increase)
 
     def create_disparity_metric_heatmap(self, model_names: list, metrics_lst: list, groups_lst: list,
-                                        tolerance: float = 0.001, figsize_scale: float = 1.0, font_increase: int = 4):
+                                        tolerance: float = 0.001, figsize_scale: tuple = (1.0, 1.0), font_increase: int = 4):
         """
         Create a heatmap for disparity metrics.
 
@@ -259,7 +259,7 @@ class MetricsVisualizer:
         tolerance
             [Optional] An acceptable value difference for metrics dense ranking
         figsize_scale
-            [Optional] A scale factor for a heatmap size.
+            [Optional] Scale factors for a heatmap size. The first element is a scale factor for a plot width, the second one is for height.
         font_increase
             [Optional] An integer to increase or decrease the plot font.
 
