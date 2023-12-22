@@ -354,8 +354,8 @@ class MetricsInteractiveVisualizer:
                         """)
                     with gr.Row():
                         accuracy_metric_vw4 = gr.Dropdown(
-                            sorted([metric for metric in self.all_accuracy_metrics if metric != POSITIVE_RATE]),
-                            value=ACCURACY, multiselect=False, label="Accuracy Metric",
+                            sorted([metric for metric in self.all_accuracy_metrics if metric not in (POSITIVE_RATE, SELECTION_RATE)]),
+                            value=ACCURACY, multiselect=False, label="Correctness Metric",
                             scale=2
                         )
                         accuracy_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
@@ -378,8 +378,8 @@ class MetricsInteractiveVisualizer:
                         subgroup_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         positive_rate_metric_vw4 = gr.Dropdown(
-                            [POSITIVE_RATE],
-                            value=POSITIVE_RATE, multiselect=False, label="Positive-Rate Metric",
+                            [POSITIVE_RATE, SELECTION_RATE],
+                            value=POSITIVE_RATE, multiselect=False, label="Representation Metric",
                             scale=2
                         )
                         positive_rate_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
@@ -418,7 +418,7 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         group_positive_rate_metrics_vw4 = gr.Dropdown(
                             sorted([DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE]),
-                            value=DISPARATE_IMPACT, multiselect=False, label="Positive-Rate Disparity Metric",
+                            value=DISPARATE_IMPACT, multiselect=False, label="Representation Disparity Metric",
                             scale=2
                         )
                         group_positive_rate_min_val_vw4 = gr.Text(value="0.7", label="Min value", scale=1)
@@ -688,14 +688,14 @@ class MetricsInteractiveVisualizer:
                                           group_stability_metric, group_stab_min_val, group_stab_max_val,
                                           group_uncertainty_metric, group_uncertainty_min_val, group_uncertainty_max_val,
                                           group_positive_rate_metric, group_positive_rate_min_val, group_positive_rate_max_val):
-        accuracy_constraint = (accuracy_metric, [str_to_float(accuracy_min_val, 'Accuracy min value'),
-                                                 str_to_float(accuracy_max_val, 'Accuracy max value')])
+        accuracy_constraint = (accuracy_metric, [str_to_float(accuracy_min_val, 'Correctness min value'),
+                                                 str_to_float(accuracy_max_val, 'Correctness max value')])
         stability_constraint = (stability_metric, [str_to_float(stability_min_val, 'Stability min value'),
                                                    str_to_float(stability_max_val, 'Stability max value')])
         uncertainty_constraint = (uncertainty_metric, [str_to_float(uncertainty_min_val, 'Uncertainty min value'),
                                                        str_to_float(uncertainty_max_val, 'Uncertainty max value')])
-        positive_rate_constraint = (positive_rate_metric, [str_to_float(positive_rate_min_val, 'Positive-Rate min value'),
-                                                           str_to_float(positive_rate_max_val, 'Positive-Rate max value')])
+        positive_rate_constraint = (positive_rate_metric, [str_to_float(positive_rate_min_val, 'Representation min value'),
+                                                           str_to_float(positive_rate_max_val, 'Representation max value')])
 
         fairness_constraint = (fairness_metric, [str_to_float(fairness_min_val, 'Error disparity metric min value'),
                                                  str_to_float(fairness_max_val, 'Error disparity metric max value')])
@@ -703,11 +703,11 @@ class MetricsInteractiveVisualizer:
                                                                str_to_float(group_stab_max_val, 'Stability disparity max value')])
         group_uncertainty_constraint = (group_uncertainty_metric, [str_to_float(group_uncertainty_min_val, 'Uncertainty disparity min value'),
                                                                    str_to_float(group_uncertainty_max_val, 'Uncertainty disparity max value')])
-        group_positive_rate_constraint = (group_positive_rate_metric, [str_to_float(group_positive_rate_min_val, 'Positive-Rate disparity min value'),
-                                                                       str_to_float(group_positive_rate_max_val, 'Positive-Rate disparity max value')])
+        group_positive_rate_constraint = (group_positive_rate_metric, [str_to_float(group_positive_rate_min_val, 'Representation disparity min value'),
+                                                                       str_to_float(group_positive_rate_max_val, 'Representation disparity max value')])
 
         input_constraints_dct = {
-            'Accuracy': {
+            'Correctness': {
                 'overall': accuracy_constraint,
                 'disparity': fairness_constraint,
             },
@@ -719,7 +719,7 @@ class MetricsInteractiveVisualizer:
                 'overall': uncertainty_constraint,
                 'disparity': group_uncertainty_constraint,
             },
-            'Positive-Rate': {
+            'Representation': {
                 'overall': positive_rate_constraint,
                 'disparity': group_positive_rate_constraint,
             },
