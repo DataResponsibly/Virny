@@ -218,7 +218,7 @@ class MetricsInteractiveVisualizer:
                     subgroup_tolerance = gr.Text(value="0.005", label="Tolerance", info="Define an acceptable tolerance for metric dense ranking.")
                     accuracy_metrics = gr.Dropdown(
                         sorted(self.all_accuracy_metrics),
-                        value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
+                        value=['Accuracy', 'F1'], multiselect=True, label="Correctness Metrics", info="Select correctness metrics to display on the heatmap:",
                     )
                     uncertainty_metrics = gr.Dropdown(
                         sorted(self.all_uncertainty_metrics),
@@ -291,7 +291,7 @@ class MetricsInteractiveVisualizer:
                         """)
                     accuracy_metrics = gr.Dropdown(
                         sorted(self.all_accuracy_metrics),
-                        value=['Accuracy', 'F1'], multiselect=True, label="Accuracy Metrics", info="Select accuracy metrics to display on the heatmap:",
+                        value=['Accuracy', 'F1'], multiselect=True, label="Correctness Metrics", info="Select correctness metrics to display on the heatmap:",
                     )
                     uncertainty_metrics = gr.Dropdown(
                         sorted(self.all_uncertainty_metrics),
@@ -590,7 +590,7 @@ class MetricsInteractiveVisualizer:
         model_names
             A list of selected model names to display on the heatmap
         subgroup_accuracy_metrics_lst
-            A list of subgroup accuracy metrics to visualize
+            A list of subgroup correctness metrics to visualize
         subgroup_uncertainty_metrics
             A list of subgroup uncertainty metrics to visualize
         subgroup_stability_metrics_lst
