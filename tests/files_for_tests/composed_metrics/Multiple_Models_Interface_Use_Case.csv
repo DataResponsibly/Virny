@@ -25,7 +25,7 @@ Jitter_Parity,-0.020064,0.007173,-0.003853,LogisticRegression
 Label_Stability_Ratio,1.026811,0.989255,1.003616,LogisticRegression
 Overall_Uncertainty_Parity,-0.010267,-0.008368,-0.014665,LogisticRegression
 Overall_Uncertainty_Ratio,0.988816,0.990853,0.984011,LogisticRegression
-Statistical_Parity_Difference,0.150606,0.248551,0.205548,LogisticRegression
+Statistical_Parity_Difference,0.1641493031212316,0.24247144340602278,0.25625224191118445,LogisticRegression
 Disparate_Impact,1.182185,1.317713,1.247712,LogisticRegression
 Std_Parity,0.000235,0.000197,-0.000059,LogisticRegression
 Std_Ratio,1.010249,1.008557,0.997473,LogisticRegression
@@ -57,7 +57,7 @@ Jitter_Parity,-0.041082,-0.006113,-0.015435,XGBClassifier
 Label_Stability_Ratio,1.070995,1.015429,1.029570,XGBClassifier
 Overall_Uncertainty_Parity,-0.018830,0.008251,-0.003674,XGBClassifier
 Overall_Uncertainty_Ratio,0.978951,1.009435,0.995831,XGBClassifier
-Statistical_Parity_Difference,0.138384,0.093978,0.086817,XGBClassifier
+Statistical_Parity_Difference,0.1629490451218486,0.18481647026953812,0.21069660664323125,XGBClassifier
 Disparate_Impact,1.159674,1.102332,1.093266,XGBClassifier
 Std_Parity,0.000692,0.002415,0.002737,XGBClassifier
 Std_Ratio,1.015140,1.053930,1.060978,XGBClassifier
