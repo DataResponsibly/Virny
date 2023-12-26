@@ -1,6 +1,6 @@
-# mean_prediction
+# std
 
-Compute mean predictions of all estimators in the boostrap.
+Compute standard deviation of predictive variance.
 
 
 

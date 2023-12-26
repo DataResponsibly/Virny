@@ -65,8 +65,50 @@ This module contains functions for computing subgroup variance and error metrics
 - [aleatoric_uncertainty](../metrics/aleatoric-uncertainty)
 - [churn](../metrics/churn)
 - [conf_interval](../metrics/conf-interval)
+- [confusion_matrix_metrics](../metrics/confusion-matrix-metrics)
 - [entropy_from_predicted_probability](../metrics/entropy-from-predicted-probability)
 - [iqr](../metrics/iqr)
 - [jitter](../metrics/jitter)
 - [label_stability](../metrics/label-stability)
 - [mean_prediction](../metrics/mean-prediction)
+- [overall_uncertainty](../metrics/overall-uncertainty)
+- [per_sample_label_stability](../metrics/per-sample-label-stability)
+- [statistical_bias](../metrics/statistical-bias)
+- [statistical_bias_from_predict_proba](../metrics/statistical-bias-from-predict-proba)
+- [std](../metrics/std)
+
+## preprocessing
+
+
+Preprocessing techniques.
+
+This module contains function for input dataset preprocessing.
+
+
+- [get_dummies](../preprocessing/get-dummies)
+- [make_features_dfs](../preprocessing/make-features-dfs)
+- [preprocess_dataset](../preprocessing/preprocess-dataset)
+
+## user_interfaces
+
+
+User interfaces.
+
+This module contains user interfaces for metrics computation.
+
+
+- [compute_metrics_with_config](../user-interfaces/compute-metrics-with-config)
+- [compute_metrics_with_db_writer](../user-interfaces/compute-metrics-with-db-writer)
+- [compute_metrics_with_multiple_test_sets](../user-interfaces/compute-metrics-with-multiple-test-sets)
+- [compute_one_model_metrics](../user-interfaces/compute-one-model-metrics)
+- [compute_one_model_metrics_with_multiple_test_sets](../user-interfaces/compute-one-model-metrics-with-multiple-test-sets)
+- [run_metrics_computation](../user-interfaces/run-metrics-computation)
+- [run_metrics_computation_with_multiple_test_sets](../user-interfaces/run-metrics-computation-with-multiple-test-sets)
+
+## utils
+
+
+Common helpers and utils.
+
+
+- [count_prediction_metrics](../utils/count-prediction-metrics)

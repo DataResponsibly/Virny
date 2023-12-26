@@ -1,6 +1,6 @@
-# mean_prediction
+# overall_uncertainty
 
-Compute mean predictions of all estimators in the boostrap.
+Compute overall uncertainty as predictive entropy.
 
 
 
@@ -12,7 +12,7 @@ Compute mean predictions of all estimators in the boostrap.
 
 - **uq_predict_probas** (*pandas.core.frame.DataFrame*)
 
-    A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap
+    A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap.
 
 
 

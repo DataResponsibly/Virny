@@ -1,6 +1,6 @@
-# mean_prediction
+# statistical_bias
 
-Compute mean predictions of all estimators in the boostrap.
+Compute statistical bias.
 
 
 
