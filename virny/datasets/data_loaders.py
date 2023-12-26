@@ -104,7 +104,7 @@ class StudentPerformancePortugueseDataset(BaseDataLoader):
         target = 'class'
         numerical_columns = ['age', 'Medu', 'Fedu', 'traveltime', 'studytime', 'failures', 'famrel', 'freetime',
                              'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2']
-        categorical_columns = [column for column in df.column if column not in numerical_columns + [target]]
+        categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
 
         super().__init__(
             full_df=df,
