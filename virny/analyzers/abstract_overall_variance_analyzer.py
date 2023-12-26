@@ -35,6 +35,9 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
