@@ -4,4 +4,5 @@ nav:
     - Multiple_Models_Interface_With_DB_Writer.md
     - Multiple_Models_Interface_With_Error_Analysis.md
     - Multiple_Models_Interface_With_Multiple_Test_Sets.md
+    - Multiple_Models_Interface_With_Postprocessor.md
     - Interactive_Web_App_Demo.md
