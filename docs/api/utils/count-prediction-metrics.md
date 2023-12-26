@@ -16,3 +16,8 @@ Return a 1D numpy array of predictions, 2D array of each model prediction for y_
 
 - **with_predict_proba** (*bool*) – defaults to `True`
 
+    [Optional] A flag if model can return probabilities for its predictions.  If no, only metrics based on labels (not labels and probabilities) will be computed.
+
+
+
+

@@ -106,6 +106,16 @@ class MetricsInteractiveVisualizer:
         return [gr.Textbox(visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
 
     def create_web_app(self, start_app=True):
+        """
+        Build an interactive web application.
+
+        Parameters
+        ----------
+        start_app
+            [Optional] If True, the web app will be started when calling this method.
+             Otherwise, the gradio demo object will be returned, and users can start the web app themselves.
+
+        """
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
             # ==================================== Dataset Statistics ====================================
             gr.Markdown(

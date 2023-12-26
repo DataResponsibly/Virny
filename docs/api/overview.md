@@ -112,3 +112,7 @@ Common helpers and utils.
 
 
 - [count_prediction_metrics](../utils/count-prediction-metrics)
+- [create_test_protected_groups](../utils/create-test-protected-groups)
+- [tune_ML_models](../utils/tune-ML-models)
+- [validate_config](../utils/validate-config)
+
