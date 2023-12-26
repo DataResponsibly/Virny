@@ -14,7 +14,7 @@ from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization,
 
 class MetricsInteractiveVisualizer:
     """
-    Class to create useful visualizations of models metrics.
+    Class to create an interactive web app based on models metrics.
 
     Parameters
     ----------
@@ -89,7 +89,9 @@ class MetricsInteractiveVisualizer:
         self.sorted_model_composed_metrics_df = self.melted_model_composed_metrics_df.sort_values(by=['Value'])
 
     def _align_input_metric_df(self, model_metrics_df: pd.DataFrame, allowed_cols: list, sensitive_attrs: list):
-        # Filter columns in the input dataframe based on allowed_cols and sensitive_attrs
+        """
+        Filter columns in the input dataframe based on allowed_cols and sensitive_attrs.
+        """
         filtered_cols = allowed_cols
         for col in model_metrics_df.columns:
             for sensitive_attr in sensitive_attrs:
@@ -446,6 +448,10 @@ class MetricsInteractiveVisualizer:
 
     def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
                                      selected_metric: str, selected_subgroup: str, defined_model_names: list):
+        """
+        Find metric values for each model based on metric, subgroup, and model names.
+        Add the values to a results dict.
+        """
         results[subgroup_metric] = dict()
 
         # Get distinct sorted model names
@@ -468,6 +474,9 @@ class MetricsInteractiveVisualizer:
         return results
 
     def __check_metric_constraints(self, model_performance_dct, input_constraint_dct):
+        """
+        Create a dictionary of constraint check identifiers for each metric and group.
+        """
         model_metrics_constraints_check_dct = dict()
         for metric_dim in model_performance_dct.keys():
             model_metrics_constraints_check_dct[metric_dim] = dict()

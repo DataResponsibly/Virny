@@ -5,8 +5,11 @@ from virny.configs.constants import *
 
 class MetricsComposer:
     """
-    Composer class that combines different subgroup metrics to create group metrics
-     such as 'Disparate_Impact' or 'Accuracy_Parity'
+    Metric Composer class that combines different subgroup metrics to create disparity metrics
+     such as 'Disparate_Impact' or 'Accuracy_Parity'.
+
+    Definitions of the disparity metrics could be observed in the __init__ method of the Metric Composer:
+     https://github.com/DataResponsibly/Virny/blob/main/virny/custom_classes/metrics_composer.py
 
     Parameters
     ----------
@@ -22,6 +25,8 @@ class MetricsComposer:
         self.sensitive_attributes_dct = sensitive_attributes_dct
         self.models_average_metrics_dct = None  # will be created in self.compose_metrics()
 
+        # A dictionary of disparity metrics, where keys are subgroup metrics and values are
+        # lists of tuples of the following format: [(<DISPARITY_METRIC_NAME>, <DISPARITY_OPERATION>), ...].
         self.disparity_metric_functions = {
             # Error disparity metrics
             TPR: [(EQUALIZED_ODDS_TPR, self._difference_operation)],
