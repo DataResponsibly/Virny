@@ -29,3 +29,9 @@ Class to create an interactive web app based on models metrics.
 
 ???- note "create_web_app"
 
+    Build an interactive web application.
+
+    **Parameters**
+
+    - **start_app**     – defaults to `True`    
+    
