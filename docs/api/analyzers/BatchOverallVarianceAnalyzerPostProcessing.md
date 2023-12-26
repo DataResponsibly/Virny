@@ -1,10 +1,18 @@
-# AbstractOverallVarianceAnalyzer
+# BatchOverallVarianceAnalyzerPostProcessing
 
-Abstract class for an analyzer that computes overall variance metrics for subgroups.
+Analyzer to compute subgroup variance metrics using the defined post-processor.
 
 
 
 ## Parameters
+
+- **postprocessor**
+
+    One of postprocessors from aif360 (https://aif360.readthedocs.io/en/stable/modules/algorithms.html#module-aif360.algorithms.postprocessing)
+
+- **sensitive_attribute** (*str*)
+
+    A sensitive attribute to use for post-processing
 
 - **base_model**
 
@@ -12,7 +20,7 @@ Abstract class for an analyzer that computes overall variance metrics for subgro
 
 - **base_model_name** (*str*)
 
-    Model name like 'HoeffdingTreeClassifier' or 'LogisticRegression'
+    Model name like 'DecisionTreeClassifier' or 'LogisticRegression'
 
 - **bootstrap_fraction** (*float*)
 
@@ -33,6 +41,10 @@ Abstract class for an analyzer that computes overall variance metrics for subgro
 - **y_test** (*pandas.core.frame.DataFrame*)
 
     Targets test set
+
+- **target_column** (*str*)
+
+    Name of the target column
 
 - **dataset_name** (*str*)
 
@@ -61,7 +73,7 @@ Abstract class for an analyzer that computes overall variance metrics for subgro
 
 ???- note "UQ_by_boostrap"
 
-    Quantifying uncertainty of the base model by constructing an ensemble from bootstrapped samples.
+    Quantifying uncertainty of the base model by constructing an ensemble from bootstrapped samples and applying postprocessing intervention.
 
     Return a dictionary where keys are models indexes, and values are lists of  correspondent model predictions for X_test set.
 

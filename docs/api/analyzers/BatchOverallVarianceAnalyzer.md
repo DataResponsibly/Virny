@@ -1,6 +1,6 @@
-# AbstractOverallVarianceAnalyzer
+# BatchOverallVarianceAnalyzer
 
-Abstract class for an analyzer that computes overall variance metrics for subgroups.
+Analyzer to compute subgroup variance metrics for batch learning models.
 
 
 
@@ -12,7 +12,7 @@ Abstract class for an analyzer that computes overall variance metrics for subgro
 
 - **base_model_name** (*str*)
 
-    Model name like 'HoeffdingTreeClassifier' or 'LogisticRegression'
+    Model name like 'DecisionTreeClassifier' or 'LogisticRegression'
 
 - **bootstrap_fraction** (*float*)
 
@@ -33,6 +33,10 @@ Abstract class for an analyzer that computes overall variance metrics for subgro
 - **y_test** (*pandas.core.frame.DataFrame*)
 
     Targets test set
+
+- **target_column** (*str*)
+
+    Name of the target column
 
 - **dataset_name** (*str*)
 
