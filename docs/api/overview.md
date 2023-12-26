@@ -52,3 +52,21 @@ The purpose is to provide sample datasets for functionality testing and show exa
 - [CompasDataset](../datasets/CompasDataset)
 - [CompasWithoutSensitiveAttrsDataset](../datasets/CompasWithoutSensitiveAttrsDataset)
 - [CreditCardDefaultDataset](../datasets/CreditCardDefaultDataset)
+- [DiabetesDataset](../datasets/DiabetesDataset)
+- [LawSchoolDataset](../datasets/LawSchoolDataset)
+- [RicciDataset](../datasets/RicciDataset)
+
+## metrics
+
+
+This module contains functions for computing subgroup variance and error metrics.
+
+
+- [aleatoric_uncertainty](../metrics/aleatoric-uncertainty)
+- [churn](../metrics/churn)
+- [conf_interval](../metrics/conf-interval)
+- [entropy_from_predicted_probability](../metrics/entropy-from-predicted-probability)
+- [iqr](../metrics/iqr)
+- [jitter](../metrics/jitter)
+- [label_stability](../metrics/label-stability)
+- [mean_prediction](../metrics/mean-prediction)

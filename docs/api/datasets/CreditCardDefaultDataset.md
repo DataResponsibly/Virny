@@ -8,3 +8,8 @@ Dataset class for the Credit Card dataset that contains sensitive attributes amo
 
 - **dataset_path** (*str*) – defaults to `None`
 
+    [Optional] Path to a file with the data
+
+
+
+

@@ -7,6 +7,17 @@ from virny.configs.constants import *
 
 
 def mean_prediction(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> float:
+    """
+    Compute mean predictions of all estimators in the boostrap.
+
+    Parameters
+    ----------
+    y_true
+        A pandas dataframe of true labels. Is not used in this function, required for consistency.
+    uq_predict_probas
+        A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap
+
+    """
     return np.mean(uq_predict_probas.mean().values)
 
 
@@ -30,6 +41,17 @@ def statistical_bias_from_predict_proba(x, y_true):
 
 
 def statistical_bias(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> float:
+    """
+    Compute statistical bias.
+
+    Parameters
+    ----------
+    y_true
+        A pandas dataframe of true labels. Is not used in this function, required for consistency.
+    uq_predict_probas
+        A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap
+
+    """
     main_predictions = uq_predict_probas.mean().values
     statistical_bias_lst =  np.array(
         [statistical_bias_from_predict_proba(x, y_true) for x, y_true in np.column_stack((main_predictions, y_true))]
@@ -38,6 +60,17 @@ def statistical_bias(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> f
 
 
 def confusion_matrix_metrics(y_true, y_preds):
+    """
+    Compute accuracy metrics based on the confusion matrix.
+
+    Parameters
+    ----------
+    y_true
+        True labels.
+    y_preds
+        Predicted labels.
+
+    """
     metrics = {}
     TN, FP, FN, TP = confusion_matrix(y_true, y_preds, labels=[0, 1]).ravel()
 
