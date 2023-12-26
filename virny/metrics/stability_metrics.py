@@ -5,10 +5,32 @@ import scipy as sp
 
 
 def std(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> float:
+    """
+    Compute standard deviation of predictive variance.
+
+    Parameters
+    ----------
+    y_true
+        A pandas dataframe of true labels. Is not used in this function, required for consistency.
+    uq_predict_probas
+        A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap
+
+    """
     return np.mean(uq_predict_probas.std().values)
 
 
 def iqr(y_true: pd.DataFrame, uq_predict_probas: pd.DataFrame) -> float:
+    """
+    Compute inter-quantile range (IQR) of predictive variance.
+
+    Parameters
+    ----------
+    y_true
+        A pandas dataframe of true labels. Is not used in this function, required for consistency.
+    uq_predict_probas
+        A pandas dataframe of predictions (probabilities) from all estimators in the bootstrap
+
+    """
     return np.mean(sp.stats.iqr(uq_predict_probas, axis=0))
 
 
@@ -34,7 +56,10 @@ def jitter(y_true: pd.DataFrame, uq_labels: pd.DataFrame) -> float:
 
     Parameters
     ----------
-    models_prediction_labels
+    y_true
+        A pandas dataframe of true labels. Is not used in this function, required for consistency.
+    uq_labels
+        `uq_labels` variable from count_prediction_metrics()
 
     """
     models_prediction_labels = uq_labels.values

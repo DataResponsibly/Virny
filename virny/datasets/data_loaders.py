@@ -39,7 +39,7 @@ class CreditCardDefaultDataset(BaseDataLoader):
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
         )
-        
+
 
 class CreditDataset(BaseDataLoader):
     """
