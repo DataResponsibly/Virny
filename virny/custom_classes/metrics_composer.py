@@ -42,7 +42,9 @@ class MetricsComposer:
             OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_PARITY, self._difference_operation),
                                   (OVERALL_UNCERTAINTY_RATIO, self._ratio_operation)],
             ALEATORIC_UNCERTAINTY: [(ALEATORIC_UNCERTAINTY_PARITY, self._difference_operation),
-                                    (ALEATORIC_UNCERTAINTY_RATIO, self._ratio_operation)]
+                                    (ALEATORIC_UNCERTAINTY_RATIO, self._ratio_operation)],
+            EPISTEMIC_UNCERTAINTY: [(EPISTEMIC_UNCERTAINTY_PARITY, self._difference_operation),
+                                    (EPISTEMIC_UNCERTAINTY_RATIO, self._ratio_operation)],
         }
 
     def _difference_operation(self, cfm, metric_name, dis_group, priv_group):

@@ -57,7 +57,7 @@ Jitter_Parity,-0.041082,-0.006113,-0.015435,XGBClassifier
 Label_Stability_Ratio,1.070995,1.015429,1.029570,XGBClassifier
 Overall_Uncertainty_Parity,-0.018830,0.008251,-0.003674,XGBClassifier
 Overall_Uncertainty_Ratio,0.978951,1.009435,0.995831,XGBClassifier
-Statistical_Parity_Difference,0.138384,0.093978,0.086817,XGBClassifier
+Statistical_Parity_Difference,0.162949,0.184816,0.210697,XGBClassifier
 Disparate_Impact,1.159674,1.102332,1.093266,XGBClassifier
 Std_Parity,0.000692,0.002415,0.002737,XGBClassifier
 Std_Ratio,1.015140,1.053930,1.060978,XGBClassifier
