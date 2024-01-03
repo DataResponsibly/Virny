@@ -28,7 +28,8 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                          with_predict_proba=with_predict_proba,
                          notebook_logs_stdout=notebook_logs_stdout,
                          verbose=verbose)
-        
+
+        postprocessor.seed = None  # Set postprocessor's seed to None to avoid similar predictions during the bootstrap
         self.postprocessor = postprocessor
         self.sensitive_attribute = sensitive_attribute
         self.test_binary_label_dataset = construct_binary_label_dataset_from_df(X_test, y_test, target_column, sensitive_attribute)

@@ -7,7 +7,6 @@ class ModelSetting(Enum):
 
 class ComputationMode(Enum):
     ERROR_ANALYSIS = "error_analysis"
-    POSTPROCESSING_INTERVENTION = "postprocessing_intervention"
 
 
 INTERSECTION_SIGN = '&'
