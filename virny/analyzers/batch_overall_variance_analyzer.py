@@ -13,7 +13,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
     base_model
         Base model for stability measuring
     base_model_name
-        Model name like 'HoeffdingTreeClassifier' or 'LogisticRegression'
+        Model name like 'DecisionTreeClassifier' or 'LogisticRegression'
     bootstrap_fraction
         [0-1], fraction from train_pd_dataset for fitting an ensemble of base models
     X_train
@@ -30,6 +30,12 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
          As for now, 0, 1, 2 levels are supported.

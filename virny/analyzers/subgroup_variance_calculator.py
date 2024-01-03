@@ -25,6 +25,9 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
          that are correspondent to these sensitive attributes.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
 
     """
     def __init__(self, X_test: pd.DataFrame, y_test: pd.DataFrame, sensitive_attributes_dct: dict,
@@ -54,8 +57,14 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         Partition predictions on correct and incorrect and compute subgroup metrics for each of the partitions.
         Used for the 'error_analysis' mode.
 
-        :param models_predictions: a list of predictions
-        :param results: a dict to add subgroup metrics for each partition
+        Parameters
+        ----------
+        y_preds
+            Is not used in this function, but needed for function argument consistency.
+        models_predictions
+            A dictionary of models predictions.
+        results
+            A dict to add subgroup metrics for each partition
         """
 
         # Partition and compute subgroup metrics

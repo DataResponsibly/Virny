@@ -39,59 +39,39 @@ Class to create useful visualizations of models metrics.
 
     - **metrics_lst**     (*list*)    
     
-???- note "create_fairness_variance_interactive_bar_chart"
+???- note "create_disparity_metric_heatmap"
 
-    This interactive bar chart includes all groups, all composed group fairness and stability metrics,  and all defined models. Using it, you can select any pair of group fairness and stability metrics and   compare them across all groups and models. Since this plot is interactive, it saves a lot of space for other plots.    Also, it could be more convenient to compare each group fairness and stability metric using the interactive mode.
-
-    
-???- note "create_html_report"
-
-    Create Fairness and Stability Report depending on report type. It includes visualizations and helpful details to them.
+    Create a heatmap for disparity metrics.
 
     **Parameters**
 
-    - **report_type**     (*virny.configs.constants.ReportType*)    
-    - **report_save_path**     (*str*)    
-    
-???- note "create_model_rank_heatmap"
-
-    This heatmap includes all group fairness and stability metrics and all defined models. Using it, you can visually compare all models across all group metrics. On this plot, colors display ranks where 1 is the best model for the metric. These ranks are conditioned on difference or ratio operations used to create these group metrics:
-
-    1) if the metric is created based on the difference operation, closer values to zero have ranks that are closer to the first rank  2) if the metric is created based on the ratio operation, closer values to one have ranks that are closer to the first rank
-
-    **Parameters**
-
-    - **model_metrics_matrix**    
-    - **sorted_matrix_by_rank**    
-    - **num_models**     (*int*)    
-    
-???- note "create_model_rank_heatmaps"
-
-    Create model rank and total model rank heatmaps.
-
-    **Parameters**
-
+    - **model_names**     (*list*)    
+        Metrics for what model names to visualize
     - **metrics_lst**     (*list*)    
-    - **groups_lst**    
+    - **groups_lst**     (*list*)    
+    - **tolerance**     (*float*)     – defaults to `0.001`    
+    - **figsize_scale**     (*tuple*)     – defaults to `(0.7, 0.5)`    
+    - **font_increase**     (*int*)     – defaults to `-3`    
     
-???- note "create_models_metrics_bar_chart"
+???- note "create_overall_metric_heatmap"
 
+    Create a heatmap for overall metrics.
+
+    **Parameters**
+
+    - **model_names**     (*list*)    
+        Metrics for what model names to visualize
+    - **metrics_lst**     (*list*)    
+    - **tolerance**     (*float*)     – defaults to `0.001`    
+    - **figsize_scale**     (*tuple*)     – defaults to `(0.7, 0.5)`    
+    - **font_increase**     (*int*)     – defaults to `-3`    
+    
 ???- note "create_overall_metrics_bar_char"
 
     This bar chart includes all defined models and all overall subgroup error and stability metrics, which are averaged across multiple runs. Using it, you can compare all models for each subgroup error or stability metric. This comparison also includes reversed metrics, in which values closer to zero are better since straight and reversed metrics in this plot are converted to the same format -- values closer to one are better.
 
     **Parameters**
 
-    - **metrics_names**     (*list*)    
-    - **reversed_metrics_names**     (*list*)     – defaults to `None`    
-    - **metrics_title**     (*str*)     – defaults to `Overall Metrics`    
-    
-???- note "create_total_model_rank_heatmap"
-
-    This heatmap includes all defined models and sums of their fairness and stability ranks. On this plot, colors display sums of ranks for one model. If the sum is smaller, the model has better fairness or stability characteristics than other models. Using this plot, you can visually compare all models for fairness and stability characteristics.
-
-    **Parameters**
-
-    - **sorted_matrix_by_rank**    
-    - **num_models**    
+    - **metric_names**     (*list*)    
+    - **plot_title**     (*str*)     – defaults to `Overall Metrics`    
     

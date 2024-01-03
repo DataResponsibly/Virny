@@ -19,10 +19,6 @@ from .multiple_models_with_multiple_test_sets_api import (
 
 __all__ = [
     "compute_metrics_with_config",
-    "run_metrics_computation",
-    "compute_one_model_metrics",
     "compute_metrics_with_db_writer",
     "compute_metrics_with_multiple_test_sets",
-    "run_metrics_computation_with_multiple_test_sets",
-    "compute_one_model_metrics_with_multiple_test_sets",
 ]

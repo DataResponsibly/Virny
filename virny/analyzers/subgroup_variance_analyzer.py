@@ -33,8 +33,15 @@ class SubgroupVarianceAnalyzer:
     test_protected_groups
         A dictionary of protected groups where keys are subgroup names,
          and values are X_test row indexes correspondent to this subgroup.
+    postprocessor
+        One of postprocessors from aif360 (https://aif360.readthedocs.io/en/stable/modules/algorithms.html#module-aif360.algorithms.postprocessing)
+    postprocessing_sensitive_attribute
+        A sensitive attribute to use for post-processing
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
          As for now, 0, 1, 2 levels are supported.
