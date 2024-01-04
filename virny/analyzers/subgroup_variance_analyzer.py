@@ -47,6 +47,7 @@ class SubgroupVarianceAnalyzer:
                  notebook_logs_stdout: bool = False, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
             if postprocessor is not None:
+                print('Enabled a postprocessing mode')
                 overall_variance_analyzer = BatchOverallVarianceAnalyzerPostProcessing(postprocessor=postprocessor,
                                                                                        sensitive_attribute=postprocessing_sensitive_attribute,
                                                                                        base_model=base_model,
