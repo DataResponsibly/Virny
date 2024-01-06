@@ -5,11 +5,12 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
-from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
-from virny.utils.common_helpers import save_metrics_to_file
 from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
+from virny.utils.protected_groups_partitioning import create_test_protected_groups
+from virny.utils.common_helpers import save_metrics_to_file
+from virny.utils.custom_initializers import create_base_model_wrapper
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
@@ -48,6 +49,11 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
 
+    # Check if a type of inprocessing_sensitive_attribute is not NoneType.
+    # In other words, check if inprocessing_sensitive_attribute is defined in a config yaml.
+    inprocessing_sensitive_attribute = config.inprocessing_sensitive_attribute \
+        if type(config.inprocessing_sensitive_attribute) != type(None) else None
+
     # Check if a type of postprocessing_sensitive_attribute is not NoneType.
     # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
     postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \
@@ -62,6 +68,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
+                                                 inprocessing_sensitive_attribute=inprocessing_sensitive_attribute,
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
@@ -82,6 +89,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
+                            inprocessing_sensitive_attribute: str = None,
                             postprocessor=None, postprocessing_sensitive_attribute: str = None,
                             save_results: bool = True, save_results_dir_path: str = None,
                             notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
@@ -110,6 +118,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    inprocessing_sensitive_attribute
+        [Optional] Sensitive attribute name to use in the fairness in-processing intervention
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
     postprocessing_sensitive_attribute
@@ -144,6 +154,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
+            base_model = create_base_model_wrapper(base_model, inprocessing_sensitive_attribute)
             model_metrics_df = compute_one_model_metrics(base_model=base_model,
                                                          n_estimators=n_estimators,
                                                          dataset=dataset,
