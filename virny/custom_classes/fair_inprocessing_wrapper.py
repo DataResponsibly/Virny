@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 from virny.utils.postprocessing_intervention_utils import construct_binary_label_dataset_from_df
@@ -50,3 +51,11 @@ class FairInprocessingWrapper:
                                                                      sensitive_attribute=self.sensitive_attr_for_intervention)
         test_dataset_pred = self.inprocessor.predict(test_binary_dataset)
         return test_dataset_pred.labels
+
+    def __copy__(self):
+        return FairInprocessingWrapper(inprocessor=copy.deepcopy(self.inprocessor),
+                                       sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
+
+    def __deepcopy__(self, memo):
+        return FairInprocessingWrapper(inprocessor=copy.deepcopy(self.inprocessor, memo),
+                                       sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
