@@ -53,9 +53,9 @@ class FairInprocessingWrapper:
         return test_dataset_pred.labels
 
     def __copy__(self):
-        return FairInprocessingWrapper(inprocessor=copy.deepcopy(self.inprocessor),
+        return FairInprocessingWrapper(inprocessor=copy.copy(self.inprocessor),
                                        sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
 
     def __deepcopy__(self, memo):
-        return FairInprocessingWrapper(inprocessor=copy.deepcopy(self.inprocessor, memo),
+        return FairInprocessingWrapper(inprocessor=copy.copy(self.inprocessor),
                                        sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
