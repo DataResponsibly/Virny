@@ -40,11 +40,6 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
     if notebook_logs_stdout:
         verbose = 0
 
-    # Check if a type of inprocessing_sensitive_attribute is not NoneType.
-    # In other words, check if inprocessing_sensitive_attribute is defined in a config yaml.
-    inprocessing_sensitive_attribute = config.inprocessing_sensitive_attribute \
-        if type(config.inprocessing_sensitive_attribute) != type(None) else None
-
     # Check if a type of postprocessing_sensitive_attribute is not NoneType.
     # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
     postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \
@@ -60,7 +55,6 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
-                                                 inprocessing_sensitive_attribute=inprocessing_sensitive_attribute,
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
