@@ -391,7 +391,7 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         positive_rate_metric_vw4 = gr.Dropdown(
                             [POSITIVE_RATE, SELECTION_RATE],
-                            value=POSITIVE_RATE, multiselect=False, label="Representation Metric",
+                            value=SELECTION_RATE, multiselect=False, label="Representation Metric",
                             scale=2
                         )
                         positive_rate_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
@@ -430,11 +430,11 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         group_positive_rate_metrics_vw4 = gr.Dropdown(
                             sorted([DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE]),
-                            value=DISPARATE_IMPACT, multiselect=False, label="Representation Disparity Metric",
+                            value=STATISTICAL_PARITY_DIFFERENCE, multiselect=False, label="Representation Disparity Metric",
                             scale=2
                         )
-                        group_positive_rate_min_val_vw4 = gr.Text(value="0.7", label="Min value", scale=1)
-                        group_positive_rate_max_val_vw4 = gr.Text(value="1.5", label="Max value", scale=1)
+                        group_positive_rate_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
+                        group_positive_rate_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
             with gr.Row():
                 model_performance_summary = gr.Plot(label="Model Performance Summary")
 
