@@ -3,7 +3,6 @@ import yaml
 import pandas as pd
 from munch import DefaultMunch
 
-from virny.custom_classes.fair_inprocessing_wrapper import FairInprocessingWrapper
 from virny.utils.common_helpers import validate_config
 from virny.configs.constants import INTERSECTION_SIGN
 
@@ -34,37 +33,6 @@ def create_config_obj(config_yaml_path: str):
                 config_obj.sensitive_attributes_dct[cleaned_attr] = config_obj.sensitive_attributes_dct.pop(attr)
 
     return config_obj
-
-
-def create_base_model_wrapper(base_model, inprocessing_sensitive_attribute):
-    """
-    Check if a model is from aif360.algorithms.inprocessing package.
-    If yes, create a wrapper to align with sklearn models API.
-    Otherwise, return the same base_model.
-
-    Parameters
-    ----------
-    base_model
-        An initialized model to profile.
-    inprocessing_sensitive_attribute
-        Sensitive attribute name to use in the fairness in-processing intervention.
-
-    """
-    model_class = getattr(base_model, '__module__', None)
-    if model_class is None:
-        return base_model
-
-    model_source_package = '.'.join(model_class.split('.')[:3])
-    if model_source_package == 'aif360.algorithms.inprocessing':
-        if inprocessing_sensitive_attribute is None:
-            raise ValueError('Sensitive attribute for inprocessing is not defined. '
-                             'Please, set inprocessing_sensitive_attribute argument in the metric computation config.')
-
-        new_base_model = FairInprocessingWrapper(inprocessor=base_model,
-                                                 sensitive_attr_for_intervention=inprocessing_sensitive_attribute)
-        return new_base_model
-
-    return base_model
 
 
 def read_model_metric_dfs(metrics_path, model_names):

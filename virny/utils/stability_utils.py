@@ -82,8 +82,8 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
 
 def generate_bootstrap(features, labels, boostrap_size, with_replacement=True):
     bootstrap_index = np.random.choice(features.shape[0], size=boostrap_size, replace=with_replacement)
-    bootstrap_features = pd.DataFrame(features).iloc[bootstrap_index].values
-    bootstrap_labels = pd.DataFrame(labels).iloc[bootstrap_index].values
+    bootstrap_features = pd.DataFrame(features).iloc[bootstrap_index]
+    bootstrap_labels = pd.DataFrame(labels).iloc[bootstrap_index]
     if len(bootstrap_features) == boostrap_size:
         return bootstrap_features, bootstrap_labels
     else:
