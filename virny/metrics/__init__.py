@@ -5,7 +5,8 @@ from virny.configs.constants import *
 from .accuracy_metrics import (
     mean_prediction,
     statistical_bias_from_predict_proba,
-    statistical_bias
+    statistical_bias,
+    confusion_matrix_metrics
 )
 from .stability_metrics import (
     std,
@@ -43,19 +44,12 @@ METRICS_FOR_LABELS = set([metric for metric in METRIC_TO_FUNCTION.keys() if metr
 
 __all__ = [
     "mean_prediction",
-    "statistical_bias_from_predict_proba",
     "statistical_bias",
+    "confusion_matrix_metrics",
     "std",
     "iqr",
-    "churn",
     "jitter",
-    "per_sample_label_stability",
     "label_stability",
-    "entropy_from_predicted_probability",
-    "conf_interval",
     "aleatoric_uncertainty",
     "overall_uncertainty",
-    "METRIC_TO_FUNCTION",
-    "METRICS_FOR_PREDICT_PROBA",
-    "METRICS_FOR_LABELS"
 ]

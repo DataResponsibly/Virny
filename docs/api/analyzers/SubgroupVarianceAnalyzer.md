@@ -6,7 +6,7 @@ Analyzer to compute variance metrics for subgroups.
 
 ## Parameters
 
-- **model_setting** (*virny.configs.constants.ModelSetting*)
+- **model_setting** (*[metrics.ModelSetting](../../metrics/ModelSetting)*)
 
     Model learning type; a constant from virny.configs.constants.ModelSetting
 
@@ -42,9 +42,21 @@ Analyzer to compute variance metrics for subgroups.
 
     A dictionary of protected groups where keys are subgroup names,  and values are X_test row indexes correspondent to this subgroup.
 
+- **postprocessor** – defaults to `None`
+
+    One of postprocessors from aif360 (https://aif360.readthedocs.io/en/stable/modules/algorithms.html#module-aif360.algorithms.postprocessing)
+
+- **postprocessing_sensitive_attribute** (*str*) – defaults to `None`
+
+    A sensitive attribute to use for post-processing
+
 - **computation_mode** (*str*) – defaults to `None`
 
     [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+
+- **notebook_logs_stdout** (*bool*) – defaults to `False`
+
+    [Optional] True, if this interface was execute in a Jupyter notebook,  False, otherwise.
 
 - **verbose** (*int*) – defaults to `0`
 
@@ -66,7 +78,6 @@ Analyzer to compute variance metrics for subgroups.
     - **save_results**     (*bool*)    
     - **result_filename**     (*str*)     – defaults to `None`    
     - **save_dir_path**     (*str*)     – defaults to `None`    
-    - **make_plots**     (*bool*)     – defaults to `True`    
     - **with_fit**     (*bool*)     – defaults to `True`    
     
 ???- note "set_test_protected_groups"

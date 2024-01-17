@@ -9,7 +9,16 @@ from virny.datasets.base import BaseDataLoader
 
 
 class CreditCardDefaultDataset(BaseDataLoader):
+    """
+    Dataset class for the Credit Card Default dataset that contains sensitive attributes among feature columns.
+    Description: https://arxiv.org/pdf/2110.00530.pdf (Section 3.1.6)
 
+    Parameters
+    ----------
+    dataset_path
+        [Optional] Path to a file with the data
+
+    """
     def __init__(self, dataset_path: str = None):
         if dataset_path is None:
             filename = 'credit_card_default_clean.csv'
@@ -36,7 +45,7 @@ class CreditCardDefaultDataset(BaseDataLoader):
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
         )
-        
+
 
 class CreditDataset(BaseDataLoader):
     """

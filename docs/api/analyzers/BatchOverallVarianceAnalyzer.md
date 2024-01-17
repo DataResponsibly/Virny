@@ -12,7 +12,7 @@ Analyzer to compute subgroup variance metrics for batch learning models.
 
 - **base_model_name** (*str*)
 
-    Model name like 'HoeffdingTreeClassifier' or 'LogisticRegression'
+    Model name like 'DecisionTreeClassifier' or 'LogisticRegression'
 
 - **bootstrap_fraction** (*float*)
 
@@ -46,6 +46,14 @@ Analyzer to compute subgroup variance metrics for batch learning models.
 
     Number of estimators in ensemble to measure base_model stability
 
+- **with_predict_proba** (*bool*) – defaults to `True`
+
+    [Optional] A flag if model can return probabilities for its predictions.  If no, only metrics based on labels (not labels and probabilities) will be computed.
+
+- **notebook_logs_stdout** (*bool*) – defaults to `False`
+
+    [Optional] True, if this interface was execute in a Jupyter notebook,  False, otherwise.
+
 - **verbose** (*int*) – defaults to `0`
 
     [Optional] Level of logs printing. The greater level provides more logs.  As for now, 0, 1, 2 levels are supported.
@@ -69,17 +77,12 @@ Analyzer to compute subgroup variance metrics for batch learning models.
     
 ???- note "compute_metrics"
 
-    Measure metrics for the base model. Display plots for analysis if needed. Save results to a .pkl file
+    Measure metrics for the base model. Save results to a .csv file.
 
     **Parameters**
 
-    - **make_plots**     (*bool*)     – defaults to `False`    
     - **save_results**     (*bool*)     – defaults to `True`    
     - **with_fit**     (*bool*)     – defaults to `True`    
     
-???- note "get_metrics_dict"
-
-???- note "print_metrics"
-
 ???- note "save_metrics_to_file"
 

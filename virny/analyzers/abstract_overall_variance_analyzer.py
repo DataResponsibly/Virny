@@ -35,6 +35,12 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
          As for now, 0, 1, 2 levels are supported.
@@ -78,7 +84,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
     def compute_metrics(self, save_results: bool = True, with_fit: bool = True):
         """
-        Measure metrics for the base model. Display plots for analysis if needed. Save results to a .pkl file
+        Measure metrics for the base model. Save results to a .csv file.
 
         Parameters
         ----------

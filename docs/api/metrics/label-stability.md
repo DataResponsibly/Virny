@@ -1,4 +1,4 @@
-# compute_per_sample_accuracy
+# label_stability
 
 Compute per-sample accuracy for each model predictions.
 
@@ -6,13 +6,13 @@ Return per_sample_accuracy and label_stability (refer to https://www.osti.gov/se
 
 ## Parameters
 
-- **y_test**
+- **y_true** (*pandas.core.frame.DataFrame*)
 
     y test dataset
 
-- **results**
+- **uq_labels** (*pandas.core.frame.DataFrame*)
 
-    `results` variable from count_prediction_stats()
+    `uq_labels` variable from count_prediction_metrics()
 
 
 

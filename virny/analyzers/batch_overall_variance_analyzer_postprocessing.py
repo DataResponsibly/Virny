@@ -10,6 +10,46 @@ from virny.utils.postprocessing_intervention_utils import (construct_binary_labe
 
 
 class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
+    """
+    Analyzer to compute subgroup variance metrics using the defined post-processor.
+
+    Parameters
+    ----------
+    postprocessor
+        One of postprocessors from aif360 (https://aif360.readthedocs.io/en/stable/modules/algorithms.html#module-aif360.algorithms.postprocessing)
+    sensitive_attribute
+        A sensitive attribute to use for post-processing
+    base_model
+        Base model for stability measuring
+    base_model_name
+        Model name like 'DecisionTreeClassifier' or 'LogisticRegression'
+    bootstrap_fraction
+        [0-1], fraction from train_pd_dataset for fitting an ensemble of base models
+    X_train
+        Processed features train set
+    y_train
+        Targets train set
+    X_test
+        Processed features test set
+    y_test
+        Targets test set
+    target_column
+        Name of the target column
+    dataset_name
+        Name of dataset, used for correct results naming
+    n_estimators
+        Number of estimators in ensemble to measure base_model stability
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
+    notebook_logs_stdout
+        [Optional] True, if this interface was execute in a Jupyter notebook,
+         False, otherwise.
+    verbose
+        [Optional] Level of logs printing. The greater level provides more logs.
+         As for now, 0, 1, 2 levels are supported.
+
+    """
     def __init__(self, postprocessor, sensitive_attribute: str, 
                  base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
