@@ -7,7 +7,6 @@ class ModelSetting(Enum):
 
 class ComputationMode(Enum):
     ERROR_ANALYSIS = "error_analysis"
-    POSTPROCESSING_INTERVENTION = "postprocessing_intervention"
 
 
 INTERSECTION_SIGN = '&'
@@ -35,6 +34,7 @@ LABEL_STABILITY = 'Label_Stability'
 
 # Uncertainty metrics
 ALEATORIC_UNCERTAINTY = 'Aleatoric_Uncertainty'
+EPISTEMIC_UNCERTAINTY = 'Epistemic_Uncertainty'
 OVERALL_UNCERTAINTY = 'Overall_Uncertainty'
 
 # Error disparity metrics
@@ -57,5 +57,7 @@ JITTER_PARITY = 'Jitter_Parity'
 # Uncertainty disparity metrics
 OVERALL_UNCERTAINTY_PARITY = 'Overall_Uncertainty_Parity'
 OVERALL_UNCERTAINTY_RATIO = 'Overall_Uncertainty_Ratio'
+EPISTEMIC_UNCERTAINTY_PARITY = 'Epistemic_Uncertainty_Parity'
+EPISTEMIC_UNCERTAINTY_RATIO = 'Epistemic_Uncertainty_Ratio'
 ALEATORIC_UNCERTAINTY_PARITY = 'Aleatoric_Uncertainty_Parity'
 ALEATORIC_UNCERTAINTY_RATIO = 'Aleatoric_Uncertainty_Ratio'

@@ -29,6 +29,7 @@ def test_count_prediction_metrics_true1():
     assert abs(prediction_metrics[STD] - 0.0565685424949238) < alpha
     assert abs(prediction_metrics[IQR] - 0.03999999999999998) < alpha
     assert abs(prediction_metrics[ALEATORIC_UNCERTAINTY] - 0.9345065014636438) < alpha
+    assert abs(prediction_metrics[EPISTEMIC_UNCERTAINTY] - 0.02150068825) < alpha
     assert abs(prediction_metrics[OVERALL_UNCERTAINTY] - 0.9560071897163649) < alpha
 
 
@@ -57,6 +58,7 @@ def test_count_prediction_metrics_true2(COMPAS_y_test, COMPAS_RF_bootstrap_predi
     assert abs(prediction_metrics[STD] - 0.06812843675435999) < alpha
     assert abs(prediction_metrics[IQR] - 0.08940024816894414) < alpha
     assert abs(prediction_metrics[ALEATORIC_UNCERTAINTY] - 0.8369703514251653) < alpha
+    assert abs(prediction_metrics[EPISTEMIC_UNCERTAINTY] - 0.02378108452) < alpha
     assert abs(prediction_metrics[OVERALL_UNCERTAINTY] - 0.8607514359506866) < alpha
 
 

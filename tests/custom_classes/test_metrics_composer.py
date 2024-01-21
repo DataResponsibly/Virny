@@ -73,7 +73,7 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
     models_composed_metrics_df = metrics_composer.compose_metrics()
 
     # Check shape
-    assert models_composed_metrics_df.shape == (34, 5)
+    assert models_composed_metrics_df.shape == (38, 5)
 
     # Check column names
     assert sorted(models_composed_metrics_df.columns.tolist()) == sorted(['Metric', 'Model_Name', 'sex', 'race', 'sex&race'])
@@ -87,7 +87,8 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
                 DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
                 LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY,
                 ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO,
-                OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO])
+                OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO,
+                EPISTEMIC_UNCERTAINTY_PARITY, EPISTEMIC_UNCERTAINTY_RATIO])
     )
 
     expected_composed_metrics_df = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'composed_metrics',

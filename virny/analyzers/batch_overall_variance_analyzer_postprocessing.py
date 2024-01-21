@@ -55,6 +55,10 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
                  target_column: str, dataset_name: str, n_estimators: int, 
                  with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
+        if sensitive_attribute is None:
+            raise ValueError('Sensitive attribute for postprocessing is not defined. '
+                             'Please, set postprocessing_sensitive_attribute argument in the metric computation config.')
+
         super().__init__(base_model=base_model,
                          base_model_name=base_model_name,
                          bootstrap_fraction=bootstrap_fraction,
@@ -68,7 +72,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                          with_predict_proba=with_predict_proba,
                          notebook_logs_stdout=notebook_logs_stdout,
                          verbose=verbose)
-        
+
         self.postprocessor = postprocessor
         self.sensitive_attribute = sensitive_attribute
         self.test_binary_label_dataset = construct_binary_label_dataset_from_df(X_test, y_test, target_column, sensitive_attribute)
