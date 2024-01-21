@@ -58,7 +58,6 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
                                                                          computation_mode=config.computation_mode,
                                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
-
     # Concatenate current run metrics with previous results and
     # create melted_model_metrics_df to save it in a database
     run_models_metrics_df = pd.DataFrame()

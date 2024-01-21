@@ -14,7 +14,7 @@ from virny.utils.data_viz_utils import (create_model_rank_heatmap_visualization,
 
 class MetricsInteractiveVisualizer:
     """
-    Class to create useful visualizations of models metrics.
+    Class to create an interactive web app based on models metrics.
 
     Parameters
     ----------
@@ -90,7 +90,9 @@ class MetricsInteractiveVisualizer:
         self.sorted_model_composed_metrics_df = self.melted_model_composed_metrics_df.sort_values(by=['Value'])
 
     def _align_input_metric_df(self, model_metrics_df: pd.DataFrame, allowed_cols: list, sensitive_attrs: list):
-        # Filter columns in the input dataframe based on allowed_cols and sensitive_attrs
+        """
+        Filter columns in the input dataframe based on allowed_cols and sensitive_attrs.
+        """
         filtered_cols = allowed_cols
         for col in model_metrics_df.columns:
             for sensitive_attr in sensitive_attrs:
@@ -105,6 +107,16 @@ class MetricsInteractiveVisualizer:
         return [gr.Textbox(visible=True)] * k + [gr.Textbox(value='', visible=False)] * (self.max_groups - k)
 
     def create_web_app(self, start_app=True):
+        """
+        Build an interactive web application.
+
+        Parameters
+        ----------
+        start_app
+            [Optional] If True, the web app will be started when calling this method.
+             Otherwise, the gradio demo object will be returned, and users can start the web app themselves.
+
+        """
         with gr.Blocks(theme=gr.themes.Soft()) as demo:
             # ==================================== Dataset Statistics ====================================
             gr.Markdown(
@@ -380,7 +392,7 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         positive_rate_metric_vw4 = gr.Dropdown(
                             [POSITIVE_RATE, SELECTION_RATE],
-                            value=POSITIVE_RATE, multiselect=False, label="Representation Metric",
+                            value=SELECTION_RATE, multiselect=False, label="Representation Metric",
                             scale=2
                         )
                         positive_rate_min_val_vw4 = gr.Text(value="0.0", label="Min value", scale=1)
@@ -419,11 +431,11 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         group_positive_rate_metrics_vw4 = gr.Dropdown(
                             sorted([DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE]),
-                            value=DISPARATE_IMPACT, multiselect=False, label="Representation Disparity Metric",
+                            value=STATISTICAL_PARITY_DIFFERENCE, multiselect=False, label="Representation Disparity Metric",
                             scale=2
                         )
-                        group_positive_rate_min_val_vw4 = gr.Text(value="0.7", label="Min value", scale=1)
-                        group_positive_rate_max_val_vw4 = gr.Text(value="1.5", label="Max value", scale=1)
+                        group_positive_rate_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
+                        group_positive_rate_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
             with gr.Row():
                 model_performance_summary = gr.Plot(label="Model Performance Summary")
 
@@ -447,6 +459,10 @@ class MetricsInteractiveVisualizer:
 
     def __filter_subgroup_metrics_df(self, results: dict, subgroup_metric: str,
                                      selected_metric: str, selected_subgroup: str, defined_model_names: list):
+        """
+        Find metric values for each model based on metric, subgroup, and model names.
+        Add the values to a results dict.
+        """
         results[subgroup_metric] = dict()
 
         # Get distinct sorted model names
@@ -469,6 +485,9 @@ class MetricsInteractiveVisualizer:
         return results
 
     def __check_metric_constraints(self, model_performance_dct, input_constraint_dct):
+        """
+        Create a dictionary of constraint check identifiers for each metric and group.
+        """
         model_metrics_constraints_check_dct = dict()
         for metric_dim in model_performance_dct.keys():
             model_metrics_constraints_check_dct[metric_dim] = dict()

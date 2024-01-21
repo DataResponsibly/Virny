@@ -26,6 +26,10 @@ Calculator that calculates variance metrics for subgroups.
 
     [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
 
+- **with_predict_proba** (*bool*) – defaults to `True`
+
+    [Optional] A flag if model can return probabilities for its predictions.  If no, only metrics based on labels (not labels and probabilities) will be computed.
+
 
 
 
@@ -39,6 +43,7 @@ Calculator that calculates variance metrics for subgroups.
 
     **Parameters**
 
+    - **y_preds**    
     - **models_predictions**     (*dict*)    
     - **save_results**     (*bool*)    
     - **result_filename**     (*str*)     – defaults to `None`    

@@ -56,8 +56,15 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
         Partition predictions on correct and incorrect and compute subgroup metrics for each of the partitions.
         Used for the 'error_analysis' mode.
 
-        :param y_preds: a list of predictions
-        :param results: a dict to add subgroup metrics for each partition
+        Parameters
+        ----------
+        y_preds
+            A list of predictions
+        models_predictions
+            Is not used in this function, but needed for function argument consistency.
+        results
+            A dict to add subgroup metrics for each partition
+
         """
         for group_name in self.test_protected_groups.keys():
             X_test_group = self.test_protected_groups[group_name]

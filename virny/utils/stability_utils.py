@@ -42,6 +42,9 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
         True labels
     uq_results
         2D array of prediction proba for the zero value label by each model
+    with_predict_proba
+        [Optional] A flag if model can return probabilities for its predictions.
+         If no, only metrics based on labels (not labels and probabilities) will be computed.
 
     """
     if isinstance(uq_results, np.ndarray):

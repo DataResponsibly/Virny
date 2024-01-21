@@ -79,6 +79,18 @@ def tune_ML_models(models_params_for_tuning: dict, base_flow_dataset: BaseFlowDa
     Return each model with its best hyperparameters that have the highest F1 score and Accuracy.
      results_df is a dataframe with metrics and tuned parameters;
      models_config is a dict with model tuned params for the metrics computation stage
+
+    Parameters
+    ----------
+    models_params_for_tuning
+        A dictionary, where keys are model names and values are a dictionary of hyperparameters and value ranges to tune.
+    base_flow_dataset
+        An instance of BaseFlowDataset object. Its train and test sets are used for training and tuning.
+    dataset_name
+        A name of the dataset. Used to save tuned hyperparameters to a csv file with an appropriate filename.
+    n_folds
+        The number of folds for k-fold cross validation.
+
     """
     models_config = dict()
     tuned_params_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score', 'Accuracy_Score', 'Model_Best_Params'))
