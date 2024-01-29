@@ -1,6 +1,6 @@
 # Multiple Models Interface For Multiple Test Sets
 
-In this example, we are going to audit 2 models for stability and fairness, visualize metrics, and create an analysis report. To get better analysis accuracy, we will use `compute_metrics_multiple_runs_with_multiple_test_sets` interface that will run metric computation for multiple models and test each model using multiple test sets.
+In this example, we are going to conduct a deep performance profiling for 2 models. For that, we will use `compute_metrics_with_multiple_test_sets` interface that will run metric computation for multiple models and test each model using multiple test sets.
 
 ## Import dependencies
 
@@ -16,21 +16,22 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
-from virny.user_interfaces.metrics_computation_interfaces import compute_metrics_multiple_runs_with_multiple_test_sets
+from virny.user_interfaces.multiple_models_with_multiple_test_sets_api import compute_metrics_with_multiple_test_sets
 from virny.utils.custom_initializers import create_config_obj, create_models_metrics_dct_from_database_df
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
 from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
 ```
 
+
 ## Initialize Input Variables
 
 Based on the library flow, we need to create 3 input objects for a user interface:
 
+* A **config yaml** that is a file with configuration parameters for different user interfaces for metric computation.
+
 * A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseDataset class, which was created for user convenience.
 
-* A **config yaml** that is a file with configuration parameters for different user interfaces for metrics computation.
-
-* Finally, a **models config** that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits of multiple models and analyze different types of models.
+* Finally, a **models config** that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits for different analysis modes and analyze different types of models.
 
 
 ```python
@@ -144,15 +145,17 @@ base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET
 
 ### Create a config object
 
-`compute_metrics_multiple_runs_with_multiple_test_sets` interface requires that your **yaml file** includes the following parameters:
+`compute_metrics_with_multiple_test_sets` interface requires that your **yaml file** includes the following parameters:
 
 * **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
-* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup variance metrics.
+* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
-* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including attribute intersections), and values are privileged values for these attributes. Currently, the library supports only intersections among two sensitive attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify privileged values for intersectional groups since they will be derived from privileged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+
+Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
 
 
 
@@ -194,9 +197,9 @@ models_config = {
 }
 ```
 
-## Subgroup Metrics Computation
+## Subgroup Metric Computation
 
-After the variables are input to a user interface, the interface uses subgroup analyzers to compute different sets of metrics for each privileged and disprivileged subgroup. As for now, our library supports **Subgroup Variance Analyzer** and **Subgroup Error Analyzer**, but it is easily extensible to any other analyzers. When the variance and error analyzers complete metrics computation, their metrics are combined, returned in a matrix format, and stored in a file if defined.
+After that we need to input the _BaseFlowDataset_ object, models config, and config yaml to a metric computation interface and execute it. The interface uses subgroup analyzers to compute different sets of metrics for each privileged and disadvantaged group. As for now, our library supports **Subgroup Variance Analyzer** and **Subgroup Error Analyzer**, but it is easily extensible to any other analyzers. When the variance and error analyzers complete metric computation, their metrics are combined, returned in a matrix format, and stored in a file if defined.
 
 
 ```python
@@ -230,16 +233,19 @@ custom_table_fields_dct = {
 print('Current session uuid: ', custom_table_fields_dct['session_uuid'])
 ```
 
-    Current session uuid:  b2945b06-3cbe-4e6f-80f4-8f8b8228b359
+    Current session uuid:  8d31eaab-5d6d-4830-9b23-c29355efa90b
 
 
 
 ```python
-extra_test_sets_lst = [(base_flow_dataset.X_test, base_flow_dataset.y_test)]
-compute_metrics_multiple_runs_with_multiple_test_sets(base_flow_dataset, extra_test_sets_lst, config, models_config,
-                                                      custom_table_fields_dct, db_writer_func)
+extra_test_sets_lst = [(base_flow_dataset.X_test, base_flow_dataset.y_test, base_flow_dataset.init_features_df)]
+compute_metrics_with_multiple_test_sets(dataset=base_flow_dataset,
+                                        extra_test_sets_lst=extra_test_sets_lst,
+                                        config=config,
+                                        models_config=models_config,
+                                        custom_tbl_fields_dct=custom_table_fields_dct,
+                                        db_writer_func=db_writer_func)
 ```
-A lot of logs...
 
 
 
@@ -267,4 +273,9 @@ def read_model_metric_dfs_from_db(collection, session_uuid):
 ```python
 model_metric_dfs = read_model_metric_dfs_from_db(collection, custom_table_fields_dct['session_uuid'])
 models_metrics_dct = create_models_metrics_dct_from_database_df(model_metric_dfs)
+```
+
+
+```python
+client.close()
 ```

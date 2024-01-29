@@ -1,8 +1,8 @@
 # MetricsComposer
 
-Composer class that combines different subgroup metrics to create group metrics  such as 'Disparate_Impact' or 'Accuracy_Parity'
+Metric Composer class that combines different subgroup metrics to create disparity metrics  such as 'Disparate_Impact' or 'Accuracy_Difference'.
 
-
+Definitions of the disparity metrics could be observed in the __init__ method of the Metric Composer:  https://github.com/DataResponsibly/Virny/blob/main/virny/custom_classes/metrics_composer.py
 
 ## Parameters
 

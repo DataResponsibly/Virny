@@ -40,6 +40,7 @@ Abstract class for a subgroup analyzer to compute metrics for subgroups.
     **Parameters**
 
     - **y_preds**    
+    - **models_predictions**     (*dict*)    
     - **save_results**     (*bool*)    
     - **result_filename**     (*str*)     – defaults to `None`    
     - **save_dir_path**     (*str*)     – defaults to `None`    

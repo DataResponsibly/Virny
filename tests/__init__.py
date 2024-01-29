@@ -5,6 +5,7 @@ import pandas as pd
 from munch import DefaultMunch
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
 
 from virny.datasets.base import BaseDataLoader
 
@@ -22,6 +23,22 @@ def get_root_dir():
             root_dir = os.path.join('..', '..')
             
     return root_dir
+
+
+def compare_metric_dfs(expected_composed_metrics_df, actual_composed_metrics_df,
+                       model_name, metrics_lst, groups, alpha=0.000_001):
+    for metric_name in metrics_lst:
+        for group in groups:
+            expected_metric_val = expected_composed_metrics_df[
+                (expected_composed_metrics_df['Model_Name'] == model_name) &
+                (expected_composed_metrics_df['Metric'] == metric_name)
+                ][group].values[0]
+            actual_metric_val = actual_composed_metrics_df[
+                (actual_composed_metrics_df['Model_Name'] == model_name) &
+                (actual_composed_metrics_df['Metric'] == metric_name)
+                ][group].values[0]
+
+            assert abs(expected_metric_val - actual_metric_val) < alpha, f"Assert for {metric_name} metric and {group} group"
 
 
 ROOT_DIR = get_root_dir()
@@ -64,7 +81,10 @@ def models_config():
         'LogisticRegression': LogisticRegression(C=1,
                                                  max_iter=50,
                                                  penalty='l2',
-                                                 solver='newton-cg')
+                                                 solver='newton-cg'),
+        'XGBClassifier': XGBClassifier(learning_rate=0.1,
+                                       n_estimators=200,
+                                       max_depth=7),
     }
 
 
@@ -108,3 +128,35 @@ def compas_without_sensitive_attrs_dataset_class():
                           target=target,
                           numerical_columns=numerical_columns,
                           categorical_columns=categorical_columns)
+
+@pytest.fixture(scope='package')
+def COMPAS_y_test():
+    y_test = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'COMPAS_use_case', 'COMPAS_y_test.csv'), header=0)
+    y_test = y_test.set_index("0")
+    return y_test
+
+
+@pytest.fixture(scope='package')
+def COMPAS_RF_expected_preds():
+    expected_preds = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'COMPAS_use_case',
+                                 'COMPAS_RF_expected_preds.csv'), header=0)
+    expected_preds = expected_preds.set_index("0")
+    return expected_preds
+
+
+@pytest.fixture(scope='package')
+def COMPAS_RF_bootstrap_predictions():
+    models_predictions = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'COMPAS_use_case',
+                                                  'COMPAS_RF_predictions.csv'), header=0)
+    models_predictions = models_predictions.reset_index(drop=True)
+    models_predictions_dct = dict()
+    for col in models_predictions.columns:
+        models_predictions_dct[int(col)] = models_predictions[col].to_numpy()
+
+    return models_predictions_dct
+
+
+@pytest.fixture(scope='package')
+def COMPAS_RF_expected_metrics():
+    return pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'COMPAS_use_case',
+                                    'COMPAS_RF_expected_metrics.csv'), header=0)

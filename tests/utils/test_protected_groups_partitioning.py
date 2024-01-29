@@ -79,3 +79,48 @@ def test_create_test_protected_groups_true2(compas_without_sensitive_attrs_datas
     assert actual_test_protected_groups['sex_dis'].shape[0] == 845
     assert actual_test_protected_groups['race_priv'].shape[0] == 414
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
+
+
+def test_create_test_protected_groups_folk_true1(folk_emp_config_params):
+    data_loader = ACSEmploymentDataset(state=['NY'], year=2018, with_nulls=False,
+                                       subsample_size=20_000, subsample_seed=42)
+
+    seed = 100
+    X_train, X_test, y_train, y_test = train_test_split(data_loader.X_data,
+                                                        data_loader.y_data,
+                                                        test_size=folk_emp_config_params.test_set_fraction,
+                                                        random_state=seed)
+    actual_test_protected_groups = create_test_protected_groups(X_test,
+                                                                data_loader.full_df,
+                                                                folk_emp_config_params.sensitive_attributes_dct)
+
+    assert len(actual_test_protected_groups) == len(folk_emp_config_params.sensitive_attributes_dct.keys()) * 2
+
+    assert actual_test_protected_groups['SEX_priv'].shape[0] == X_test[X_test.SEX == '1'].shape[0]
+    assert actual_test_protected_groups['SEX_dis'].shape[0] == X_test[X_test.SEX == '2'].shape[0]
+    assert actual_test_protected_groups['RAC1P_priv'].shape[0] == X_test[X_test.RAC1P != '2'].shape[0]
+    assert actual_test_protected_groups['RAC1P_dis'].shape[0] == X_test[X_test.RAC1P == '2'].shape[0]
+    assert actual_test_protected_groups['SEX&RAC1P_priv'].shape[0] == X_test[(X_test.SEX != '2') | (X_test.RAC1P != '2')].shape[0]
+    assert actual_test_protected_groups['SEX&RAC1P_dis'].shape[0] == X_test[(X_test.SEX == '2') & (X_test.RAC1P == '2')].shape[0]
+
+
+def test_create_test_protected_groups_folk_true2(folk_emp_config_params):
+    data_loader = ACSEmploymentDataset(state=['NY'], year=2018, with_nulls=False,
+                                       subsample_size=20_000, subsample_seed=42)
+    new_sensitive_attributes_dct = {'SEX': '2', 'RAC1P': ['2', '3', '4', '5', '6', '7', '8', '9']}
+
+    seed = 100
+    X_train, X_test, y_train, y_test = train_test_split(data_loader.X_data,
+                                                        data_loader.y_data,
+                                                        test_size=folk_emp_config_params.test_set_fraction,
+                                                        random_state=seed)
+    actual_test_protected_groups = create_test_protected_groups(X_test,
+                                                                data_loader.full_df,
+                                                                new_sensitive_attributes_dct)
+
+    assert len(actual_test_protected_groups) == len(new_sensitive_attributes_dct.keys()) * 2
+
+    assert actual_test_protected_groups['SEX_priv'].shape[0] == X_test[X_test.SEX == '1'].shape[0]
+    assert actual_test_protected_groups['SEX_dis'].shape[0] == X_test[X_test.SEX == '2'].shape[0]
+    assert actual_test_protected_groups['RAC1P_priv'].shape[0] == X_test[X_test.RAC1P == '1'].shape[0]
+    assert actual_test_protected_groups['RAC1P_dis'].shape[0] == X_test[X_test.RAC1P.isin(['2', '3', '4', '5', '6', '7', '8', '9'])].shape[0]

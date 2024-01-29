@@ -1,14 +1,14 @@
-# Multiple Models Interface Usage With DB Writer
+# Multiple Models With DB Writer Interface
 
-In this example, we are going to audit 4 models for stability and fairness, visualize metrics, and create an analysis report. To get better analysis accuracy, we will use `compute_metrics_multiple_runs_with_db_writer` interface that will compute metrics for multiple models and save results in the user database based on the db_writer function. For that, we will need to do the next steps:
+In this example, we are going to conduct a deep performance profiling for 4 models. For that, we will use `compute_metrics_with_db_writer` interface that will compute metrics for multiple models and save results in the user database based on the _db_writer_ function. Thus, we will need to do the next steps:
 
 * Initialize input variables
 
 * Compute subgroup metrics
 
-* Make group metrics composition
+* Perform disparity metrics composition using the Metric Composer
 
-* Create metrics visualizations and an analysis report
+* Create static visualizations using the Metric Visualizer
 
 ## Import dependencies
 
@@ -26,24 +26,24 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 
-from virny.user_interfaces.metrics_computation_interfaces import compute_metrics_multiple_runs_with_db_writer
+from virny.user_interfaces.multiple_models_with_db_writer_api import compute_metrics_with_db_writer
 from virny.utils.custom_initializers import create_config_obj, create_models_metrics_dct_from_database_df
 from virny.custom_classes.metrics_visualizer import MetricsVisualizer
 from virny.custom_classes.metrics_composer import MetricsComposer
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
 from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
-from virny.configs.constants import ReportType
 ```
+
 
 ## Initialize Input Variables
 
 Based on the library flow, we need to create 3 input objects for a user interface:
 
+* A **config yaml** that is a file with configuration parameters for different user interfaces for metric computation.
+
 * A **dataset class** that is a wrapper above the user’s raw dataset that includes its descriptive attributes like a target column, numerical columns, categorical columns, etc. This class must be inherited from the BaseDataset class, which was created for user convenience.
 
-* A **config yaml** that is a file with configuration parameters for different user interfaces for metrics computation.
-
-* Finally, a **models config** that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits of multiple models and analyze different types of models.
+* Finally, a **models config** that is a Python dictionary, where keys are model names and values are initialized models for analysis. This dictionary helps conduct audits for different analysis modes and analyze different types of models.
 
 
 ```python
@@ -157,7 +157,7 @@ base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET
 
 ### Create a config object
 
-`compute_metrics_multiple_runs_with_db_writer` interface requires that your **yaml file** includes the following parameters:
+`compute_metrics_with_db_writer` interface requires that your **yaml file** includes the following parameters:
 
 * **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
 
@@ -165,7 +165,9 @@ base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET
 
 * **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
-* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including attribute intersections), and values are privileged values for these attributes. Currently, the library supports only intersections among two sensitive attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify privileged values for intersectional groups since they will be derived from privileged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+
+Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
 
 
 
@@ -213,9 +215,9 @@ models_config = {
 }
 ```
 
-## Subgroup Metrics Computation
+## Subgroup Metric Computation
 
-After the variables are input to a user interface, the interface uses subgroup analyzers to compute different sets of metrics for each privileged and disprivileged subgroup. As for now, our library supports **Subgroup Variance Analyzer** and **Subgroup Error Analyzer**, but it is easily extensible to any other analyzers. When the variance and error analyzers complete metrics computation, their metrics are combined, returned in a matrix format, and stored in a file if defined.
+After that we need to input the _BaseFlowDataset_ object, models config, and config yaml to a metric computation interface and execute it. The interface uses subgroup analyzers to compute different sets of metrics for each privileged and disadvantaged group. As for now, our library supports **Subgroup Variance Analyzer** and **Subgroup Error Analyzer**, but it is easily extensible to any other analyzers. When the variance and error analyzers complete metric computation, their metrics are combined, returned in a matrix format, and stored in the user defined database using the input _db_writer_ function.
 
 
 ```python
@@ -249,15 +251,33 @@ custom_table_fields_dct = {
 print('Current session uuid: ', custom_table_fields_dct['session_uuid'])
 ```
 
-    Current session uuid:  7013282e-2bf0-42df-ac7a-acf338c1cf58
+    Current session uuid:  65f2800c-dea8-4760-89bd-40564b4e19fd
 
 
 
 ```python
-metrics_dct = compute_metrics_multiple_runs_with_db_writer(base_flow_dataset, config, models_config, custom_table_fields_dct,
-                                                           db_writer_func)
+metrics_dct = compute_metrics_with_db_writer(base_flow_dataset, config, models_config, custom_table_fields_dct, db_writer_func,
+                                             notebook_logs_stdout=True)
 ```
-A lot of logs...
+
+
+    Analyze multiple models:   0%|          | 0/4 [00:00<?, ?it/s]
+
+
+
+    Classifiers testing by bootstrap:   0%|          | 0/50 [00:00<?, ?it/s]
+
+
+
+    Classifiers testing by bootstrap:   0%|          | 0/50 [00:00<?, ?it/s]
+
+
+
+    Classifiers testing by bootstrap:   0%|          | 0/50 [00:00<?, ?it/s]
+
+
+
+    Classifiers testing by bootstrap:   0%|          | 0/50 [00:00<?, ?it/s]
 
 
 Look at several columns in top rows of computed metrics
@@ -300,174 +320,174 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
   <tbody>
     <tr>
       <th>0</th>
-      <td>Mean</td>
-      <td>0.520075</td>
-      <td>0.575481</td>
-      <td>0.506240</td>
-      <td>0.584422</td>
-      <td>0.478580</td>
+      <td>Statistical_Bias</td>
+      <td>0.415777</td>
+      <td>0.411280</td>
+      <td>0.416900</td>
+      <td>0.411460</td>
+      <td>0.418561</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Std</td>
-      <td>0.073216</td>
-      <td>0.076031</td>
-      <td>0.072513</td>
-      <td>0.073452</td>
-      <td>0.073063</td>
+      <td>0.070086</td>
+      <td>0.072965</td>
+      <td>0.069367</td>
+      <td>0.069672</td>
+      <td>0.070352</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>IQR</td>
-      <td>0.088307</td>
-      <td>0.087492</td>
-      <td>0.088510</td>
-      <td>0.088613</td>
-      <td>0.088109</td>
+      <td>Mean_Prediction</td>
+      <td>0.519189</td>
+      <td>0.574330</td>
+      <td>0.505420</td>
+      <td>0.583615</td>
+      <td>0.477643</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>Aleatoric_Uncertainty</td>
-      <td>0.861499</td>
-      <td>0.868571</td>
-      <td>0.859733</td>
-      <td>0.854025</td>
-      <td>0.866318</td>
+      <td>Overall_Uncertainty</td>
+      <td>0.885080</td>
+      <td>0.894485</td>
+      <td>0.882731</td>
+      <td>0.879480</td>
+      <td>0.888691</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>Overall_Uncertainty</td>
-      <td>0.888512</td>
-      <td>0.897406</td>
-      <td>0.886291</td>
-      <td>0.882379</td>
-      <td>0.892467</td>
+      <td>Aleatoric_Uncertainty</td>
+      <td>0.859123</td>
+      <td>0.866579</td>
+      <td>0.857261</td>
+      <td>0.853366</td>
+      <td>0.862836</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>Statistical_Bias</td>
-      <td>0.416186</td>
-      <td>0.411654</td>
-      <td>0.417318</td>
-      <td>0.411442</td>
-      <td>0.419246</td>
+      <td>IQR</td>
+      <td>0.084150</td>
+      <td>0.081478</td>
+      <td>0.084817</td>
+      <td>0.085661</td>
+      <td>0.083176</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>Jitter</td>
-      <td>0.113070</td>
-      <td>0.135874</td>
-      <td>0.107375</td>
-      <td>0.111362</td>
-      <td>0.114171</td>
+      <td>Epistemic_Uncertainty</td>
+      <td>0.025957</td>
+      <td>0.027907</td>
+      <td>0.025470</td>
+      <td>0.026114</td>
+      <td>0.025856</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>Per_Sample_Accuracy</td>
-      <td>0.687519</td>
-      <td>0.688720</td>
-      <td>0.687219</td>
-      <td>0.692222</td>
-      <td>0.684486</td>
+      <td>Label_Stability</td>
+      <td>0.854811</td>
+      <td>0.842275</td>
+      <td>0.857941</td>
+      <td>0.865700</td>
+      <td>0.847788</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>Label_Stability</td>
-      <td>0.858295</td>
-      <td>0.822938</td>
-      <td>0.867124</td>
-      <td>0.856715</td>
-      <td>0.859315</td>
+      <td>Jitter</td>
+      <td>0.111783</td>
+      <td>0.119586</td>
+      <td>0.109835</td>
+      <td>0.103488</td>
+      <td>0.117133</td>
     </tr>
     <tr>
       <th>9</th>
       <td>TPR</td>
       <td>0.656051</td>
-      <td>0.466667</td>
-      <td>0.691919</td>
+      <td>0.480000</td>
+      <td>0.689394</td>
       <td>0.517007</td>
       <td>0.719136</td>
     </tr>
     <tr>
       <th>10</th>
       <td>TNR</td>
-      <td>0.733333</td>
+      <td>0.735043</td>
       <td>0.808824</td>
-      <td>0.710468</td>
-      <td>0.786517</td>
+      <td>0.712695</td>
+      <td>0.790262</td>
       <td>0.688679</td>
     </tr>
     <tr>
       <th>11</th>
       <td>PPV</td>
-      <td>0.664516</td>
-      <td>0.573770</td>
-      <td>0.678218</td>
-      <td>0.571429</td>
+      <td>0.665948</td>
+      <td>0.580645</td>
+      <td>0.679104</td>
+      <td>0.575758</td>
       <td>0.701807</td>
     </tr>
     <tr>
       <th>12</th>
       <td>FNR</td>
       <td>0.343949</td>
-      <td>0.533333</td>
-      <td>0.308081</td>
+      <td>0.520000</td>
+      <td>0.310606</td>
       <td>0.482993</td>
       <td>0.280864</td>
     </tr>
     <tr>
       <th>13</th>
       <td>FPR</td>
-      <td>0.266667</td>
+      <td>0.264957</td>
       <td>0.191176</td>
-      <td>0.289532</td>
-      <td>0.213483</td>
+      <td>0.287305</td>
+      <td>0.209738</td>
       <td>0.311321</td>
     </tr>
     <tr>
       <th>14</th>
       <td>Accuracy</td>
-      <td>0.698864</td>
-      <td>0.687204</td>
+      <td>0.699811</td>
+      <td>0.691943</td>
       <td>0.701775</td>
-      <td>0.690821</td>
+      <td>0.693237</td>
       <td>0.704050</td>
     </tr>
     <tr>
       <th>15</th>
       <td>F1</td>
-      <td>0.660256</td>
-      <td>0.514706</td>
-      <td>0.685000</td>
-      <td>0.542857</td>
+      <td>0.660963</td>
+      <td>0.525547</td>
+      <td>0.684211</td>
+      <td>0.544803</td>
       <td>0.710366</td>
     </tr>
     <tr>
       <th>16</th>
       <td>Selection-Rate</td>
-      <td>0.440341</td>
-      <td>0.289100</td>
-      <td>0.478107</td>
-      <td>0.321256</td>
+      <td>0.439394</td>
+      <td>0.293839</td>
+      <td>0.475740</td>
+      <td>0.318841</td>
       <td>0.517134</td>
     </tr>
     <tr>
       <th>17</th>
       <td>Positive-Rate</td>
-      <td>0.987261</td>
-      <td>0.813333</td>
-      <td>1.020202</td>
-      <td>0.904762</td>
+      <td>0.985138</td>
+      <td>0.826667</td>
+      <td>1.015152</td>
+      <td>0.897959</td>
       <td>1.024691</td>
     </tr>
     <tr>
       <th>18</th>
       <td>Sample_Size</td>
       <td>1056.000000</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
+      <td>211.000000</td>
+      <td>845.000000</td>
+      <td>414.000000</td>
+      <td>642.000000</td>
     </tr>
   </tbody>
 </table>
@@ -475,9 +495,9 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
 
 
 
-## Group Metrics Composition
+## Disparity Metric Composition
 
-**Metrics Composer** is responsible for this second stage of the model audit. Currently, it computes our custom group fairness and stability metrics, but extending it for new group metrics is very simple. We noticed that more and more group metrics have appeared during the last decade, but most of them are based on the same subgroup metrics. Hence, such a separation of subgroup and group metrics computation allows one to experiment with different combinations of subgroup metrics and avoid subgroup metrics recomputation for a new set of grouped metrics.
+To compose disparity metrics, the Metric Composer should be applied. **Metric Composer** is responsible for the second stage of the model audit. Currently, it computes our custom error disparity, stability disparity, and uncertainty disparity metrics, but extending it for new disparity metrics is very simple. We noticed that more and more disparity metrics have appeared during the last decade, but most of them are based on the same group specific metrics. Hence, such a separation of group specific and disparity metrics computation allows us to experiment with different combinations of group specific metrics and avoid group metrics recomputation for a new set of disparity metrics.
 
 
 ```python
@@ -507,7 +527,6 @@ models_metrics_dct = create_models_metrics_dct_from_database_df(model_metric_dfs
 ```
 
 
-
 ```python
 metrics_composer = MetricsComposer(models_metrics_dct, config.sensitive_attributes_dct)
 ```
@@ -519,9 +538,9 @@ Compute composed metrics
 models_composed_metrics_df = metrics_composer.compose_metrics()
 ```
 
-## Metrics Visualization and Reporting
+## Metric Visualization
 
-**Metrics Visualizer** provides metrics visualization and reporting functionality. It unifies different preprocessing methods for result metrics and creates various data formats required for visualizations. Hence, users can simply call methods of the Metrics Visualizer class and get custom plots for diverse metrics analysis. Additionally, these plots could be collected in an HTML report with comments for user convenience and future reference.
+**Metric Visualizer** allows us to build static visualizations for the computed metrics. It unifies different preprocessing methods for the computed metrics and creates various data formats required for visualizations. Hence, users can simply call methods of the MetricsVisualizer class and get custom plots for diverse metric analysis.
 
 
 ```python
@@ -533,8 +552,8 @@ visualizer = MetricsVisualizer(models_metrics_dct, models_composed_metrics_df, c
 
 ```python
 visualizer.create_overall_metrics_bar_char(
-    metrics_names=['TPR', 'PPV', 'Accuracy', 'F1', 'Selection-Rate', 'Positive-Rate'],
-    metrics_title="Error Metrics"
+    metric_names=['Accuracy', 'F1', 'TPR', 'TNR', 'PPV', 'Selection-Rate'],
+    plot_title="Accuracy Metrics"
 )
 ```
 
@@ -542,13 +561,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-8ea4a7d427aa41c5b0375c5f011433d5"></div>
+<div id="altair-viz-473b6bf64d8e4135b31fef897d373def"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-8ea4a7d427aa41c5b0375c5f011433d5") {
-      outputDiv = document.getElementById("altair-viz-8ea4a7d427aa41c5b0375c5f011433d5");
+    if (outputDiv.id !== "altair-viz-473b6bf64d8e4135b31fef897d373def") {
+      outputDiv = document.getElementById("altair-viz-473b6bf64d8e4135b31fef897d373def");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -594,7 +613,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-5690df7a1c0b28e492c2541e9f2b7d21"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Error Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-5690df7a1c0b28e492c2541e9f2b7d21": [{"overall": 0.6988636363636364, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6602564102564102, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6645161290322581, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9872611464968153, "metric": "Positive-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4403409090909091, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6560509554140127, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6856060606060606, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6406926406926406, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.6534216335540839, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.9617834394904459, "metric": "Positive-Rate", "model_name": "LogisticRegression"}, {"overall": 0.4289772727272727, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.6284501061571125, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.6988636363636364, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6573275862068966, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6673960612691466, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.970276008492569, "metric": "Positive-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.4327651515151515, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.6475583864118896, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.7007575757575758, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6623931623931624, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.6666666666666666, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.9872611464968153, "metric": "Positive-Rate", "model_name": "XGBClassifier"}, {"overall": 0.4403409090909091, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.6581740976645435, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-c117569302593cdc97d0314abc4fd37c"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-c117569302593cdc97d0314abc4fd37c": [{"overall": 0.6998106060606061, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6609625668449198, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.665948275862069, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4393939393939394, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.7350427350427351, "metric": "TNR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6560509554140127, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6808712121212122, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6324972737186477, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.6502242152466368, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.42234848484848486, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.7333333333333333, "metric": "TNR", "model_name": "LogisticRegression"}, {"overall": 0.6157112526539278, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.7017045454545454, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6572361262241567, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6741071428571429, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.42424242424242425, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.7504273504273504, "metric": "TNR", "model_name": "RandomForestClassifier"}, {"overall": 0.6411889596602972, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.6988636363636364, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6609808102345416, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.6638115631691649, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.4422348484848485, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.7316239316239316, "metric": "TNR", "model_name": "XGBClassifier"}, {"overall": 0.6581740976645435, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 
@@ -602,9 +621,8 @@ visualizer.create_overall_metrics_bar_char(
 
 ```python
 visualizer.create_overall_metrics_bar_char(
-    metrics_names=['Label_Stability'],
-    reversed_metrics_names=['Std', 'IQR', 'Jitter'],
-    metrics_title="Variance Metrics"
+    metric_names=['Aleatoric_Uncertainty', 'Overall_Uncertainty', 'Label_Stability', 'Std', 'IQR', 'Jitter'],
+    plot_title="Stability and Uncertainty Metrics"
 )
 ```
 
@@ -612,13 +630,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-da9a5cfa83c24b7a94af21eba89b05b2"></div>
+<div id="altair-viz-d17adf3038d247149594ad4fe264bfdf"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-da9a5cfa83c24b7a94af21eba89b05b2") {
-      outputDiv = document.getElementById("altair-viz-da9a5cfa83c24b7a94af21eba89b05b2");
+    if (outputDiv.id !== "altair-viz-d17adf3038d247149594ad4fe264bfdf") {
+      outputDiv = document.getElementById("altair-viz-d17adf3038d247149594ad4fe264bfdf");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -664,115 +682,50 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 14, "titleFontSize": 18}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 14, "labelPadding": 10, "titleFontSize": 18}}, "data": {"name": "data-dcec27f134222100f9bb68b811bdaf17"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 13, "title": "Model Name", "titleFontSize": 13}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "title": "Variance Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-dcec27f134222100f9bb68b811bdaf17": [{"overall": 0.9116932535457332, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8869302721088436, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8582954545454545, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9267844838532684, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9707728645217658, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.9533194186765614, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9386363636363637, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9768009012909905, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.9464417952651862, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.9315700371057514, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9132954545454546, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9596965855703175, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.9397615121084858, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.9214602659245515, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.8967803030303031, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.954162422567606, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-3655430fa0eee6b7ba47ddf1df303d99"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Aleatoric_Uncertainty", "Overall_Uncertainty", "Label_Stability", "Std", "IQR", "Jitter"], "title": "Stability and Uncertainty Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-3655430fa0eee6b7ba47ddf1df303d99": [{"overall": 0.8591229811791057, "metric": "Aleatoric_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.08415004523689926, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.11178339517625227, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8548106060606061, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8850799535132081, "metric": "Overall_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.07008563635038499, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9078145787256542, "metric": "Aleatoric_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.030509997155247992, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.04393089053803341, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9405681818181818, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9105608415542872, "metric": "Overall_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.022965943503670514, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.9072899046739998, "metric": "Aleatoric_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.05098023671765084, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.07247139764996907, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9022348484848485, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9127667850021168, "metric": "Overall_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.03867443270741568, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.9080001711845398, "metric": "Aleatoric_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.059111923755457006, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.08818645640074223, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.8834090909090909, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.9171733900042791, "metric": "Overall_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.04579654708504677, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 
 
-Below is an example of an interactive plot. It requires that you run the below cell in Jupyter in the browser or EDAs, which support JavaScript displaying.
-
-You can use this plot to compare any pair of group fairness and stability metrics for all models.
-
 
 ```python
-visualizer.create_fairness_variance_interactive_bar_chart()
+visualizer.create_overall_metric_heatmap(
+    model_names=list(models_config.keys()),
+    metrics_lst=visualizer.all_accuracy_metrics + visualizer.all_uncertainty_metrics,
+    tolerance=0.005,
+)
 ```
 
 
-
-
-
-<div id="altair-viz-18bed04d64e0460ea6f487d3aaa33a6d"></div>
-<script type="text/javascript">
-  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
-  (function(spec, embedOpt){
-    let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-18bed04d64e0460ea6f487d3aaa33a6d") {
-      outputDiv = document.getElementById("altair-viz-18bed04d64e0460ea6f487d3aaa33a6d");
-    }
-    const paths = {
-      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
-      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
-      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.17.0?noext",
-      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
-    };
-
-    function maybeLoadScript(lib, version) {
-      var key = `${lib.replace("-", "")}_version`;
-      return (VEGA_DEBUG[key] == version) ?
-        Promise.resolve(paths[lib]) :
-        new Promise(function(resolve, reject) {
-          var s = document.createElement('script');
-          document.getElementsByTagName("head")[0].appendChild(s);
-          s.async = true;
-          s.onload = () => {
-            VEGA_DEBUG[key] = version;
-            return resolve(paths[lib]);
-          };
-          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
-          s.src = paths[lib];
-        });
-    }
-
-    function showError(err) {
-      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
-      throw err;
-    }
-
-    function displayChart(vegaEmbed) {
-      vegaEmbed(outputDiv, spec, embedOpt)
-        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
-    }
-
-    if(typeof define === "function" && define.amd) {
-      requirejs.config({paths});
-      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
-    } else {
-      maybeLoadScript("vega", "5")
-        .then(() => maybeLoadScript("vega-lite", "4.17.0"))
-        .then(() => maybeLoadScript("vega-embed", "6"))
-        .catch(showError)
-        .then(() => displayChart(vegaEmbed));
-    }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}}, "hconcat": [{"vconcat": [{"data": {"name": "data-797903c1afac88cf7c86dc3ee9691bca"}, "mark": {"type": "circle", "size": 200}, "encoding": {"color": {"condition": {"field": "Metric", "legend": null, "scale": {"scheme": "tableau20"}, "type": "nominal", "selection": "selector001"}, "value": "lightgray"}, "y": {"axis": {"title": "Select Fairness Metric", "titleFontSize": 15}, "field": "Metric", "type": "nominal"}}, "height": 200, "selection": {"selector001": {"type": "single", "fields": ["Metric"], "init": {"Metric": "Accuracy_Parity"}, "empty": "none"}}, "width": 50}, {"data": {"name": "data-5c7ee326dbf1c9391b0cbb891f2432d2"}, "mark": {"type": "circle", "size": 200}, "encoding": {"color": {"condition": {"field": "Metric", "legend": null, "scale": {"scheme": "tableau20"}, "type": "nominal", "selection": "selector002"}, "value": "lightgray"}, "y": {"axis": {"title": "Select Variance Metric", "titleFontSize": 15}, "field": "Metric", "type": "nominal"}}, "height": 200, "selection": {"selector002": {"type": "single", "fields": ["Metric"], "init": {"Metric": "IQR_Parity"}, "empty": "none"}}, "width": 50}, {"data": {"name": "data-797903c1afac88cf7c86dc3ee9691bca"}, "mark": {"type": "circle", "size": 200}, "encoding": {"color": {"field": "Model_Name", "scale": {"scheme": "tableau20"}, "type": "nominal"}, "y": {"axis": {"title": "Model Name", "titleFontSize": 15}, "field": "Model_Name", "type": "nominal"}}, "height": 200, "width": 50}]}, {"data": {"name": "data-797903c1afac88cf7c86dc3ee9691bca"}, "mark": "bar", "encoding": {"color": {"field": "Model_Name", "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "Subgroup", "title": "Group", "type": "nominal"}, "x": {"field": "Value", "type": "quantitative"}, "y": {"axis": null, "field": "Model_Name", "type": "nominal"}}, "height": 200, "title": "Fairness Metric Plot", "transform": [{"filter": {"selection": "selector001"}}], "width": 300}, {"data": {"name": "data-5c7ee326dbf1c9391b0cbb891f2432d2"}, "mark": "bar", "encoding": {"color": {"field": "Model_Name", "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "Subgroup", "title": "Group", "type": "nominal"}, "x": {"field": "Value", "type": "quantitative"}, "y": {"axis": null, "field": "Model_Name", "type": "nominal"}}, "height": 200, "title": "Variance Metric Plot", "transform": [{"filter": {"selection": "selector002"}}], "width": 300}], "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-797903c1afac88cf7c86dc3ee9691bca": [{"Metric": "Equalized_Odds_TPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.22525252525252526}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.09835582339840171}, {"Metric": "Disparate_Impact", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 1.2543467461500246}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.20686868686868676}, {"Metric": "Accuracy_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.014571356459799789}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 0.1765656565656566}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 0.10058299489060657}, {"Metric": "Disparate_Impact", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 1.1944037145650048}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 0.1607070707070707}, {"Metric": "Accuracy_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": -0.007919459323032063}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.24686868686868685}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.0894471374295821}, {"Metric": "Disparate_Impact", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 1.2776065742167437}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.21838383838383835}, {"Metric": "Accuracy_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.026416893350907245}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.1960606060606061}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.07696842656884584}, {"Metric": "Disparate_Impact", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 1.1655011655011656}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.14343434343434347}, {"Metric": "Accuracy_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.016938220365125267}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.20212899974804732}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.0978376086495654}, {"Metric": "Disparate_Impact", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 1.132553606237817}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.1199294532627867}, {"Metric": "Accuracy_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.01322858819811279}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.2608969513731419}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.1561020422584976}, {"Metric": "Disparate_Impact", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 1.3334943639291466}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.26089695137314184}, {"Metric": "Accuracy_Parity", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": -0.0006320827125378958}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.20956160241874522}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.10592890961769486}, {"Metric": "Disparate_Impact", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 1.166160300925926}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.1446837994457043}, {"Metric": "Accuracy_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.009255496862160872}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 0.1755479969765683}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 0.1153628718818458}, {"Metric": "Disparate_Impact", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 1.132553606237817}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 0.1199294532627867}, {"Metric": "Accuracy_Parity", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": -0.007494695020091258}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 0.18889557176152172}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 0.1340703830582373}, {"Metric": "Disparate_Impact", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 1.1212647317142914}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 0.11158935418389593}, {"Metric": "Accuracy_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": -0.005294497453188884}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 0.23148635440944293}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 0.18716910619744628}, {"Metric": "Disparate_Impact", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 1.2647458548518618}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 0.2196827306217577}, {"Metric": "Accuracy_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": -0.020345792381089023}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 0.2013194496654387}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 0.1388975397072563}, {"Metric": "Disparate_Impact", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 1.1535938723260193}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 0.13643710999172987}, {"Metric": "Accuracy_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": -0.005294497453188884}, {"Metric": "Equalized_Odds_TPR", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 0.17472370498458756}, {"Metric": "Equalized_Odds_FPR", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 0.13702896293989408}, {"Metric": "Disparate_Impact", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 1.111002802485683}, {"Metric": "Statistical_Parity_Difference", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 0.10273663634313213}, {"Metric": "Accuracy_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": -0.012884711959251116}], "data-5c7ee326dbf1c9391b0cbb891f2432d2": [{"Metric": "Label_Stability_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 1.0536928065820736}, {"Metric": "IQR_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.0010187574269431982}, {"Metric": "Std_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": -0.003518007762120842}, {"Metric": "Std_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": 0.9537290474165461}, {"Metric": "Jitter_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex", "Value": -0.02849843786753349}, {"Metric": "Label_Stability_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 1.0337782556345574}, {"Metric": "IQR_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 0.0009649850160295126}, {"Metric": "Std_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 0.0009769770861901006}, {"Metric": "Std_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": 1.0435813274258516}, {"Metric": "Jitter_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex", "Value": -0.022850943546324047}, {"Metric": "Label_Stability_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 1.0274737468399555}, {"Metric": "IQR_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.002634071357278202}, {"Metric": "Std_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 0.002194506424840835}, {"Metric": "Std_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": 1.0569300857015784}, {"Metric": "Jitter_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex", "Value": -0.01855429461949959}, {"Metric": "Label_Stability_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 1.0811705905703761}, {"Metric": "IQR_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.0016266550990248069}, {"Metric": "Std_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 0.0003659874200820923}, {"Metric": "Std_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": 1.0080357819849586}, {"Metric": "Jitter_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex", "Value": -0.04443498879122039}, {"Metric": "Label_Stability_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 1.003034458334958}, {"Metric": "IQR_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": -0.0005040764571539458}, {"Metric": "Std_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": -0.00038934379848776235}, {"Metric": "Std_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.9946993596483451}, {"Metric": "Jitter_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "race", "Value": 0.002809745867736288}, {"Metric": "Label_Stability_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.9959273486598349}, {"Metric": "IQR_Parity", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.0006242956894535988}, {"Metric": "Std_Parity", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.0005334497615498562}, {"Metric": "Std_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 1.0233204268302374}, {"Metric": "Jitter_Parity", "Model_Name": "LogisticRegression", "Subgroup": "race", "Value": 0.003668401669214408}, {"Metric": "Label_Stability_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.9921390238574576}, {"Metric": "IQR_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.00020914306050921067}, {"Metric": "Std_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.000404431990050004}, {"Metric": "Std_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 1.0100962767208574}, {"Metric": "Jitter_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "race", "Value": 0.005397746800196487}, {"Metric": "Label_Stability_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 1.0229418118630538}, {"Metric": "IQR_Parity", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 0.001265306996717383}, {"Metric": "Std_Parity", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 0.0006801486015319824}, {"Metric": "Std_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": 1.0149733057130015}, {"Metric": "Jitter_Parity", "Model_Name": "XGBClassifier", "Subgroup": "race", "Value": -0.013312528045215155}, {"Metric": "Label_Stability_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 1.012002885939789}, {"Metric": "IQR_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 0.0013672530668205896}, {"Metric": "Std_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": -0.0010427463020750705}, {"Metric": "Std_Ratio", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": 0.9858589318747513}, {"Metric": "Jitter_Parity", "Model_Name": "DecisionTreeClassifier", "Subgroup": "sex&race", "Value": -0.0030938008319045945}, {"Metric": "Label_Stability_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 1.0118651104857685}, {"Metric": "IQR_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 0.00046281790662127884}, {"Metric": "Std_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 0.0005195769034000118}, {"Metric": "Std_Ratio", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": 1.0226510382074103}, {"Metric": "Jitter_Parity", "Model_Name": "LogisticRegression", "Subgroup": "sex&race", "Value": -0.00773470412628801}, {"Metric": "Label_Stability_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 1.0067977495322034}, {"Metric": "IQR_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 0.0011964612992943005}, {"Metric": "Std_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 0.0013706356945650741}, {"Metric": "Std_Ratio", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": 1.034598469563365}, {"Metric": "Jitter_Parity", "Model_Name": "RandomForestClassifier", "Subgroup": "sex&race", "Value": -0.0033153023889807287}, {"Metric": "Label_Stability_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 1.0418606550682024}, {"Metric": "IQR_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 0.002001379434142532}, {"Metric": "Std_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 0.0012781880795955658}, {"Metric": "Std_Ratio", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": 1.0282809624780285}, {"Metric": "Jitter_Parity", "Model_Name": "XGBClassifier", "Subgroup": "sex&race", "Value": -0.023324151441191876}]}}, {"mode": "vega-lite"});
-</script>
-
+    
+![png](Multiple_Models_Interface_With_DB_Writer_files/Multiple_Models_Interface_With_DB_Writer_40_0.png)
+    
 
 
 
 ```python
-visualizer.create_model_rank_heatmaps(
+visualizer.create_disparity_metric_heatmap(
+    model_names=list(models_config.keys()),
     metrics_lst=[
-        # Group fairness metrics
+        # Error disparity metrics
         'Equalized_Odds_TPR',
         'Equalized_Odds_FPR',
         'Disparate_Impact',
-        'Statistical_Parity_Difference',
-        'Accuracy_Parity',
-        # Group variance metrics
-        'Label_Stability_Ratio',
-        'IQR_Parity',
-        'Std_Parity',
+        # Stability disparity metrics
+        'Label_Stability_Difference',
+        'Aleatoric_Uncertainty_Difference',
         'Std_Ratio',
-        'Jitter_Parity',
     ],
     groups_lst=config.sensitive_attributes_dct.keys(),
+    tolerance=0.005,
 )
 ```
 
 
     
-![png](Multiple_Models_Interface_With_DB_Writer_files/Multiple_Models_Interface_With_DB_Writer_43_0.png)
+![png](Multiple_Models_Interface_With_DB_Writer_files/Multiple_Models_Interface_With_DB_Writer_41_0.png)
     
 
-
-
-    
-![png](Multiple_Models_Interface_With_DB_Writer_files/Multiple_Models_Interface_With_DB_Writer_43_1.png)
-    
-
-
-Create an analysis report. It includes correspondent visualizations and details about your result metrics.
 
 
 ```python

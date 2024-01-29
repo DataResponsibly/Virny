@@ -4,14 +4,16 @@ The purpose is to provide sample datasets for functionality testing and show exa
 """
 from .data_loaders import CompasWithoutSensitiveAttrsDataset, DiabetesDataset, CompasDataset, \
     ACSIncomeDataset, ACSEmploymentDataset, ACSMobilityDataset, ACSTravelTimeDataset, ACSPublicCoverageDataset, \
-    RicciDataset, LawSchoolDataset
+    RicciDataset, LawSchoolDataset, CreditCardDefaultDataset, StudentPerformancePortugueseDataset
 
 
 __all__ = [
     "CompasWithoutSensitiveAttrsDataset",
     "CompasDataset",
+    "CreditCardDefaultDataset",
     "DiabetesDataset",
     "RicciDataset",
+    "StudentPerformancePortugueseDataset",
     "LawSchoolDataset",
     "ACSIncomeDataset",
     "ACSEmploymentDataset",

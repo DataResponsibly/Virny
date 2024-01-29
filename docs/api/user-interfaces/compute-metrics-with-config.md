@@ -22,9 +22,17 @@ Return a dictionary where keys are model names, and values are metrics for sensi
 
     Location where to save result files with metrics
 
+- **postprocessor** – defaults to `None`
+
+    [Optional] Postprocessor object to apply to model predictions before metrics computation
+
+- **notebook_logs_stdout** (*bool*) – defaults to `False`
+
+    [Optional] True, if this interface was execute in a Jupyter notebook,  False, otherwise.
+
 - **verbose** (*int*) – defaults to `0`
 
-    [Optional] Level of logs printing. The greater level provides more logs.     As for now, 0, 1, 2 levels are supported.
+    [Optional] Level of logs printing. The greater level provides more logs.     As for now, 0, 1, 2 levels are supported. Currently, verbose works only with notebook_logs_stdout = False.
 
 
 

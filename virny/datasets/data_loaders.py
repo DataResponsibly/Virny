@@ -8,6 +8,45 @@ from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSTravelTime, A
 from virny.datasets.base import BaseDataLoader
 
 
+class CreditCardDefaultDataset(BaseDataLoader):
+    """
+    Dataset class for the Credit Card Default dataset that contains sensitive attributes among feature columns.
+    Description: https://arxiv.org/pdf/2110.00530.pdf (Section 3.1.6)
+
+    Parameters
+    ----------
+    dataset_path
+        [Optional] Path to a file with the data
+
+    """
+    def __init__(self, dataset_path: str = None):
+        if dataset_path is None:
+            filename = 'credit_card_default_clean.csv'
+            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+
+        df = pd.read_csv(dataset_path)
+        target = 'default_payment'
+        numerical_columns = [
+            "limit_bal", "age", 
+            "bill_amt1", "bill_amt2", "bill_amt3", 
+            "bill_amt4", "bill_amt5", "bill_amt6", 
+            "pay_amt1", "pay_amt2", "pay_amt3", 
+            "pay_amt4", "pay_amt5", "pay_amt6"
+        ]
+        categorical_columns = [
+            "sex", "education", "marriage",
+            "pay_0", "pay_2", "pay_3",
+            "pay_4", "pay_5", "pay_6"
+        ]
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+
+
 class CreditDataset(BaseDataLoader):
     """
     Dataset class for the Credit dataset that contains sensitive attributes among feature columns.
@@ -36,6 +75,46 @@ class CreditDataset(BaseDataLoader):
                              'DebtRatio', 'MonthlyIncome', 'NumberOfOpenCreditLinesAndLoans',
                              'NumberOfTimes90DaysLate', 'NumberRealEstateLoansOrLines']
         categorical_columns = []
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+
+
+class StudentPerformancePortugueseDataset(BaseDataLoader):
+    """
+    Dataset class for the Student Performance Portuguese dataset that contains sensitive attributes among feature columns.
+    Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/student_por_new.csv
+    Description: https://arxiv.org/pdf/2110.00530.pdf (Section 3.4.1)
+
+    Parameters
+    ----------
+    subsample_size
+        Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
+
+    """
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
+        filename = 'student_por_new.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+        df = pd.read_csv(dataset_path)
+
+        if subsample_size:
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
+
+        # Preprocessing
+        df['class'] = [1 if v == "High" else 0 for v in df['class']]
+
+        target = 'class'
+        numerical_columns = ['age', 'Medu', 'Fedu', 'traveltime', 'studytime', 'failures', 'famrel', 'freetime',
+                             'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2']
+        categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
 
         super().__init__(
             full_df=df,

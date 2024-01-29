@@ -14,19 +14,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classifica
 from virny.custom_classes.base_dataset import BaseFlowDataset
 
 
-def folds_iterator(n_folds, samples_per_fold, size):
-    """
-    Iterator for GridSearch based on Cross-Validation
-
-    :param n_folds: number of folds for Cross-Validation
-    :param samples_per_fold: number of samples per fold
-    """
-    for i in range(n_folds):
-        yield np.arange(0, size - samples_per_fold * (i + 1)), \
-              np.arange(size - samples_per_fold * (i + 1), size - samples_per_fold * i)
-
-
-def validate_model(model, x, y, params, n_folds, samples_per_fold):
+def validate_model(model, x, y, params, n_folds):
     """
     Use GridSearchCV for a special model to find the best hyperparameters based on validation set
     """
@@ -38,15 +26,15 @@ def validate_model(model, x, y, params, n_folds, samples_per_fold):
                                },
                                refit="F1_Score",
                                n_jobs=-1,
-                               cv=folds_iterator(n_folds, samples_per_fold, x.shape[0]),
-                               verbose=10)
+                               cv=n_folds,
+                               verbose=0)
     grid_search.fit(x, y.values.ravel())
     best_index = grid_search.best_index_
 
     return grid_search.best_estimator_, \
-           grid_search.cv_results_["mean_test_F1_Score"][best_index], \
-           grid_search.cv_results_["mean_test_Accuracy_Score"][best_index], \
-           grid_search.best_params_
+        grid_search.cv_results_["mean_test_F1_Score"][best_index], \
+        grid_search.cv_results_["mean_test_Accuracy_Score"][best_index], \
+        grid_search.best_params_
 
 
 def test_evaluation(cur_best_model, model_name, cur_best_params,
@@ -57,7 +45,7 @@ def test_evaluation(cur_best_model, model_name, cur_best_params,
 
     :return: F1 score, accuracy and predicted values, which we use to visualisations for model comparison later.
     """
-    cur_best_model.fit(cur_x_train, cur_y_train.values.ravel()) # refit model on the whole train set
+    cur_best_model.fit(cur_x_train, cur_y_train.values.ravel())  # refit model on the whole train set
     cur_model_pred = cur_best_model.predict(cur_x_test)
     test_f1_score = f1_score(cur_y_test, cur_model_pred, average='macro')
     test_accuracy = accuracy_score(cur_y_test, cur_model_pred)
@@ -84,30 +72,39 @@ def test_evaluation(cur_best_model, model_name, cur_best_params,
 
 
 def tune_ML_models(models_params_for_tuning: dict, base_flow_dataset: BaseFlowDataset,
-                   dataset_name: str, n_folds: int = 3, samples_per_fold: int = None):
+                   dataset_name: str, n_folds: int = 3):
     """
     Tune each model on a validation set with GridSearchCV.
 
     Return each model with its best hyperparameters that have the highest F1 score and Accuracy.
      results_df is a dataframe with metrics and tuned parameters;
      models_config is a dict with model tuned params for the metrics computation stage
-    """
-    if samples_per_fold is None:
-        samples_per_fold = len(base_flow_dataset.y_test)
 
+    Parameters
+    ----------
+    models_params_for_tuning
+        A dictionary, where keys are model names and values are a dictionary of hyperparameters and value ranges to tune.
+    base_flow_dataset
+        An instance of BaseFlowDataset object. Its train and test sets are used for training and tuning.
+    dataset_name
+        A name of the dataset. Used to save tuned hyperparameters to a csv file with an appropriate filename.
+    n_folds
+        The number of folds for k-fold cross validation.
+
+    """
     models_config = dict()
     tuned_params_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score', 'Accuracy_Score', 'Model_Best_Params'))
     # Find the most optimal hyperparameters based on accuracy and F1-score for each model in models_config
     for model_idx, (model_name, model_params) in enumerate(models_params_for_tuning.items()):
         try:
-            print(f"{datetime.now().strftime('%Y/%m/%d, %H:%M:%S')}: Tuning {model_name}...")
+            print(f"{datetime.now().strftime('%Y/%m/%d, %H:%M:%S')}: Tuning {model_name}...", flush=True)
             cur_model, cur_f1_score, cur_accuracy, cur_params = validate_model(deepcopy(model_params['model']),
                                                                                base_flow_dataset.X_train_val,
                                                                                base_flow_dataset.y_train_val,
                                                                                model_params['params'],
-                                                                               n_folds, samples_per_fold)
+                                                                               n_folds)
             print(f'{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}: Tuning for {model_name} is finished '
-                  f'[F1 score = {cur_f1_score}, Accuracy = {cur_accuracy}]\n')
+                  f'[F1 score = {cur_f1_score}, Accuracy = {cur_accuracy}]\n', flush=True)
 
         except Exception as err:
             print(f"ERROR with {model_name}: ", err)
@@ -127,10 +124,7 @@ def test_ML_models(best_results_df, models_config, n_folds, X_train, y_train, X_
     Tune each model on a validation set with GridSearchCV and
     return best_model with its hyperparameters, which has the highest F1 score
     """
-    results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score',
-                                       'Accuracy_Score',
-                                       'Model_Best_Params'))
-    samples_per_fold = len(y_test)
+    results_df = pd.DataFrame(columns=('Dataset_Name', 'Model_Name', 'F1_Score', 'Accuracy_Score', 'Model_Best_Params'))
     best_f1_score = -np.Inf
     best_accuracy = -np.Inf
     best_model_pred = []
@@ -143,11 +137,12 @@ def test_ML_models(best_results_df, models_config, n_folds, X_train, y_train, X_
             print(f"{datetime.now().strftime('%Y/%m/%d, %H:%M:%S')}: Tuning {model_config['model_name']}...")
             cur_model, cur_f1_score, cur_accuracy, cur_params = validate_model(deepcopy(model_config['model']),
                                                                                X_train, y_train, model_config['params'],
-                                                                               n_folds, samples_per_fold)
+                                                                               n_folds)
             print(f'{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}: Tuning for {model_config["model_name"]} is finished')
 
             test_f1_score, test_accuracy, cur_model_pred = test_evaluation(cur_model, model_config['model_name'], cur_params,
-                                                                           X_train, y_train, X_test, y_test, dataset_title, show_plots, debug_mode)
+                                                                           X_train, y_train, X_test, y_test,
+                                                                           dataset_title, show_plots, debug_mode)
         except Exception as err:
             print(f"ERROR with {model_config['model_name']}: ", err)
             continue

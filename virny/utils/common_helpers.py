@@ -1,10 +1,9 @@
 import os
+import re
 
 from datetime import datetime, timezone
-from sklearn.metrics import confusion_matrix
-from river import base
 
-from virny.configs.constants import INTERSECTION_SIGN, ModelSetting, ComputationMode
+from virny.configs.constants import *
 
 
 def validate_config(config_obj):
@@ -13,7 +12,7 @@ def validate_config(config_obj):
 
     Extra details:
     * config_obj.model_setting is an optional argument that defines a type of models to use
-      to compute fairness and stability metrics. Should be 'batch' or 'incremental'. Default: 'batch'.
+      to compute fairness and stability metrics. Default: 'batch'.
 
     * config_obj.computation_mode is an optional argument that defines a non-default mode for metrics computation.
       Currently, only 'error_analysis' mode is supported.
@@ -71,12 +70,22 @@ def validate_config(config_obj):
     return True
 
 
+def isfloat_regex(string):
+    # We have defined a pattern for float value
+    pattern = r'^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$'
+    # Find the match and convert to boolean
+    return bool(re.match(pattern, string))
+
+
+def str_to_float(str_var: str, var_name: str):
+    if isfloat_regex(str_var):
+        return float(str_var)
+    else:
+        raise ValueError(f"{var_name} must be a float number with a '.' separator.")
+
+
 def reset_model_seed(model, new_seed, verbose):
-    if isinstance(model, base.Classifier): # For incremental models
-        model.seed = new_seed
-        if verbose >= 1:
-            print('Model seed: ', model.seed)
-    elif 'random_state' in model.get_params():
+    if 'random_state' in model.get_params():
         model.set_params(random_state=new_seed)
         if verbose >= 1:
             print('Model seed: ', model.get_params().get('random_state', None))
@@ -93,18 +102,10 @@ def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
     metrics_df.to_csv(f'{save_dir_path}/{filename}', index=False)
 
 
-def confusion_matrix_metrics(y_true, y_preds):
-    metrics = {}
-    TN, FP, FN, TP = confusion_matrix(y_true, y_preds).ravel()
-
-    metrics['TPR'] = TP/(TP+FN)
-    metrics['TNR'] = TN/(TN+FP)
-    metrics['PPV'] = TP/(TP+FP)
-    metrics['FNR'] = FN/(FN+TP)
-    metrics['FPR'] = FP/(FP+TN)
-    metrics['Accuracy'] = (TP+TN)/(TP+TN+FP+FN)
-    metrics['F1'] = (2*TP)/(2*TP+FP+FN)
-    metrics['Selection-Rate'] = (TP+FP)/(TP+FP+TN+FN)
-    metrics['Positive-Rate'] = (TP+FP)/(TP+FN)
-
-    return metrics
+def check_substring_in_list(val_to_check: str, allowed_lst: list):
+    # Case-insensitive check if a val_to_check substring is in allowed_lst
+    val_to_check = val_to_check.lower()
+    for allowed_val in allowed_lst:
+        if allowed_val.lower() in val_to_check:
+            return True
+    return False
