@@ -1,32 +1,4 @@
-# Virny Software Library
-
-<p align="left">
-  <!-- Tests -->
-  <a href="https://github.com/DataResponsibly/Virny/actions/workflows/ci.yml">
-    <img src="https://github.com/DataResponsibly/Virny/actions/workflows/ci.yml/badge.svg" alt="CI Pipeline">
-  </a>
-  <!-- Documentation -->
-  <a href="https://dataresponsibly.github.io/Virny/">
-    <img src="https://img.shields.io/website?label=docs&style=flat-square&url=https://dataresponsibly.github.io/Virny/" alt="documentation">
-  </a>
-  <!-- PyPI -->
-  <a href="https://pypi.org/project/virny">
-    <img src="https://img.shields.io/pypi/v/virny.svg?label=release&color=blue&style=flat-square" alt="pypi">
-  </a>
-  <!-- License -->
-  <a href="https://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_(%22BSD_License_2.0%22,_%22Revised_BSD_License%22,_%22New_BSD_License%22,_or_%22Modified_BSD_License%22)">
-    <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square" alt="bsd_3_license">
-  </a>
-  <!-- Code Size -->
-  <a href="">
-    <img src="https://img.shields.io/github/languages/code-size/DataResponsibly/Virny.svg" alt="code_size">
-  </a>
-  <!-- Last Commit -->
-  <a href="">
-    <img src="https://img.shields.io/github/last-commit/DataResponsibly/Virny.svg" alt="last_commit">
-  </a>
-</p>
-
+# Welcome to Virny
 
 ## 📜 Description
 
