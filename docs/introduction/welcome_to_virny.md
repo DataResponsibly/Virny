@@ -30,9 +30,10 @@
 
 ## 📜 Description
 
-**Virny** serves as a model profiling library, empowering data scientists _to engage in responsible model selection_ and
-_to generate a "nutritional label" for an ML model_, which uncovers the model performance across different overall and disparity dimensions. 
-The Virny library was developed based on three fundamental principles: 
+**Virny** is a Python library for in-depth profiling of model performance across overall and disparity dimensions.
+In addition to its metric computation capabilities, the library provides an interactive tool called _VirnyView_
+to streamline responsible model selection and generate nutritional labels for ML models.
+The Virny library was developed based on three fundamental principles:
 
 1) easy extensibility of model analysis capabilities;
 

@@ -1,4 +1,4 @@
-# Interactive Web App Demonstration
+# Interactive VirnyView Tool
 
 * [Hosted interactive app for three fair-ML benchmark datasets](https://huggingface.co/spaces/denys-herasymuk/virny-demo)
 * [Demonstrative Jupyter notebooks for the Virny capabilities](https://huggingface.co/spaces/denys-herasymuk/virny-demo/tree/main/notebooks)
@@ -6,7 +6,7 @@
 
 ## Application overview
 
-This interactive app serves as a visualization component within the Virny model profiling library, empowering data scientists
+_VirnyView_ serves as a visualization component within the Virny model profiling library, empowering data scientists
 _to engage in responsible model selection_ and _to generate a nutritional label for their model_. Users can declaratively
 define various configurations for model profiling, supplying a dataset and models for scrutiny to Virny. This library
 computes overall and disparity metrics, profiling model accuracy, stability, uncertainty, and fairness. 
