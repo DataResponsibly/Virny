@@ -322,15 +322,15 @@ class MetricsInteractiveVisualizer:
                         """)
                     fairness_metrics_vw3 = gr.Dropdown(
                         sorted(self.all_error_disparity_metrics),
-                        value=['Equalized_Odds_FPR', 'Equalized_Odds_TPR'], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
+                        value=[EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_TPR], multiselect=True, label="Error Disparity Metrics", info="Select error disparity metrics to display on the heatmap:",
                     )
                     group_uncertainty_metrics_vw3 = gr.Dropdown(
                         sorted(self.all_uncertainty_disparity_metrics),
-                        value=['Aleatoric_Uncertainty_Ratio', 'Overall_Uncertainty_Parity'], multiselect=True, label="Uncertainty Disparity Metrics", info="Select uncertainty disparity metrics to display on the heatmap:",
+                        value=[ALEATORIC_UNCERTAINTY_RATIO, OVERALL_UNCERTAINTY_DIFFERENCE], multiselect=True, label="Uncertainty Disparity Metrics", info="Select uncertainty disparity metrics to display on the heatmap:",
                     )
                     group_stability_metrics_vw3 = gr.Dropdown(
                         sorted(self.all_stability_disparity_metrics),
-                        value=['Label_Stability_Ratio', 'Std_Parity'], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
+                        value=[LABEL_STABILITY_RATIO, STD_DIFFERENCE], multiselect=True, label="Stability Disparity Metrics", info="Select stability disparity metrics to display on the heatmap:",
                     )
             with gr.Row():
                 with gr.Column():
@@ -423,7 +423,7 @@ class MetricsInteractiveVisualizer:
                     with gr.Row():
                         group_uncertainty_metrics_vw4 = gr.Dropdown(
                             sorted(self.all_uncertainty_disparity_metrics),
-                            value=ALEATORIC_UNCERTAINTY_PARITY, multiselect=False, label="Uncertainty Disparity Metric",
+                            value=ALEATORIC_UNCERTAINTY_DIFFERENCE, multiselect=False, label="Uncertainty Disparity Metric",
                             scale=2
                         )
                         group_uncertainty_min_val_vw4 = gr.Text(value="-1.0", label="Min value", scale=1)
