@@ -7,6 +7,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from altair.utils.schemapi import Undefined
 
+from virny.configs.constants import *
 from virny.utils.common_helpers import check_substring_in_list
 
 
@@ -385,32 +386,32 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
     # Replace metric groups on their aliases
     metric_name_to_alias_dct = {
         # C1
-        'TPR': 'C1',
-        'TNR': 'C1',
-        'FNR': 'C1',
-        'FPR': 'C1',
-        'PPV': 'C1',
-        'Accuracy': 'C1',
-        'F1': 'C1',
-        'Positive-Rate': 'C1',
+        TPR: 'C1',
+        TNR: 'C1',
+        FNR: 'C1',
+        FPR: 'C1',
+        PPV: 'C1',
+        ACCURACY: 'C1',
+        F1: 'C1',
+        POSITIVE_RATE: 'C1',
         # C2
-        'Equalized_Odds_TPR': 'C2',
-        'Equalized_Odds_FPR': 'C2',
-        'Equalized_Odds_FNR': 'C2',
-        'Disparate_Impact': 'C2',
-        'Statistical_Parity_Difference': 'C2',
+        EQUALIZED_ODDS_TPR: 'C2',
+        EQUALIZED_ODDS_FPR: 'C2',
+        EQUALIZED_ODDS_FNR: 'C2',
+        DISPARATE_IMPACT: 'C2',
+        STATISTICAL_PARITY_DIFFERENCE: 'C2',
         # C3
-        'Std': 'C3',
-        'IQR': 'C3',
-        'Jitter': 'C3',
-        'Label_Stability': 'C3',
+        STD: 'C3',
+        IQR: 'C3',
+        JITTER: 'C3',
+        LABEL_STABILITY: 'C3',
         # C4
-        'IQR_Parity': 'C4',
-        'Label_Stability_Ratio': 'C4',
-        'Label_Stability_Difference': 'C4',
-        'Std_Parity': 'C4',
-        'Std_Ratio': 'C4',
-        'Jitter_Parity': 'C4',
+        IQR_DIFFERENCE: 'C4',
+        LABEL_STABILITY_RATIO: 'C4',
+        LABEL_STABILITY_DIFFERENCE: 'C4',
+        STD_DIFFERENCE: 'C4',
+        STD_RATIO: 'C4',
+        JITTER_DIFFERENCE: 'C4',
     }
 
     def get_column_alias(metric_group):

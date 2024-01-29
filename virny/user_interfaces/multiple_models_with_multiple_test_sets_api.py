@@ -253,6 +253,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                test_protected_groups=new_test_protected_groups,
                                                computation_mode=computation_mode)
         dtc_res = error_analyzer.compute_subgroup_metrics(y_preds,
+                                                          models_predictions=dict(),
                                                           save_results=False,
                                                           result_filename=None,
                                                           save_dir_path=None)

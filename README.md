@@ -38,13 +38,13 @@ The Virny library was developed based on three fundamental principles:
 
 2) compatibility to user-defined/custom datasets and model types;
 
-3) simple composition of parity metrics based on the context of use.
+3) simple composition of disparity metrics based on the context of use.
 
 Virny decouples model auditing into several stages, including: **subgroup metric computation**, **disparity metric composition**,
 and **metric visualization**. This gives data scientists more control and flexibility to use the library
 for model development and monitoring post-deployment.
 
-For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/).
+For quickstart, look at [use case examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/), [an interactive demo](https://huggingface.co/spaces/denys-herasymuk/virny-demo), and [a demonstrative Jupyter notebook](https://huggingface.co/spaces/denys-herasymuk/virny-demo/blob/main/notebooks/ACS_Income_Demo.ipynb).
 
 
 ## 🛠 Installation
@@ -61,15 +61,17 @@ pip install virny
 * [Introduction](https://dataresponsibly.github.io/Virny/)
 * [API Reference](https://dataresponsibly.github.io/Virny/api/overview/)
 * [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/)
+* [Interactive Demo](https://huggingface.co/spaces/denys-herasymuk/virny-demo)
 
 
 ## 💡 Features
 
 * Entire pipeline for profiling model accuracy, stability, uncertainty, and fairness
-* Metric static and interactive visualizations
 * Ability to analyze non-binary sensitive attributes and their intersections
+* Compatibility with [pre-, in-, and post-processors](https://aif360.readthedocs.io/en/latest/modules/algorithms.html#) for fairness enhancement from AIF360
 * Convenient metric computation interfaces: an interface for multiple models, an interface for multiple test sets, and an interface for saving results into a user-defined database
 * An `error_analysis` computation mode to analyze model stability and confidence for correct and incorrect prodictions broken down by groups
+* Metric static and interactive visualizations
 * Data loaders with subsampling for popular fair-ML benchmark datasets
 * User-friendly parameters input via config yaml files
 * Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
