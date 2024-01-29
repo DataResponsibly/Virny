@@ -39,10 +39,10 @@ class MetricsVisualizer:
         self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY, POSITIVE_RATE]
         self.all_stability_metrics = [STD, IQR, JITTER, LABEL_STABILITY]
         self.all_uncertainty_metrics = [ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY, EPISTEMIC_UNCERTAINTY]
-        self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY]
-        self.all_stability_disparity_metrics = [LABEL_STABILITY_RATIO, LABEL_STABILITY_DIFFERENCE, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY]
-        self.all_uncertainty_disparity_metrics = [OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO, ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO,
-                                                  EPISTEMIC_UNCERTAINTY_PARITY, EPISTEMIC_UNCERTAINTY_RATIO]
+        self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE]
+        self.all_stability_disparity_metrics = [LABEL_STABILITY_RATIO, LABEL_STABILITY_DIFFERENCE, IQR_DIFFERENCE, STD_DIFFERENCE, STD_RATIO, JITTER_DIFFERENCE]
+        self.all_uncertainty_disparity_metrics = [OVERALL_UNCERTAINTY_DIFFERENCE, OVERALL_UNCERTAINTY_RATIO, ALEATORIC_UNCERTAINTY_DIFFERENCE, ALEATORIC_UNCERTAINTY_RATIO,
+                                                  EPISTEMIC_UNCERTAINTY_DIFFERENCE, EPISTEMIC_UNCERTAINTY_RATIO]
 
         self.all_overall_metrics = self.all_accuracy_metrics + self.all_stability_metrics + self.all_uncertainty_metrics
         self.all_disparity_metrics = self.all_error_disparity_metrics + self.all_stability_disparity_metrics + self.all_uncertainty_disparity_metrics

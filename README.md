@@ -44,7 +44,7 @@ Virny decouples model auditing into several stages, including: **subgroup metric
 and **metric visualization**. This gives data scientists more control and flexibility to use the library
 for model development and monitoring post-deployment.
 
-For quickstart, look at our [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/).
+For quickstart, look at our [use case examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/), [an interactive demo](https://huggingface.co/spaces/denys-herasymuk/virny-demo), and [a demonstrative Jupyter notebook](https://huggingface.co/spaces/denys-herasymuk/virny-demo/blob/main/notebooks/ACS_Income_Demo.ipynb).
 
 
 ## 🛠 Installation
@@ -61,6 +61,7 @@ pip install virny
 * [Introduction](https://dataresponsibly.github.io/Virny/)
 * [API Reference](https://dataresponsibly.github.io/Virny/api/overview/)
 * [Use Case Examples](https://dataresponsibly.github.io/Virny/examples/Multiple_Models_Interface_Use_Case/)
+* [Interactive Demo](https://huggingface.co/spaces/denys-herasymuk/virny-demo)
 
 
 ## 💡 Features

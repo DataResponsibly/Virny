@@ -6,7 +6,7 @@ from virny.configs.constants import *
 class MetricsComposer:
     """
     Metric Composer class that combines different subgroup metrics to create disparity metrics
-     such as 'Disparate_Impact' or 'Accuracy_Parity'.
+     such as 'Disparate_Impact' or 'Accuracy_Difference'.
 
     Definitions of the disparity metrics could be observed in the __init__ method of the Metric Composer:
      https://github.com/DataResponsibly/Virny/blob/main/virny/custom_classes/metrics_composer.py
@@ -33,22 +33,22 @@ class MetricsComposer:
             TNR: [(EQUALIZED_ODDS_TNR, self._difference_operation)],
             FPR: [(EQUALIZED_ODDS_FPR, self._difference_operation)],
             FNR: [(EQUALIZED_ODDS_FNR, self._difference_operation)],
-            ACCURACY: [(ACCURACY_PARITY, self._difference_operation)],
+            ACCURACY: [(ACCURACY_DIFFERENCE, self._difference_operation)],
             POSITIVE_RATE: [(DISPARATE_IMPACT, self._ratio_operation)],
             SELECTION_RATE: [(STATISTICAL_PARITY_DIFFERENCE, self._difference_operation)],
             # Stability disparity metrics
             LABEL_STABILITY: [(LABEL_STABILITY_RATIO, self._ratio_operation),
                               (LABEL_STABILITY_DIFFERENCE, self._difference_operation)],
-            JITTER: [(JITTER_PARITY, self._difference_operation)],
-            IQR: [(IQR_PARITY, self._difference_operation)],
-            STD: [(STD_PARITY, self._difference_operation),
+            JITTER: [(JITTER_DIFFERENCE, self._difference_operation)],
+            IQR: [(IQR_DIFFERENCE, self._difference_operation)],
+            STD: [(STD_DIFFERENCE, self._difference_operation),
                   (STD_RATIO, self._ratio_operation)],
             # Uncertainty disparity metrics
-            OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_PARITY, self._difference_operation),
+            OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_DIFFERENCE, self._difference_operation),
                                   (OVERALL_UNCERTAINTY_RATIO, self._ratio_operation)],
-            ALEATORIC_UNCERTAINTY: [(ALEATORIC_UNCERTAINTY_PARITY, self._difference_operation),
+            ALEATORIC_UNCERTAINTY: [(ALEATORIC_UNCERTAINTY_DIFFERENCE, self._difference_operation),
                                     (ALEATORIC_UNCERTAINTY_RATIO, self._ratio_operation)],
-            EPISTEMIC_UNCERTAINTY: [(EPISTEMIC_UNCERTAINTY_PARITY, self._difference_operation),
+            EPISTEMIC_UNCERTAINTY: [(EPISTEMIC_UNCERTAINTY_DIFFERENCE, self._difference_operation),
                                     (EPISTEMIC_UNCERTAINTY_RATIO, self._ratio_operation)],
         }
 
