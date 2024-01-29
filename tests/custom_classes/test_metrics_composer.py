@@ -42,8 +42,8 @@ def test_compose_metrics_true1(models_metrics_dct1, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
-                LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE, LABEL_STABILITY_DIFFERENCE,
+                LABEL_STABILITY_RATIO, IQR_DIFFERENCE, STD_DIFFERENCE, STD_RATIO, JITTER_DIFFERENCE])
     )
 
 
@@ -63,8 +63,8 @@ def test_compose_metrics_true2(models_metrics_dct1, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
-                LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY])
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE, LABEL_STABILITY_DIFFERENCE,
+                LABEL_STABILITY_RATIO, IQR_DIFFERENCE, STD_DIFFERENCE, STD_RATIO, JITTER_DIFFERENCE])
     )
 
 
@@ -84,11 +84,11 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
     # Check all metrics presence
     assert sorted(models_composed_metrics_df['Metric'].unique().tolist()) == (
         sorted([EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR,
-                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_PARITY, LABEL_STABILITY_DIFFERENCE,
-                LABEL_STABILITY_RATIO, IQR_PARITY, STD_PARITY, STD_RATIO, JITTER_PARITY,
-                ALEATORIC_UNCERTAINTY_PARITY, ALEATORIC_UNCERTAINTY_RATIO,
-                OVERALL_UNCERTAINTY_PARITY, OVERALL_UNCERTAINTY_RATIO,
-                EPISTEMIC_UNCERTAINTY_PARITY, EPISTEMIC_UNCERTAINTY_RATIO])
+                DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE, LABEL_STABILITY_DIFFERENCE,
+                LABEL_STABILITY_RATIO, IQR_DIFFERENCE, STD_DIFFERENCE, STD_RATIO, JITTER_DIFFERENCE,
+                ALEATORIC_UNCERTAINTY_DIFFERENCE, ALEATORIC_UNCERTAINTY_RATIO,
+                OVERALL_UNCERTAINTY_DIFFERENCE, OVERALL_UNCERTAINTY_RATIO,
+                EPISTEMIC_UNCERTAINTY_DIFFERENCE, EPISTEMIC_UNCERTAINTY_RATIO])
     )
 
     expected_composed_metrics_df = pd.read_csv(os.path.join(ROOT_DIR, 'tests', 'files_for_tests', 'composed_metrics',
@@ -104,23 +104,23 @@ def test_compose_metrics_true3(models_metrics_dct2, config_params):
                                     EQUALIZED_ODDS_FNR,
                                     DISPARATE_IMPACT,
                                     STATISTICAL_PARITY_DIFFERENCE,
-                                    ACCURACY_PARITY])
+                                    ACCURACY_DIFFERENCE])
     # Check stability disparity metrics
     compare_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
                        actual_composed_metrics_df=models_composed_metrics_df,
                        model_name='XGBClassifier',
                        groups=['sex', 'race', 'sex&race'],
                        metrics_lst=[LABEL_STABILITY_RATIO,
-                                    IQR_PARITY,
-                                    STD_PARITY,
+                                    IQR_DIFFERENCE,
+                                    STD_DIFFERENCE,
                                     STD_RATIO,
-                                    JITTER_PARITY])
+                                    JITTER_DIFFERENCE])
     # Check uncertainty disparity metrics
     compare_metric_dfs(expected_composed_metrics_df=expected_composed_metrics_df,
                        actual_composed_metrics_df=models_composed_metrics_df,
                        model_name='XGBClassifier',
                        groups=['sex', 'race', 'sex&race'],
-                       metrics_lst=[OVERALL_UNCERTAINTY_PARITY,
+                       metrics_lst=[OVERALL_UNCERTAINTY_DIFFERENCE,
                                     OVERALL_UNCERTAINTY_RATIO,
-                                    ALEATORIC_UNCERTAINTY_PARITY,
+                                    ALEATORIC_UNCERTAINTY_DIFFERENCE,
                                     ALEATORIC_UNCERTAINTY_RATIO])
