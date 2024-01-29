@@ -89,4 +89,4 @@ def test_subgroup_variance_and_error_analyzers(COMPAS_y_test, COMPAS_RF_bootstra
                        actual_composed_metrics_df=metrics_df,
                        model_name='RandomForestClassifier',
                        groups=['overall', 'sex_priv', 'sex_dis', 'race_priv', 'race_dis', 'sex&race_priv', 'sex&race_dis'],
-                       metrics_lst=[ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY])
+                       metrics_lst=[ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY, EPISTEMIC_UNCERTAINTY])

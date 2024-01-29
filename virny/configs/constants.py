@@ -7,7 +7,6 @@ class ModelSetting(Enum):
 
 class ComputationMode(Enum):
     ERROR_ANALYSIS = "error_analysis"
-    POSTPROCESSING_INTERVENTION = "postprocessing_intervention"
 
 
 INTERSECTION_SIGN = '&'
@@ -35,6 +34,7 @@ LABEL_STABILITY = 'Label_Stability'
 
 # Uncertainty metrics
 ALEATORIC_UNCERTAINTY = 'Aleatoric_Uncertainty'
+EPISTEMIC_UNCERTAINTY = 'Epistemic_Uncertainty'
 OVERALL_UNCERTAINTY = 'Overall_Uncertainty'
 
 # Error disparity metrics
@@ -44,18 +44,20 @@ EQUALIZED_ODDS_FPR = 'Equalized_Odds_FPR'
 EQUALIZED_ODDS_FNR = 'Equalized_Odds_FNR'
 DISPARATE_IMPACT = 'Disparate_Impact'
 STATISTICAL_PARITY_DIFFERENCE = 'Statistical_Parity_Difference'
-ACCURACY_PARITY = 'Accuracy_Parity'
+ACCURACY_DIFFERENCE = 'Accuracy_Difference'
 
 # Stability disparity metrics
 LABEL_STABILITY_RATIO = 'Label_Stability_Ratio'
 LABEL_STABILITY_DIFFERENCE = 'Label_Stability_Difference'
-IQR_PARITY = 'IQR_Parity'
-STD_PARITY = 'Std_Parity'
+IQR_DIFFERENCE = 'IQR_Difference'
+STD_DIFFERENCE = 'Std_Difference'
 STD_RATIO = 'Std_Ratio'
-JITTER_PARITY = 'Jitter_Parity'
+JITTER_DIFFERENCE = 'Jitter_Difference'
 
 # Uncertainty disparity metrics
-OVERALL_UNCERTAINTY_PARITY = 'Overall_Uncertainty_Parity'
+OVERALL_UNCERTAINTY_DIFFERENCE = 'Overall_Uncertainty_Difference'
 OVERALL_UNCERTAINTY_RATIO = 'Overall_Uncertainty_Ratio'
-ALEATORIC_UNCERTAINTY_PARITY = 'Aleatoric_Uncertainty_Parity'
+EPISTEMIC_UNCERTAINTY_DIFFERENCE = 'Epistemic_Uncertainty_Difference'
+EPISTEMIC_UNCERTAINTY_RATIO = 'Epistemic_Uncertainty_Ratio'
+ALEATORIC_UNCERTAINTY_DIFFERENCE = 'Aleatoric_Uncertainty_Difference'
 ALEATORIC_UNCERTAINTY_RATIO = 'Aleatoric_Uncertainty_Ratio'

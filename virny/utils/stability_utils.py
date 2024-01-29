@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from virny.configs.constants import ALEATORIC_UNCERTAINTY, EPISTEMIC_UNCERTAINTY, OVERALL_UNCERTAINTY
 from virny.metrics import METRIC_TO_FUNCTION, METRICS_FOR_PREDICT_PROBA, METRICS_FOR_LABELS
 
 
@@ -58,7 +59,12 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
     else:
         uq_predict_probas = results
         for metric in METRICS_FOR_PREDICT_PROBA:
+            if metric == EPISTEMIC_UNCERTAINTY: # skip computation for a metric that is based on two other metrics
+                continue
+
             metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_predict_probas)
+
+        metrics_dct[EPISTEMIC_UNCERTAINTY] = metrics_dct[OVERALL_UNCERTAINTY] - metrics_dct[ALEATORIC_UNCERTAINTY]
 
         # Convert predict proba results of each model to correspondent labels.
         # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
@@ -79,8 +85,8 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
 
 def generate_bootstrap(features, labels, boostrap_size, with_replacement=True):
     bootstrap_index = np.random.choice(features.shape[0], size=boostrap_size, replace=with_replacement)
-    bootstrap_features = pd.DataFrame(features).iloc[bootstrap_index].values
-    bootstrap_labels = pd.DataFrame(labels).iloc[bootstrap_index].values
+    bootstrap_features = pd.DataFrame(features).iloc[bootstrap_index]
+    bootstrap_labels = pd.DataFrame(labels).iloc[bootstrap_index]
     if len(bootstrap_features) == boostrap_size:
         return bootstrap_features, bootstrap_labels
     else:

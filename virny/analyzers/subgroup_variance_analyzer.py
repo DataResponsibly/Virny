@@ -53,7 +53,8 @@ class SubgroupVarianceAnalyzer:
                  postprocessing_sensitive_attribute : str = None, computation_mode: str = None,
                  notebook_logs_stdout: bool = False, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
-            if computation_mode == ComputationMode.POSTPROCESSING_INTERVENTION.value:
+            if postprocessor is not None:
+                print('Enabled a postprocessing mode')
                 overall_variance_analyzer = BatchOverallVarianceAnalyzerPostProcessing(postprocessor=postprocessor,
                                                                                        sensitive_attribute=postprocessing_sensitive_attribute,
                                                                                        base_model=base_model,
@@ -91,7 +92,7 @@ class SubgroupVarianceAnalyzer:
 
         self.__overall_variance_analyzer = overall_variance_analyzer
 
-        with_predict_proba = False if computation_mode == ComputationMode.POSTPROCESSING_INTERVENTION.value else True
+        with_predict_proba = False if postprocessor is not None else True
         self.__subgroup_variance_calculator = SubgroupVarianceCalculator(X_test=dataset.X_test,
                                                                          y_test=dataset.y_test,
                                                                          sensitive_attributes_dct=sensitive_attributes_dct,

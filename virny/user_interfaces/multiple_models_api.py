@@ -5,11 +5,11 @@ import pandas as pd
 from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
-from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
-from virny.utils.common_helpers import save_metrics_to_file
 from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
+from virny.utils.protected_groups_partitioning import create_test_protected_groups
+from virny.utils.common_helpers import save_metrics_to_file
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
