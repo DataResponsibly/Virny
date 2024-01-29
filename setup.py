@@ -11,7 +11,7 @@ from os import path
 
 
 NAME = 'virny'
-DESCRIPTION = "Python library for auditing model stability and fairness"
+DESCRIPTION = "Python library for in-depth profiling of model performance across overall and disparity dimensions"
 LONG_DESCRIPTION_CONTENT_TYPE = "text/markdown"
 URL = "https://github.com/DataResponsibly/Virny"
 EMAILS = "denis.gerasymuk799@gmail.com"
