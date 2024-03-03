@@ -59,7 +59,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
                          verbose=verbose)
         self.target_column = target_column
 
-    def _fit_model(self, classifier, X_train: np.ndarray, y_train: np.ndarray):
+    def _fit_model(self, classifier, X_train, y_train):
         """
         Fit a classifier that is an instance of self.base_model
         """

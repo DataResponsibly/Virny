@@ -15,7 +15,7 @@ def validate_config(config_obj):
       to compute fairness and stability metrics. Default: 'batch'.
 
     * config_obj.computation_mode is an optional argument that defines a non-default mode for metrics computation.
-      Currently, only 'error_analysis' mode is supported.
+      Currently, 'error_analysis' and 'meta_learner' modes are supported.
 
     Parameters
     ----------
@@ -26,11 +26,6 @@ def validate_config(config_obj):
     # ================== Required parameters ==================
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
-
-    if not isinstance(config_obj.bootstrap_fraction, float) \
-            or config_obj.bootstrap_fraction < 0.0 \
-            or config_obj.bootstrap_fraction > 1.0:
-        raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
 
     if not isinstance(config_obj.n_estimators, int) or config_obj.n_estimators <= 1:
         raise ValueError('n_estimators must be integer greater than 1')
@@ -66,6 +61,15 @@ def validate_config(config_obj):
             and config_obj.computation_mode not in ComputationMode:
         raise ValueError('computation_mode must be a string that is included in the ComputationMode enum. '
                          'Refer to this function documentation for more details!')
+
+    # ================== Computation mode specific parameters ==================
+    if config_obj.computation_mode is None \
+            or config_obj.computation_mode != ComputationMode.META_LEARNER.value:
+        # Check bootstrap_fraction correctness
+        if not isinstance(config_obj.bootstrap_fraction, float) \
+                or config_obj.bootstrap_fraction < 0.0 \
+                or config_obj.bootstrap_fraction > 1.0:
+            raise ValueError('bootstrap_fraction must be float in [0.0, 1.0] range')
 
     return True
 

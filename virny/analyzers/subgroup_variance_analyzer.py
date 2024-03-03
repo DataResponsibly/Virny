@@ -5,6 +5,7 @@ from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
 from virny.analyzers.batch_overall_variance_analyzer_postprocessing import BatchOverallVarianceAnalyzerPostProcessing
+from virny.analyzers.batch_overall_variance_meta_learner import BatchOverallVarianceMetaLearner
 
 
 class SubgroupVarianceAnalyzer:
@@ -51,38 +52,56 @@ class SubgroupVarianceAnalyzer:
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
                  sensitive_attributes_dct: dict, test_protected_groups: dict, postprocessor=None,
                  postprocessing_sensitive_attribute : str = None, computation_mode: str = None,
-                 notebook_logs_stdout: bool = False, verbose: int = 0):
+                 meta_learner_config: dict = None, notebook_logs_stdout: bool = False, verbose: int = 0):
         if model_setting == ModelSetting.BATCH:
-            if postprocessor is not None:
-                print('Enabled a postprocessing mode')
-                overall_variance_analyzer = BatchOverallVarianceAnalyzerPostProcessing(postprocessor=postprocessor,
-                                                                                       sensitive_attribute=postprocessing_sensitive_attribute,
-                                                                                       base_model=base_model,
-                                                                                       base_model_name=base_model_name,
-                                                                                       bootstrap_fraction=bootstrap_fraction,
-                                                                                       X_train=dataset.X_train_val,
-                                                                                       y_train=dataset.y_train_val,
-                                                                                       X_test=dataset.X_test,
-                                                                                       y_test=dataset.y_test,
-                                                                                       dataset_name=dataset_name,
-                                                                                       target_column=dataset.target,
-                                                                                       n_estimators=n_estimators,
-                                                                                       with_predict_proba=False,
-                                                                                       notebook_logs_stdout=notebook_logs_stdout,
-                                                                                       verbose=verbose)
+            # Conditions for each computation mode:
+            #  default, default + postprocessing, error_analysis, error_analysis + postprocessing, meta_learner
+            if computation_mode == ComputationMode.META_LEARNER.value:
+                print(f"Enabled a '{ComputationMode.META_LEARNER.value}' mode")
+                overall_variance_analyzer = BatchOverallVarianceMetaLearner(meta_learner_config=meta_learner_config,
+                                                                            base_model=base_model,
+                                                                            base_model_name=base_model_name,
+                                                                            X_train=dataset.X_train_val,
+                                                                            y_train=dataset.y_train_val,
+                                                                            X_test=dataset.X_test,
+                                                                            y_test=dataset.y_test,
+                                                                            dataset_name=dataset_name,
+                                                                            target_column=dataset.target,
+                                                                            n_estimators=n_estimators,
+                                                                            notebook_logs_stdout=notebook_logs_stdout,
+                                                                            verbose=verbose)
             else:
-                overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
-                                                                         base_model_name=base_model_name,
-                                                                         bootstrap_fraction=bootstrap_fraction,
-                                                                         X_train=dataset.X_train_val,
-                                                                         y_train=dataset.y_train_val,
-                                                                         X_test=dataset.X_test,
-                                                                         y_test=dataset.y_test,
-                                                                         dataset_name=dataset_name,
-                                                                         target_column=dataset.target,
-                                                                         n_estimators=n_estimators,
-                                                                         notebook_logs_stdout=notebook_logs_stdout,
-                                                                         verbose=verbose)
+                if postprocessor is not None:
+                    print('Enabled a postprocessing mode')
+                    overall_variance_analyzer = BatchOverallVarianceAnalyzerPostProcessing(postprocessor=postprocessor,
+                                                                                           sensitive_attribute=postprocessing_sensitive_attribute,
+                                                                                           base_model=base_model,
+                                                                                           base_model_name=base_model_name,
+                                                                                           bootstrap_fraction=bootstrap_fraction,
+                                                                                           X_train=dataset.X_train_val,
+                                                                                           y_train=dataset.y_train_val,
+                                                                                           X_test=dataset.X_test,
+                                                                                           y_test=dataset.y_test,
+                                                                                           dataset_name=dataset_name,
+                                                                                           target_column=dataset.target,
+                                                                                           n_estimators=n_estimators,
+                                                                                           with_predict_proba=False,
+                                                                                           notebook_logs_stdout=notebook_logs_stdout,
+                                                                                           verbose=verbose)
+                else:
+                    # For default and error_analysis modes
+                    overall_variance_analyzer = BatchOverallVarianceAnalyzer(base_model=base_model,
+                                                                             base_model_name=base_model_name,
+                                                                             bootstrap_fraction=bootstrap_fraction,
+                                                                             X_train=dataset.X_train_val,
+                                                                             y_train=dataset.y_train_val,
+                                                                             X_test=dataset.X_test,
+                                                                             y_test=dataset.y_test,
+                                                                             dataset_name=dataset_name,
+                                                                             target_column=dataset.target,
+                                                                             n_estimators=n_estimators,
+                                                                             notebook_logs_stdout=notebook_logs_stdout,
+                                                                             verbose=verbose)
         else:
             raise ValueError('model_setting is incorrect or not supported')
 

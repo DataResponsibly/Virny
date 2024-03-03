@@ -7,6 +7,7 @@ class ModelSetting(Enum):
 
 class ComputationMode(Enum):
     ERROR_ANALYSIS = "error_analysis"
+    META_LEARNER = "meta_learner"
 
 
 INTERSECTION_SIGN = '&'

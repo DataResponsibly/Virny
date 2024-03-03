@@ -12,3 +12,4 @@ munch~=2.5.0
 PyYAML~=6.0
 requests-toolbelt==1.0.0
 colorama~=0.4.6
+catboost~=1.2.3

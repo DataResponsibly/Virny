@@ -100,12 +100,12 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             print('\n', flush=True)
         self._logger.info('Start classifiers testing by bootstrap')
 
-        # Remove a progress bar for UQ without estimators fitting
         if self._notebook_logs_stdout:
             from tqdm.notebook import tqdm
         else:
             from tqdm import tqdm
 
+        # Remove a progress bar for UQ without estimators fitting
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",

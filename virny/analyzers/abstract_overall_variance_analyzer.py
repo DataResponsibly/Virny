@@ -7,8 +7,7 @@ from copy import deepcopy
 from abc import ABCMeta, abstractmethod
 
 from virny.custom_classes.custom_logger import get_logger
-from virny.utils.stability_utils import generate_bootstrap
-from virny.utils.stability_utils import count_prediction_metrics
+from virny.utils.stability_utils import generate_bootstrap, count_prediction_metrics
 
 
 class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
@@ -129,12 +128,12 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
             print('\n', flush=True)
         self._logger.info('Start classifiers testing by bootstrap')
 
-        # Remove a progress bar for UQ without estimators fitting
         if self._notebook_logs_stdout:
             from tqdm.notebook import tqdm
         else:
             from tqdm import tqdm
 
+        # Remove a progress bar for UQ without estimators fitting
         cycle_range = range(self.n_estimators) if with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
