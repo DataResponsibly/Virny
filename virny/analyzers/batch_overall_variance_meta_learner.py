@@ -142,6 +142,9 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
         self.y_pred_test = y_pred_test
         self.error_test = error_test
 
+        print('self.y_pred_test.index[:10] -- ', self.y_pred_test.index[:10])
+        print('self.error_test.index[:10] -- ', self.error_test.index[:10])
+
         # Step 4: Tune and fit a meta-learner based on the concatenated X_train and y_pred_prob_train sets
         X_train_meta_learner = pd.concat([self.X_train, y_pred_prob_train], axis=1)
         X_test_meta_learner = pd.concat([self.X_test, y_pred_prob_test], axis=1)
@@ -154,7 +157,7 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
         meta_learner_best_params = dict()
         for name, est in meta_learner_clf.named_estimators_.items():
             meta_learner_best_params[name] = est.best_params_
-            print(f'{name}: {meta_learner_best_params[name]}')
+            print(f'{name}: {meta_learner_best_params[name]}', flush=True)
 
         # Step 5: Get prediction labels and probabilities for a test set using the tuned meta-learner
         models_predictions = {idx: [] for idx in range(self.n_estimators)}
@@ -162,7 +165,7 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
         # Fetch pred_prob P(z|h,x) of each SGBT in the E-SGBT (auditor ensemble model)
         self.models_lst = meta_learner_clf.estimators_
         for idx, auditor_estimator in enumerate(self.models_lst):
-            models_predictions[idx] = auditor_estimator.predict_proba(X_test_meta_learner)
+            models_predictions[idx] = auditor_estimator.predict_proba(X_test_meta_learner)[:, 0]
 
         gc.collect()  # Enforce garbage collection after the most intensive part of the pipeline
 

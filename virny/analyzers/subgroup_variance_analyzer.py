@@ -105,6 +105,7 @@ class SubgroupVarianceAnalyzer:
         else:
             raise ValueError('model_setting is incorrect or not supported')
 
+        self.computation_mode = computation_mode
         self.dataset_name = overall_variance_analyzer.dataset_name
         self.n_estimators = overall_variance_analyzer.n_estimators
         self.base_model_name = overall_variance_analyzer.base_model_name
@@ -154,7 +155,12 @@ class SubgroupVarianceAnalyzer:
         y_preds = pd.Series(y_preds, index=y_test_true.index)
         self.overall_variance_metrics_dct = self.__overall_variance_analyzer.prediction_metrics
 
-        # Count and display fairness metrics
+        # If computation mode is META_LEARNER, compute subgroup arbitrariness metrics
+        # based on the error test predictions of a bbox model (NOT ground truth test labels)
+        if self.computation_mode == ComputationMode.META_LEARNER.value:
+            self.__subgroup_variance_calculator.y_test = self.__overall_variance_analyzer.error_test
+
+        # Compute subgroup arbitrariness metrics
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
         self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
             y_preds, self.__overall_variance_analyzer.models_predictions,
