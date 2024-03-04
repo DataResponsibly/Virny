@@ -6,7 +6,7 @@ from virny.user_interfaces.multiple_models_api import run_metrics_computation
 
 
 def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
-                                   custom_tbl_fields_dct: dict, db_writer_func,
+                                   custom_tbl_fields_dct: dict, db_writer_func, meta_learner_config: dict = None,
                                    postprocessor=None, notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
@@ -55,6 +55,7 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
+                                                 meta_learner_config=meta_learner_config,
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
