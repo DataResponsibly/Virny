@@ -187,7 +187,6 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
             # to have minimum correlation between the estimators in the ensemble
             if meta_learner_name.lower() == 'gbt':
                 estimator = GradientBoostingClassifier(random_state=estimator_num)
-                estimator.classes_ = np.array([0, 1])
             elif meta_learner_name.lower() == 'cbt':
                 estimator = CatBoostClassifier(loss_function='Logloss',
                                                verbose=True,

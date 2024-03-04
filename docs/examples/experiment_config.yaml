@@ -2,4 +2,4 @@
 dataset_name: Law_School
 computation_mode: meta_learner
 n_estimators: 10
-sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male&race': None}
+sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male & race': None}
