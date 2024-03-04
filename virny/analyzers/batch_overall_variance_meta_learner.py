@@ -1,10 +1,11 @@
 import gc
+
+import numpy as np
 import pandas as pd
 
 from virny.utils.stability_utils import count_prediction_metrics
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
 
-from datetime import datetime, timezone
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import GradientBoostingClassifier, VotingClassifier
 from catboost import CatBoostClassifier
@@ -131,29 +132,29 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
         # Step 2: Get prediction labels and probabilities for train and test sets using the fitted bbox
         y_pred_train = self._batch_predict(bbox_clf, self.X_train)
         y_pred_test = self._batch_predict(bbox_clf, self.X_test)
-        y_pred_prob_train = self._batch_predict_proba(bbox_clf, self.X_train)
-        y_pred_prob_test = self._batch_predict_proba(bbox_clf, self.X_test)
+        y_pred_prob_train = self._batch_predict_proba_all(bbox_clf, self.X_train)
+        y_pred_prob_test = self._batch_predict_proba_all(bbox_clf, self.X_test)
 
         # Step 3: Create error train and test sets
         error_train = (y_pred_train != self.y_train).astype(int)
         error_test = (y_pred_test != self.y_test).astype(int)
 
         # Store y_pred_test to compute model correctness. And store error_test to compute model arbitrariness.
-        self.y_pred_test = y_pred_test
-        self.error_test = error_test
+        self.y_pred_test = pd.Series(y_pred_test, index=self.y_test.index)
+        self.error_test = pd.Series(error_test, index=self.y_test.index)
 
         print('self.y_pred_test.index[:10] -- ', self.y_pred_test.index[:10])
         print('self.error_test.index[:10] -- ', self.error_test.index[:10])
 
         # Step 4: Tune and fit a meta-learner based on the concatenated X_train and y_pred_prob_train sets
-        X_train_meta_learner = pd.concat([self.X_train, y_pred_prob_train], axis=1)
-        X_test_meta_learner = pd.concat([self.X_test, y_pred_prob_test], axis=1)
+        X_train_meta_learner = np.concatenate([self.X_train.values, y_pred_prob_train], axis=1)
+        X_test_meta_learner = np.concatenate([self.X_test.values, y_pred_prob_test], axis=1)
 
         meta_learner_clf = BatchOverallVarianceMetaLearner._build_ensemble(meta_learner_config=self.meta_learner_config,
                                                                            n_estimators=self.n_estimators)
         meta_learner_clf.fit(X_train_meta_learner, error_train)  # Tune and fit a meta-learner
         self._logger.info('Meta-learner ensemble is tuned and fitted')
-        print('Best params for estimators in the meta-learner ensemble')
+        print('\n\nBest params for estimators in the meta-learner ensemble')
         meta_learner_best_params = dict()
         for name, est in meta_learner_clf.named_estimators_.items():
             meta_learner_best_params[name] = est.best_params_
@@ -182,15 +183,18 @@ class BatchOverallVarianceMetaLearner(BatchOverallVarianceAnalyzer):
 
         estimators = []
         for estimator_num in range(1, n_estimators + 1):
+            # Each estimator in the ensemble is initialized with a different seed
+            # to have minimum correlation between the estimators in the ensemble
             if meta_learner_name.lower() == 'gbt':
-                estimator = GradientBoostingClassifier()
+                estimator = GradientBoostingClassifier(random_state=estimator_num)
             elif meta_learner_name.lower() == 'cbt':
                 estimator = CatBoostClassifier(loss_function='Logloss',
                                                verbose=True,
                                                boosting_type='Plain',
                                                bootstrap_type='Bernoulli',
                                                posterior_sampling=True,
-                                               used_ram_limit='20gb')
+                                               used_ram_limit='20gb',
+                                               random_seed=estimator_num)
             else:
                 raise ValueError(f'Model {meta_learner_name} is not supported as a meta-learner')
 

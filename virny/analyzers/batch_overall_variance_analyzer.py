@@ -73,6 +73,12 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
 
     def _batch_predict_proba(self, classifier, X_test: pd.DataFrame):
         """
-        Predict with the classifier for X_test set and return probabilities for each class for each test point
+        Predict with the classifier for X_test set and return probabilities for zero class for each test point
         """
         return classifier.predict_proba(X_test)[:, 0]
+
+    def _batch_predict_proba_all(self, classifier, X_test: pd.DataFrame):
+        """
+        Predict with the classifier for X_test set and return probabilities for each class for each test point
+        """
+        return classifier.predict_proba(X_test)

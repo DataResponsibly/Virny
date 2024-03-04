@@ -12,8 +12,8 @@ from virny.utils.protected_groups_partitioning import create_test_protected_grou
 from virny.utils.common_helpers import save_metrics_to_file
 
 
-def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, postprocessor=None,
+def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict, save_results_dir_path: str,
+                                meta_learner_config: dict = None, postprocessor=None,
                                 notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
@@ -62,6 +62,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
+                                                 meta_learner_config=meta_learner_config,
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
@@ -82,6 +83,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
+                            meta_learner_config: dict = None,
                             postprocessor=None, postprocessing_sensitive_attribute: str = None,
                             save_results: bool = True, save_results_dir_path: str = None,
                             notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
@@ -153,6 +155,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                          computation_mode=computation_mode,
                                                          dataset_name=dataset_name,
                                                          base_model_name=model_name,
+                                                         meta_learner_config=meta_learner_config,
                                                          postprocessor=postprocessor,
                                                          postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                          save_results=save_results,
@@ -173,7 +176,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
 
 def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                               sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
-                              postprocessor=None, postprocessing_sensitive_attribute: str = None,
+                              meta_learner_config: dict = None, postprocessor=None, postprocessing_sensitive_attribute: str = None,
                               model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
                               save_results_dir_path: str = None, notebook_logs_stdout: bool = False, verbose: int = 0):
     """
@@ -238,6 +241,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=test_protected_groups,
                                                           computation_mode=computation_mode,
+                                                          meta_learner_config=meta_learner_config,
                                                           postprocessor=postprocessor,
                                                           postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                           notebook_logs_stdout=notebook_logs_stdout,

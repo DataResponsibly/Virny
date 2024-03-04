@@ -1,7 +1,5 @@
 
 dataset_name: Law_School
-bootstrap_fraction: 0.8
-computation_mode: error_analysis
-n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
+computation_mode: meta_learner
+n_estimators: 10
 sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male&race': None}
-postprocessing_sensitive_attribute: 'race_binary'
