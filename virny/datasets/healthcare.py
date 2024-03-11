@@ -23,7 +23,7 @@ class DiabetesDataset(BaseDataLoader):
     def __init__(self, subsample_size: int = None, subsample_seed: int = None, dataset_path=None):
         if dataset_path is None:
             filename = 'diabetes-clean.csv'
-            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+            dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
 
         df = pd.read_csv(dataset_path)
         if subsample_size:
@@ -79,7 +79,7 @@ class RicciDataset(BaseDataLoader):
     def __init__(self, dataset_path=None):
         if dataset_path is None:
             filename = 'ricci_race.csv'
-            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+            dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
 
         df = pd.read_csv(dataset_path)
 

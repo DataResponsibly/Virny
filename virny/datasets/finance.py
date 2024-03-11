@@ -18,7 +18,7 @@ class CreditCardDefaultDataset(BaseDataLoader):
     def __init__(self, dataset_path: str = None):
         if dataset_path is None:
             filename = 'credit_card_default_clean.csv'
-            dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+            dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
 
         df = pd.read_csv(dataset_path)
         target = 'default_payment'
@@ -118,7 +118,7 @@ class CreditDataset(BaseDataLoader):
     """
     def __init__(self, subsample_size: int = None, subsample_seed: int = None):
         filename = 'givemesomecredit.csv'
-        dataset_path = pathlib.Path(__file__).parent.joinpath(filename)
+        dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
 
         df = pd.read_csv(dataset_path, index_col=0)
         if subsample_size:
