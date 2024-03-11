@@ -1,4 +1,4 @@
-checking-account,duration,credit-history,purpose,credit-amount,savings-account,employment-since,installment-rate,other-debtors,residence-since,property,age,other-installment,housing,existing-credits,job,numner-people-provide-maintenance-for,telephone,foreign-worker,sex,marital-status,class-label
+checking-account,duration,credit-history,purpose,credit-amount,savings-account,employment-since,installment-rate,other-debtors,residence-since,property,age,other-installment,housing,existing-credits,job,number-people-provide-maintenance-for,telephone,foreign-worker,sex,marital-status,class-label
 <0 DM,6,critical account,radio/television,1169,no savings account,>=7 years,4,none,4,real estate,67,none,own,2,skilled employee / official,1,yes,yes,male,divorced/separated,1
 0 <= <200 DM,48,existing credits paid back duly till now,radio/television,5951,<100 DM,1<= < 4 years,2,none,2,real estate,22,none,own,1,skilled employee / official,1,none,yes,female,divorced/separated,0
 no account,12,critical account,education,2096,<100 DM,4<= <7 years,2,none,3,real estate,49,none,own,1,unskilled - resident,2,none,yes,male,divorced/separated,1
