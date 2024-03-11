@@ -2,7 +2,7 @@
 This module contains sample datasets and data loaders.
 The purpose is to provide sample datasets for functionality testing and show examples of data loaders (aka dataset classes).
 """
-from .finance import CreditCardDefaultDataset
+from .finance import CreditCardDefaultDataset, GermanCreditDataset
 from .compas import CompasWithoutSensitiveAttrsDataset, CompasDataset
 from .healthcare import DiabetesDataset, RicciDataset
 from .education import LawSchoolDataset, StudentPerformancePortugueseDataset
@@ -11,13 +11,14 @@ from .folktables import (ACSIncomeDataset, ACSEmploymentDataset, ACSMobilityData
 
 
 __all__ = [
+    "CreditCardDefaultDataset",
+    "GermanCreditDataset",
     "CompasWithoutSensitiveAttrsDataset",
     "CompasDataset",
-    "CreditCardDefaultDataset",
     "DiabetesDataset",
     "RicciDataset",
-    "StudentPerformancePortugueseDataset",
     "LawSchoolDataset",
+    "StudentPerformancePortugueseDataset",
     "ACSIncomeDataset",
     "ACSEmploymentDataset",
     "ACSMobilityDataset",
