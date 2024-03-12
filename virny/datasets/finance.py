@@ -103,6 +103,50 @@ class GermanCreditDataset(BaseDataLoader):
         )
 
 
+class BankMarketingDataset(BaseDataLoader):
+    """
+    Dataset class for the Bank Marketing dataset that contains sensitive attributes among feature columns.
+    Source: https://github.com/tailequy/fairness_dataset/blob/main/experiments/data/bank-full.csv
+    Description: https://arxiv.org/pdf/2110.00530.pdf (Section 3.1.5)
+
+    Parameters
+    ----------
+    subsample_size
+        Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
+
+    """
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
+        filename = 'bank-full.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
+        df = pd.read_csv(dataset_path)
+
+        if subsample_size:
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
+
+        # Target preprocessing
+        target = 'y'
+        df = df.replace({
+            target: {
+                'no': 0,
+                'yes': 1,
+            },
+        })
+
+        numerical_columns = ['age', 'balance', 'day', 'duration', 'campaign', 'pdays', 'previous']
+        categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+
+
 class CreditDataset(BaseDataLoader):
     """
     Dataset class for the Credit dataset that contains sensitive attributes among feature columns.
