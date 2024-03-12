@@ -21,7 +21,7 @@ class CardiovascularDiseaseDataset(BaseDataLoader):
     def __init__(self, subsample_size: int = None, subsample_seed: int = None):
         filename = 'cardio.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
-        df = pd.read_csv(dataset_path)
+        df = pd.read_csv(dataset_path, delimiter=';')
 
         if subsample_size:
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
