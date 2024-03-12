@@ -48,6 +48,47 @@ class CardiovascularDiseaseDataset(BaseDataLoader):
         )
 
 
+class DiabetesDataset2019(BaseDataLoader):
+    """
+    Dataset class for the Diabetes dataset 2019 that contains sensitive attributes among feature columns.
+    Source and broad description: https://www.kaggle.com/datasets/tigganeha4/diabetes-dataset-2019/data
+
+    Parameters
+    ----------
+    subsample_size
+        Subsample size to create based on the input dataset
+    subsample_seed
+        Seed for sampling using the sample() method from pandas
+
+    """
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
+        filename = 'diabetes_dataset__2019.csv'
+        dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
+        df = pd.read_csv(dataset_path)
+
+        if subsample_size:
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
+
+        # Preprocessing
+        df = df.astype({'Pregancies': int})
+        df['Diabetic'] = df['Diabetic'].str.strip()
+        df['Diabetic'].replace('no', 0, inplace=True)
+        df['Diabetic'].replace('yes', 1, inplace=True)
+
+        target = 'Diabetic'
+        numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregancies']
+        categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
+
+        super().__init__(
+            full_df=df,
+            target=target,
+            numerical_columns=numerical_columns,
+            categorical_columns=categorical_columns,
+        )
+
+
 class RicciDataset(BaseDataLoader):
     """
     Dataset class for the Ricci dataset that contains sensitive attributes among feature columns.

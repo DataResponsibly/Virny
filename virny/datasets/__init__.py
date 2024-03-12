@@ -4,7 +4,7 @@ The purpose is to provide sample datasets for functionality testing and show exa
 """
 from .finance import GermanCreditDataset, BankMarketingDataset
 from .compas import CompasWithoutSensitiveAttrsDataset, CompasDataset
-from .healthcare import CardiovascularDiseaseDataset, RicciDataset
+from .healthcare import CardiovascularDiseaseDataset, DiabetesDataset2019, RicciDataset
 from .education import LawSchoolDataset, StudentPerformancePortugueseDataset
 from .folktables import (ACSIncomeDataset, ACSEmploymentDataset, ACSMobilityDataset, ACSTravelTimeDataset,
                          ACSPublicCoverageDataset)
@@ -16,6 +16,7 @@ __all__ = [
     "CompasWithoutSensitiveAttrsDataset",
     "CompasDataset",
     "CardiovascularDiseaseDataset",
+    "DiabetesDataset2019",
     "RicciDataset",
     "LawSchoolDataset",
     "StudentPerformancePortugueseDataset",
