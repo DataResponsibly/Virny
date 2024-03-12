@@ -1,6 +1,5 @@
 import pathlib
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 
 from virny.datasets.base import BaseDataLoader
 
@@ -59,9 +58,11 @@ class DiabetesDataset2019(BaseDataLoader):
         Subsample size to create based on the input dataset
     subsample_seed
         Seed for sampling using the sample() method from pandas
+    with_nulls
+        Whether to keep nulls in the dataset or drop rows with any nulls. Default: True.
 
     """
-    def __init__(self, subsample_size: int = None, subsample_seed: int = None):
+    def __init__(self, subsample_size: int = None, subsample_seed: int = None, with_nulls: bool = True):
         filename = 'diabetes_dataset__2019.csv'
         dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
         df = pd.read_csv(dataset_path)
@@ -70,15 +71,18 @@ class DiabetesDataset2019(BaseDataLoader):
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else df.sample(subsample_size)
             df = df.reset_index(drop=True)
+        if not with_nulls:
+            df = df.dropna(how='any',axis=0)
+            df = df.reset_index(drop=True)
 
         # Preprocessing
-        df = df.astype({'Pregancies': int})
+        df = df.rename(columns={'Pregancies': 'Pregnancies'})
         df['Diabetic'] = df['Diabetic'].str.strip()
         df['Diabetic'].replace('no', 0, inplace=True)
         df['Diabetic'].replace('yes', 1, inplace=True)
 
         target = 'Diabetic'
-        numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregancies']
+        numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregnancies']
         categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
 
         super().__init__(
