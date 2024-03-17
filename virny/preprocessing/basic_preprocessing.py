@@ -3,7 +3,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-from virny.datasets.data_loaders import BaseDataLoader
+from virny.datasets.base import BaseDataLoader
 from virny.custom_classes.base_dataset import BaseFlowDataset
 
 

@@ -11,7 +11,7 @@ from virny.utils.protected_groups_partitioning import create_test_protected_grou
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 from virny.utils.stability_utils import count_prediction_metrics
-from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
+from virny.datasets import CompasWithoutSensitiveAttrsDataset
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
 
 
