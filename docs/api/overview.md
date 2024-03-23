@@ -55,7 +55,6 @@ The purpose is to provide sample datasets for functionality testing and show exa
 - [DiabetesDataset](../datasets/DiabetesDataset)
 - [LawSchoolDataset](../datasets/LawSchoolDataset)
 - [RicciDataset](../datasets/RicciDataset)
-- [StudentPerformancePortugueseDataset](../datasets/StudentPerformancePortugueseDataset)
 
 ## metrics
 
