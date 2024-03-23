@@ -23,8 +23,8 @@ Below, see the mathematical definition for each of the fairness metrics in the l
 #### Aleatoric Uncertainty
 
 ```math
-\frac{Pr(\hat{Y} = \text{pos_label} | D = \text{unprivileged})}
-{Pr(\hat{Y} = \text{pos_label} | D = \text{privileged})}
+\frac{Pr(\hat{Y} = \text{pos\_label} | D = \text{unprivileged})}
+{Pr(\hat{Y} = \text{pos\_label} | D = \text{privileged})}
 ```
 
 ```math
