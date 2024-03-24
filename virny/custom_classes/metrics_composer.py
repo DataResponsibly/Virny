@@ -41,9 +41,9 @@ class MetricsComposer:
                               (LABEL_STABILITY_DIFFERENCE, self._difference_operation)],
             JITTER: [(JITTER_DIFFERENCE, self._difference_operation)],
             IQR: [(IQR_DIFFERENCE, self._difference_operation)],
+            # Uncertainty disparity metrics
             STD: [(STD_DIFFERENCE, self._difference_operation),
                   (STD_RATIO, self._ratio_operation)],
-            # Uncertainty disparity metrics
             OVERALL_UNCERTAINTY: [(OVERALL_UNCERTAINTY_DIFFERENCE, self._difference_operation),
                                   (OVERALL_UNCERTAINTY_RATIO, self._ratio_operation)],
             ALEATORIC_UNCERTAINTY: [(ALEATORIC_UNCERTAINTY_DIFFERENCE, self._difference_operation),

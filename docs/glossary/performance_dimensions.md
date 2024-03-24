@@ -1,6 +1,7 @@
 # Performance Dimensions
 
-Below, see the mathematical definition for each of the fairness metrics in the library.
+This page contains short descriptions and mathematical definitions for each overall and disparity metrics implemented in Virny.
+
 
 ## Overall Performance Dimensions
 
@@ -34,7 +35,11 @@ F1 is by default calculated as 0.0 when there are no true positives, false negat
 
 #### Selection Rate
 
-#### Positive Rate
+Selection Rate (or Base Rate) means the fraction of data points in each class classified as 1. The formula for the Selection Rate is:
+
+$$
+\text{Selection Rate} = \frac{TP + FP}{TP + FP + TN + FN}
+$$
 
 
 ### Stability
@@ -124,8 +129,6 @@ $\textit{base measures}$ on the disadvantage ($\textit{dis}$) and privileged ($\
 
 ### Error Disparity
 
-#### Accuracy Difference
-
 #### Equalized Odds
 
 Hardt, Price, and Srebro[^5] state that a predictor $\hat{Y}$ satisfies $\textit{equalized odds}$ with respect 
@@ -157,18 +160,27 @@ $$
 $$
 
 
+#### Accuracy Difference
+
+Accuracy Difference is a fairness notion that requires equal accuracy across groups.
+
+$$
+\text{Accuracy Difference} = \Delta(\text{Accuracy}) = P(\hat{Y}=Y|A=0) - P(\hat{Y}=Y|A=1)
+$$
+
+
 ### Representation Disparity
 
 #### Disparate Impact
 
-Inspired by the 4/5th's rule in legal doctrines, Disparate Impact[^6] has been formulated as a fairness metric:
+Inspired by the 4/5th's rule in legal doctrines, Disparate Impact[^6][^13] has been formulated as a fairness metric:
 
 $$
-\text{Disparate Impact} = \mathcal{Q}(\text{Positive Rate}) =  \frac{P(\hat{Y}=1|A=0)}{P(\hat{Y}=1|A=1)}
+\text{Disparate Impact} = \mathcal{Q}(\text{Selection Rate}) = \frac{P(\hat{Y}=1|A=0)}{P(\hat{Y}=1|A=1)}
 $$
 
-$P(\hat{Y}=1)$ is simply the Positive Rate of the classifier, and so the measure of Disparate Impact is composed 
-as the ratio of the Positive Rate on the $\textit{dis}$ and $\textit{priv}$ groups, respectively.
+$P(\hat{Y}=1)$ is simply the Selection Rate of the classifier, and so the measure of Disparate Impact is composed 
+as the ratio of the Selection Rate on the $\textit{dis}$ and $\textit{priv}$ groups, respectively.
 
 
 #### Statistical Parity Difference
@@ -181,10 +193,10 @@ P(\hat{Y}=1|A=0) = P(\hat{Y}=1|A=1)
 $$
 
 Statistical Parity Difference (SPD) is a popular fairness measure composed simply as the difference between 
-the classifier's Positive Rate on $\textit{dis}$ and $\textit{priv}$ groups, respectively.
+the classifier's Selection Rate on $\textit{dis}$ and $\textit{priv}$ groups, respectively.
 
 $$
-\text{Statistical Parity Difference} = \Delta(\text{Positive Rate}) = P(\hat{Y}=1|A=0) - P(\hat{Y}=1|A=1)
+\text{Statistical Parity Difference} = \Delta(\text{Selection Rate}) = P(\hat{Y}=1|A=0) - P(\hat{Y}=1|A=1)
 $$
 
 
@@ -193,10 +205,10 @@ $$
 #### Label Stability Difference
 
 Label Stability Difference measures the equality (or lack thereof) of [label stability](#label-stability) across groups. 
-In practice, this metric is implemented as a difference between the metric value for $\textit{dis}$ and $\textit{priv}$ groups.
+In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Label Stability Difference } \Delta U_{h, \text{stability}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{stability}}(x)] - \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{stability}}(x)]
+\text{Label Stability Difference} = \Delta U_{h, \text{stability}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{stability}}(x)] - \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{stability}}(x)]
 $$
 
 
@@ -205,19 +217,20 @@ $$
 #### Epistemic Uncertainty Difference
 
 Epistemic Uncertainty Difference measures the equality (or lack thereof) of [epistemic (model) uncertainty](#epistemic-uncertainty) across groups.
-In practice, this metric is implemented as a difference between the metric value for $\textit{dis}$ and $\textit{priv}$ groups.
+In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Epistemic Uncertainty Difference } \Delta U_{h, \text{epistemic}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{epistemic}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{epistemic}}(x)]
+\text{Epistemic Uncertainty Difference} = \Delta U_{h, \text{epistemic}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{epistemic}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{epistemic}}(x)]
 $$
+
 
 #### Aleatoric Uncertainty Difference
 
 Aleatoric Uncertainty Difference measures the equality (or lack thereof) of [aleatoric (data) uncertainty](#aleatoric-uncertainty) across groups.
-In practice, this metric is implemented as a difference between the metric value for $\textit{dis}$ and $\textit{priv}$ groups.
+In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Aleatoric Uncertainty Difference } \Delta U_{h, \text{aleatoric}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{aleatoric}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{aleatoric}}(x)]
+\text{Aleatoric Uncertainty Difference} = \Delta U_{h, \text{aleatoric}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{aleatoric}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{aleatoric}}(x)]
 $$
 
 
@@ -247,3 +260,5 @@ Information and Knowledge Management (CIKM ’23). Association for Computing Mac
 [^11]: Accuracy Score. Metrics and scoring: quantifying the quality of predictions. [Link](https://scikit-learn.org/stable/modules/model_evaluation.html#accuracy-score)
 
 [^12]: F1 score, scikit-learn documentation. [Link](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html#sklearn.metrics.f1_score)
+
+[^13]: Feldman, Michael, et al. "Certifying and removing disparate impact." proceedings of the 21th ACM SIGKDD international conference on knowledge discovery and data mining. 2015.
