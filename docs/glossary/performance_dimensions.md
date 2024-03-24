@@ -38,7 +38,7 @@ F1 is by default calculated as 0.0 when there are no true positives, false negat
 Selection Rate (or Base Rate) means the fraction of data points in each class classified as 1. The formula for the Selection Rate is:
 
 $$
-\text{Selection Rate} = \frac{TP + FP}{TP + FP + TN + FN}
+\text{Selection Rate} = P(\hat{Y} = 1) = \frac{TP + FP}{TP + FP + TN + FN}
 $$
 
 

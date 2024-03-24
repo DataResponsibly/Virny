@@ -10,7 +10,6 @@ Label_Stability_Ratio,1.020156,0.996574,0.997767,DecisionTreeClassifier
 Overall_Uncertainty_Difference,-0.007746,0.012562,0.003668,DecisionTreeClassifier
 Overall_Uncertainty_Ratio,0.991382,1.014195,1.004118,DecisionTreeClassifier
 Statistical_Parity_Difference,0.196061,0.116213,0.100951,DecisionTreeClassifier
-Disparate_Impact,1.237170,1.127488,1.108450,DecisionTreeClassifier
 Std_Difference,-0.002647,0.000628,-0.000949,DecisionTreeClassifier
 Std_Ratio,0.963159,1.009053,0.986485,DecisionTreeClassifier
 Equalized_Odds_TNR,-0.095457,-0.100382,-0.132202,DecisionTreeClassifier
@@ -26,7 +25,7 @@ Label_Stability_Ratio,1.026811,0.989255,1.003616,LogisticRegression
 Overall_Uncertainty_Difference,-0.010267,-0.008368,-0.014665,LogisticRegression
 Overall_Uncertainty_Ratio,0.988816,0.990853,0.984011,LogisticRegression
 Statistical_Parity_Difference,0.1641493031212316,0.24247144340602278,0.25625224191118445,LogisticRegression
-Disparate_Impact,1.182185,1.317713,1.247712,LogisticRegression
+Disparate_Impact,1.558637,1.872897,1.864030,LogisticRegression
 Std_Difference,0.000235,0.000197,-0.000059,LogisticRegression
 Std_Ratio,1.010249,1.008557,0.997473,LogisticRegression
 Equalized_Odds_TNR,-0.098356,-0.152957,-0.183121,LogisticRegression
@@ -42,7 +41,6 @@ Label_Stability_Ratio,1.089016,1.017421,1.025583,RandomForestClassifier
 Overall_Uncertainty_Difference,-0.025571,0.016989,0.000197,RandomForestClassifier
 Overall_Uncertainty_Ratio,0.970915,1.020024,1.000230,RandomForestClassifier
 Statistical_Parity_Difference,0.060909,0.145251,0.102699,RandomForestClassifier
-Disparate_Impact,1.064341,1.161756,1.109701,RandomForestClassifier
 Std_Difference,-0.005710,-0.000903,-0.000312,RandomForestClassifier
 Std_Ratio,0.923399,0.987202,0.995557,RandomForestClassifier
 Equalized_Odds_TNR,-0.079867,-0.126599,-0.145905,RandomForestClassifier
@@ -58,7 +56,7 @@ Label_Stability_Ratio,1.070995,1.015429,1.029570,XGBClassifier
 Overall_Uncertainty_Difference,-0.018830,0.008251,-0.003674,XGBClassifier
 Overall_Uncertainty_Ratio,0.978951,1.009435,0.995831,XGBClassifier
 Statistical_Parity_Difference,0.1629490451218486,0.18481647026953812,0.21069660664323125,XGBClassifier
-Disparate_Impact,1.159674,1.102332,1.093266,XGBClassifier
+Disparate_Impact,1.528958,1.566771,1.633294,XGBClassifier
 Std_Difference,0.000692,0.002415,0.002737,XGBClassifier
 Std_Ratio,1.015140,1.053930,1.060978,XGBClassifier
 Equalized_Odds_TNR,-0.082094,-0.102184,-0.128932,XGBClassifier

@@ -55,7 +55,7 @@ class MetricsInteractiveVisualizer:
         self.max_groups = 8
 
         # Metric names
-        self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY, POSITIVE_RATE]
+        self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY]
         self.all_stability_metrics = [STD, IQR, JITTER, LABEL_STABILITY]
         self.all_uncertainty_metrics = [ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY, EPISTEMIC_UNCERTAINTY]
         self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE]
@@ -367,7 +367,7 @@ class MetricsInteractiveVisualizer:
                         """)
                     with gr.Row():
                         accuracy_metric_vw4 = gr.Dropdown(
-                            sorted([metric for metric in self.all_accuracy_metrics if metric not in (POSITIVE_RATE, SELECTION_RATE)]),
+                            sorted([metric for metric in self.all_accuracy_metrics if metric != SELECTION_RATE]),
                             value=ACCURACY, multiselect=False, label="Correctness Metric",
                             scale=2
                         )
@@ -391,7 +391,7 @@ class MetricsInteractiveVisualizer:
                         subgroup_uncertainty_max_val_vw4 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         positive_rate_metric_vw4 = gr.Dropdown(
-                            [POSITIVE_RATE, SELECTION_RATE],
+                            [SELECTION_RATE],
                             value=SELECTION_RATE, multiselect=False, label="Representation Metric",
                             scale=2
                         )

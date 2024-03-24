@@ -90,7 +90,7 @@ def models_config():
 
 @pytest.fixture(scope='package')
 def compas_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
+    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'data', 'COMPAS.csv')
     df = pd.read_csv(dataset_path)
 
     int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -111,7 +111,7 @@ def compas_dataset_class():
 
 @pytest.fixture(scope='package')
 def compas_without_sensitive_attrs_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
+    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'data', 'COMPAS.csv')
     df = pd.read_csv(dataset_path)
 
     int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',

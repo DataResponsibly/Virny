@@ -82,6 +82,5 @@ def confusion_matrix_metrics(y_true, y_preds):
     metrics[ACCURACY] = (TP+TN)/(TP+TN+FP+FN)
     metrics[F1] = (2*TP)/(2*TP+FP+FN)
     metrics[SELECTION_RATE] = (TP+FP)/(TP+FP+TN+FN)
-    metrics[POSITIVE_RATE] = (TP+FP)/(TP+FN)
 
     return metrics

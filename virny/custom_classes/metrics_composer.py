@@ -34,8 +34,8 @@ class MetricsComposer:
             FPR: [(EQUALIZED_ODDS_FPR, self._difference_operation)],
             FNR: [(EQUALIZED_ODDS_FNR, self._difference_operation)],
             ACCURACY: [(ACCURACY_DIFFERENCE, self._difference_operation)],
-            POSITIVE_RATE: [(DISPARATE_IMPACT, self._ratio_operation)],
-            SELECTION_RATE: [(STATISTICAL_PARITY_DIFFERENCE, self._difference_operation)],
+            SELECTION_RATE: [(STATISTICAL_PARITY_DIFFERENCE, self._difference_operation),
+                             (DISPARATE_IMPACT, self._ratio_operation)],
             # Stability disparity metrics
             LABEL_STABILITY: [(LABEL_STABILITY_RATIO, self._ratio_operation),
                               (LABEL_STABILITY_DIFFERENCE, self._difference_operation)],
