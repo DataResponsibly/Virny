@@ -13,7 +13,7 @@ Accuracy[^11] is the fraction of correct predictions. If $\hat{Y}_i$ is the pred
 is the corresponding true value, then the fraction of correct predictions over $n_{samples}$ is defined as:
 
 $$
-\text{Accuracy } (Y, \hat{Y}) = \frac{1}{n_{samples}} \sum_{i=0}^{n_{samples}-1} \mathbf{1}(\hat{Y}_i = Y_i)
+\text{Accuracy } (Y, \hat{Y}) = \frac{1}{n_{samples}} \sum_{i=1}^{n_{samples}} \mathbf{1}(\hat{Y}_i = Y_i)
 $$
 
 
@@ -165,7 +165,7 @@ $$
 Accuracy Difference is a fairness notion that requires equal accuracy across groups.
 
 $$
-\text{Accuracy Difference} = \Delta(\text{Accuracy}) = P(\hat{Y}=Y|A=0) - P(\hat{Y}=Y|A=1)
+\Delta(\text{Accuracy}) = P(\hat{Y}=Y|A=0) - P(\hat{Y}=Y|A=1)
 $$
 
 
@@ -208,7 +208,7 @@ Label Stability Difference measures the equality (or lack thereof) of [label sta
 In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Label Stability Difference} = \Delta U_{h, \text{stability}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{stability}}(x)] - \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{stability}}(x)]
+\Delta U_{h, \text{stability}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{stability}}(x)] - \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{stability}}(x)]
 $$
 
 
@@ -220,7 +220,7 @@ Epistemic Uncertainty Difference measures the equality (or lack thereof) of [epi
 In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Epistemic Uncertainty Difference} = \Delta U_{h, \text{epistemic}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{epistemic}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{epistemic}}(x)]
+\Delta U_{h, \text{epistemic}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{epistemic}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{epistemic}}(x)]
 $$
 
 
@@ -230,7 +230,7 @@ Aleatoric Uncertainty Difference measures the equality (or lack thereof) of [ale
 In practice, this metric is implemented as a difference between the averaged metric value for $\textit{dis}$ and $\textit{priv}$ groups.
 
 $$
-\text{Aleatoric Uncertainty Difference} = \Delta U_{h, \text{aleatoric}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{aleatoric}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{aleatoric}}(x)]
+\Delta U_{h, \text{aleatoric}}(D^*)  = \mathbb{E}_{x* \in D^*_\text{dis}}[U_{\text{aleatoric}}(x)] -  \mathbb{E}_{x* \in D^*_\text{priv}}[U_{\text{aleatoric}}(x)]
 $$
 
 
