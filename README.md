@@ -32,7 +32,8 @@
 
 **Virny** is a Python library for in-depth profiling of model performance across overall and disparity dimensions. 
 In addition to its metric computation capabilities, the library provides an interactive tool called _VirnyView_ 
-to streamline responsible model selection and generate nutritional labels for ML models. 
+to streamline responsible model selection and generate nutritional labels for ML models.
+
 The Virny library was developed based on three fundamental principles: 
 
 1) easy extensibility of model analysis capabilities;
@@ -65,17 +66,32 @@ pip install virny
 * [Interactive Demo](https://huggingface.co/spaces/denys-herasymuk/virny-demo)
 
 
-## 💡 Features
+## 😎 Why Virny
+
+In contrast to existing fairness software libraries and model card generating frameworks, our system stands out in four key aspects:
+
+1. Virny facilitates the measurement of **all normatively important performance dimensions** (including _fairness_, _stability_, and _uncertainty_) for a set of initialized models, both overall and broken down by user-defined subgroups of interest.
+
+2. Virny enables data scientists to analyze performance using **multiple sensitive attributes** (including _non-binary_) and their _intersections_.
+
+3. Virny offers **diverse APIs for metric computation**, designed to analyze multiple models in a single execution, assessing stability and uncertainty on correct and incorrect predictions broken down by protected groups, and testing models on multiple test sets, including in-domain and out-of-domain.
+
+4. Virny implements streamlined flow design tailored for **responsible model selection**, reducing the complexity associated with numerous model types, performance dimensions, and data-centric and model-centric interventions.
+
+
+## 💡 Full List of Features
 
 * Entire pipeline for profiling model accuracy, stability, uncertainty, and fairness
 * Ability to analyze non-binary sensitive attributes and their intersections
-* Compatibility with [pre-, in-, and post-processors](https://aif360.readthedocs.io/en/latest/modules/algorithms.html#) for fairness enhancement from AIF360
 * Convenient metric computation interfaces: an interface for multiple models, an interface for multiple test sets, and an interface for saving results into a user-defined database
+* Interactive _VirnyView_ visualizer that profiles dataset properties related to protected groups, computes comprehensive [nutritional labels](http://sites.computer.org/debull/A19sept/p13.pdf) for individual models, compares multiple models according to multiple metrics, and guides users through model selection
+* Compatibility with [pre-, in-, and post-processors](https://aif360.readthedocs.io/en/latest/modules/algorithms.html#) for fairness enhancement from AIF360
 * An `error_analysis` computation mode to analyze model stability and confidence for correct and incorrect prodictions broken down by groups
 * Metric static and interactive visualizations
 * Data loaders with subsampling for popular fair-ML benchmark datasets
-* User-friendly parameters input via config yaml files
-* Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview
+* User-friendly parameters input via config yaml files 
+
+Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview.
 
 
 ## 📖 Library Overview
