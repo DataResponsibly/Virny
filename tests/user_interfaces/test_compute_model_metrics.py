@@ -76,8 +76,7 @@ def test_subgroup_variance_and_error_analyzers(COMPAS_y_test, COMPAS_RF_bootstra
                                     FPR,
                                     F1,
                                     ACCURACY,
-                                    SELECTION_RATE,
-                                    POSITIVE_RATE])
+                                    SELECTION_RATE])
     # Check stability metrics
     compare_metric_dfs(expected_composed_metrics_df=COMPAS_RF_expected_metrics,
                        actual_composed_metrics_df=metrics_df,

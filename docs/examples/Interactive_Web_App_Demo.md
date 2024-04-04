@@ -85,7 +85,7 @@ communicates the model's performance across diverse dimensions.
 _**Step 6**: Summarize the performance of a particular model across different dimensions and protected groups._
 
 Finally, in the sixth step, users select a particular model and specify a desirable range for overall and disparity metrics
-encompassing accuracy, stability, uncertainty, and positive rate dimensions. This allows for a clear indication of whether a specific model 
+encompassing accuracy, stability, uncertainty, and selection rate dimensions. This allows for a clear indication of whether a specific model 
 meets these defined constraints. The matrix adopts a color-coded scheme, where green signifies compliance with the constraints, 
 and red signals non-compliance. This final colored matrix serves as a model performance summary and can be incorporated into a model card, 
 similarly to the visualization generated in the fifth step.

@@ -82,6 +82,6 @@ def test_confusion_matrix_metrics():
 
     actual_metrics = confusion_matrix_metrics(y_true, y_preds)
 
-    required_fields = ['TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1', 'Selection-Rate', 'Positive-Rate']
+    required_fields = ['TPR', 'TNR', 'PPV', 'FNR', 'FPR', 'Accuracy', 'F1', 'Selection-Rate']
     for field in required_fields:
         assert field in actual_metrics.keys()

@@ -5,8 +5,7 @@ from colorama import Fore
 from datetime import datetime, timezone
 from abc import ABCMeta, abstractmethod
 
-from virny.configs.constants import (ComputationMode, TPR, TNR, PPV, FPR, FNR, ACCURACY, F1,
-                                     SELECTION_RATE, POSITIVE_RATE)
+from virny.configs.constants import ComputationMode, TPR, TNR, PPV, FPR, FNR, ACCURACY, F1, SELECTION_RATE
 
 
 class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
@@ -94,7 +93,6 @@ class AbstractSubgroupAnalyzer(metaclass=ABCMeta):
                         ACCURACY: None,
                         F1: None,
                         SELECTION_RATE: None,
-                        POSITIVE_RATE: None,
                     }
                 else:
                     metrics_dct = self._compute_metrics(self.y_test[partition_indexes], y_preds[partition_indexes])

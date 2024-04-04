@@ -1,5 +1,6 @@
 nav:
   - introduction
-  - api
   - examples
+  - glossary
+  - api
   - release_notes
