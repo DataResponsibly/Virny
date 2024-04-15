@@ -19,13 +19,17 @@ class BaseInprocessingWrapper(metaclass=abc.ABCMeta):
 
         If the inprocessor does not support prediction probabilities, the implementation of this method can be skipped,
          and with_predict_proba = False should be set in the metric computation interface.
+
+        Indexes from the returned array of predictions should start from zero.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def predict(self, X):
-        """Predicts using the fitted inprocessor based on X features pandas dataframe. Returns labels for each
-        sample."""
+        """
+        Predicts using the fitted inprocessor based on X features pandas dataframe. Returns labels for each
+        sample. Indexes from the returned array of predictions should start from zero.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
