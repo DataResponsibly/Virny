@@ -128,7 +128,9 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             train_binary_label_dataset_sample_pred = predict_on_binary_label_dataset(classifier, train_binary_label_dataset_sample)
             test_binary_label_dataset_pred = predict_on_binary_label_dataset(classifier, self.test_binary_label_dataset)
             postprocessor_fitted = self.postprocessor.fit(train_binary_label_dataset_sample, train_binary_label_dataset_sample_pred)
-            
+
+            # Note that model predictions do not preserve X_test indexes.
+            # Indexes of the predictions will be aligned with X_test later in the pipeline.
             models_predictions[idx] = postprocessor_fitted.predict(test_binary_label_dataset_pred).labels.ravel()
             self.models_lst[idx] = classifier
             

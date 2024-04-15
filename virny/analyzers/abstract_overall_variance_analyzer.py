@@ -151,6 +151,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                 classifier = self._fit_model(classifier, X_sample, y_sample)
 
             # Use a predict_proba method if the classifier supports it.
+            # Note that model predictions do not preserve X_test indexes.
+            # Indexes of the predictions will be aligned with X_test later in the pipeline.
             if self.with_predict_proba:
                 models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
             else:
