@@ -13,8 +13,13 @@ class BaseInprocessingWrapper(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def predict_proba(self, X):
-        """Predicts using the fitted inprocessor based on X features pandas dataframe. Returns probabilities
-        for **ZERO** class. These probabilities will be used by Virny in the downstream metric computation."""
+        """
+        Predicts using the fitted inprocessor based on X features pandas dataframe. Returns probabilities
+        for **ZERO** class. These probabilities will be used by Virny in the downstream metric computation.
+
+        If the inprocessor does not support prediction probabilities, the implementation of this method can be skipped,
+         and with_predict_proba = False should be set in the metric computation interface.
+        """
         raise NotImplementedError
 
     @abc.abstractmethod

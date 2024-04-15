@@ -145,11 +145,19 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
+            # If True, fit the classifier. Otherwise, use already fitted classifier.
             if with_fit:
                 X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
                 classifier = self._fit_model(classifier, X_sample, y_sample)
-            models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+
+            # Use a predict_proba method if the classifier supports it.
+            if self.with_predict_proba:
+                models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+            else:
+                models_predictions[idx] = self._batch_predict(classifier, self.X_test)
+
             self.models_lst[idx] = classifier
+
             # Force garbage collection to avoid out of memory error
             if with_fit and ((idx + 1) % 10 == 0 or (idx + 1) == self.n_estimators):
                 gc.collect()

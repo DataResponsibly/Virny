@@ -12,7 +12,8 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 
 def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test_sets_lst,
                                             config, models_config: dict, custom_tbl_fields_dct: dict,
-                                            db_writer_func, notebook_logs_stdout: bool = False, verbose: int = 0):
+                                            db_writer_func, with_predict_proba: bool = True,
+                                            notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Arguments are defined as an input config object. Save results to a database after each run
@@ -35,6 +36,10 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
         Dictionary where keys are column names and values to add to inserted metrics during saving results to a database
     db_writer_func
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -56,6 +61,7 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
                                                                          sensitive_attributes_dct=config.sensitive_attributes_dct,
                                                                          model_setting=config.model_setting,
                                                                          computation_mode=config.computation_mode,
+                                                                         with_predict_proba=with_predict_proba,
                                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
     # Concatenate current run metrics with previous results and
@@ -91,8 +97,8 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
                                                     sensitive_attributes_dct: dict, model_setting: str = ModelSetting.BATCH.value,
-                                                    computation_mode: str = None, notebook_logs_stdout: bool = False,
-                                                    verbose: int = 0) -> dict:
+                                                    computation_mode: str = None, with_predict_proba: bool = True,
+                                                    notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
@@ -120,6 +126,10 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -155,6 +165,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                                                       computation_mode=computation_mode,
                                                                                       dataset_name=dataset_name,
                                                                                       base_model_name=model_name,
+                                                                                      with_predict_proba=with_predict_proba,
                                                                                       notebook_logs_stdout=notebook_logs_stdout,
                                                                                       verbose=verbose)
             models_metrics_dct[model_name] = model_metrics_dfs_lst
@@ -173,8 +184,8 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                       bootstrap_fraction: float, sensitive_attributes_dct: dict,
                                                       dataset_name: str, base_model_name: str,
                                                       model_setting: str = ModelSetting.BATCH.value,
-                                                      computation_mode: str = None, notebook_logs_stdout: bool = False,
-                                                      verbose: int = 0):
+                                                      computation_mode: str = None, with_predict_proba: bool = True,
+                                                      notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute subgroup metrics for the base model based on dataset.X_test and each extra test set in extra_test_sets_lst.
     Save results in `save_results_dir_path` folder.
@@ -205,6 +216,10 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
         Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -224,6 +239,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=dict(),  # stub for this attribute
                                                           computation_mode=computation_mode,
+                                                          with_predict_proba=with_predict_proba,
                                                           notebook_logs_stdout=notebook_logs_stdout,
                                                           verbose=verbose)
 

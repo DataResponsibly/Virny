@@ -13,7 +13,7 @@ from virny.utils.common_helpers import save_metrics_to_file
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, postprocessor=None,
+                                save_results_dir_path: str, postprocessor=None, with_predict_proba: bool = True,
                                 notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
@@ -33,6 +33,10 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         Location where to save result files with metrics
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -65,6 +69,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  postprocessor=postprocessor,
                                                  postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                  save_results=False,
+                                                 with_predict_proba=with_predict_proba,
                                                  notebook_logs_stdout=notebook_logs_stdout,
                                                  verbose=verbose)
 
@@ -84,7 +89,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                             model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
                             postprocessor=None, postprocessing_sensitive_attribute: str = None,
                             save_results: bool = True, save_results_dir_path: str = None,
-                            notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
+                            with_predict_proba: bool = True, notebook_logs_stdout: bool = False,
+                            verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
@@ -118,6 +124,10 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] If to save result metrics in a file
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -157,6 +167,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                          postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                          save_results=save_results,
                                                          save_results_dir_path=save_results_dir_path,
+                                                         with_predict_proba=with_predict_proba,
                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                          verbose=verbose)
             models_metrics_dct[model_name] = model_metrics_df
@@ -174,8 +185,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
 def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                               sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
                               postprocessor=None, postprocessing_sensitive_attribute: str = None,
-                              model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
-                              save_results_dir_path: str = None, notebook_logs_stdout: bool = False, verbose: int = 0):
+                              model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
+                              save_results: bool = True, save_results_dir_path: str = None,
+                              with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
     Save results in `save_results_dir_path` folder.
@@ -211,6 +223,10 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -240,6 +256,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
                                                           computation_mode=computation_mode,
                                                           postprocessor=postprocessor,
                                                           postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
+                                                          with_predict_proba=with_predict_proba,
                                                           notebook_logs_stdout=notebook_logs_stdout,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,

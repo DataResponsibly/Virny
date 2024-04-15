@@ -1,6 +1,6 @@
 import pandas as pd
 
-from virny.configs.constants import ModelSetting, ComputationMode
+from virny.configs.constants import ModelSetting
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -39,6 +39,10 @@ class SubgroupVarianceAnalyzer:
         A sensitive attribute to use for post-processing
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -51,7 +55,9 @@ class SubgroupVarianceAnalyzer:
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
                  sensitive_attributes_dct: dict, test_protected_groups: dict, postprocessor=None,
                  postprocessing_sensitive_attribute : str = None, computation_mode: str = None,
-                 notebook_logs_stdout: bool = False, verbose: int = 0):
+                 with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
+
+        with_predict_proba = False if postprocessor is not None else with_predict_proba
         if model_setting == ModelSetting.BATCH:
             if postprocessor is not None:
                 print('Enabled a postprocessing mode')
@@ -67,7 +73,7 @@ class SubgroupVarianceAnalyzer:
                                                                                        dataset_name=dataset_name,
                                                                                        target_column=dataset.target,
                                                                                        n_estimators=n_estimators,
-                                                                                       with_predict_proba=False,
+                                                                                       with_predict_proba=with_predict_proba,
                                                                                        notebook_logs_stdout=notebook_logs_stdout,
                                                                                        verbose=verbose)
             else:
@@ -81,6 +87,7 @@ class SubgroupVarianceAnalyzer:
                                                                          dataset_name=dataset_name,
                                                                          target_column=dataset.target,
                                                                          n_estimators=n_estimators,
+                                                                         with_predict_proba=with_predict_proba,
                                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
         else:
@@ -91,8 +98,6 @@ class SubgroupVarianceAnalyzer:
         self.base_model_name = overall_variance_analyzer.base_model_name
 
         self.__overall_variance_analyzer = overall_variance_analyzer
-
-        with_predict_proba = False if postprocessor is not None else True
         self.__subgroup_variance_calculator = SubgroupVarianceCalculator(X_test=dataset.X_test,
                                                                          y_test=dataset.y_test,
                                                                          sensitive_attributes_dct=sensitive_attributes_dct,
