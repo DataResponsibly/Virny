@@ -87,12 +87,6 @@ class ACSIncomeDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
 
-        # Align ordered_cats with subsampled acs_data
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
-
         super().__init__(
             full_df=full_df,
             target=target,
@@ -183,12 +177,6 @@ class ACSEmploymentDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
 
-        # Align ordered_cats with subsampled acs_data
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
-
         super().__init__(
             full_df=full_df,
             target=target,
@@ -259,12 +247,6 @@ class ACSMobilityDataset(BaseDataLoader):
         y_data = acs_data[target].apply(lambda x: int(x == 1))
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([filtered_X_data, y_data], axis=1)
-
-        # Align ordered_cats with subsampled acs_data
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
 
         super().__init__(
             full_df=full_df,
@@ -357,12 +339,6 @@ class ACSPublicCoverageDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
 
-        # Align ordered_cats with subsampled acs_data
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
-
         super().__init__(
             full_df=full_df,
             target=target,
@@ -432,12 +408,6 @@ class ACSTravelTimeDataset(BaseDataLoader):
         y_data = acs_data[target].apply(lambda x: int(x > 20))
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([filtered_X_data, y_data], axis=1)
-
-        # Align ordered_cats with subsampled acs_data
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
 
         super().__init__(
             full_df=full_df,

@@ -34,8 +34,14 @@ class BaseDataLoader:
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
         self.features = numerical_columns + categorical_columns
-        self.ordered_categories_dct = ordered_categories_dct
 
+        # Align ordered_cats with subsampled df
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in self.full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
+        self.ordered_categories_dct = ordered_categories_dct
         self.X_data = self.full_df[self.features] if X_data is None else X_data
         self.y_data = self.full_df[self.target] if y_data is None else y_data
         self.columns_with_nulls = self.X_data.columns[self.X_data.isna().any().to_list()].to_list() \
