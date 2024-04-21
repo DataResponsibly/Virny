@@ -65,6 +65,17 @@ class ACSIncomeDataset(BaseDataLoader):
         categorical_columns = ['SCHL', 'COW', 'MAR', 'OCCP', 'POBP', 'RELP', 'SEX', 'RAC1P']
         numerical_columns = ['AGEP', 'WKHP']
 
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'SCHL': [str(i) for i in range(1, 25)]
+        }
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            # Align ordered_cats with subsampled acs_data
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in acs_data[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
         if with_nulls:
             X_data = acs_data[features]
         else:
@@ -86,6 +97,7 @@ class ACSIncomeDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
