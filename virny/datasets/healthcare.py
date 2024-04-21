@@ -80,16 +80,28 @@ class DiabetesDataset2019(BaseDataLoader):
         df['Diabetic'] = df['Diabetic'].str.strip()
         df['Diabetic'].replace('no', 0, inplace=True)
         df['Diabetic'].replace('yes', 1, inplace=True)
+        df['BPLevel'] = df['BPLevel'].str.strip().str.lower()
 
         target = 'Diabetic'
         numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregnancies']
         categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
+
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'PhysicallyActive': ['none', 'less than half an hr', 'more than half an hr', 'one hr or more'],
+            'JunkFood': ['occasionally', 'often', 'very often', 'always'],
+            'Stress': ['not at all', 'sometimes', 'very often', 'always'],
+            'BPLevel': ['low', 'normal', 'high'],
+            'UriationFreq': ['not much', 'quite often'],
+        }
 
         super().__init__(
             full_df=df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
         )
 
 

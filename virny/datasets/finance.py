@@ -85,6 +85,12 @@ class BankMarketingDataset(BaseDataLoader):
         dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
         df = pd.read_csv(dataset_path)
 
+        # 'duration' attribute highly affects the output target (e.g., if duration=0 then y='no').
+        # Yet, the duration is not known before a call is performed.
+        # Also, after the end of the call y is obviously known.
+        # Source: https://archive.ics.uci.edu/dataset/222/bank+marketing
+        df = df.drop(columns=['duration'])
+
         if subsample_size:
             df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else df.sample(subsample_size)
@@ -99,7 +105,7 @@ class BankMarketingDataset(BaseDataLoader):
             },
         })
 
-        numerical_columns = ['age', 'balance', 'day', 'duration', 'campaign', 'pdays', 'previous']
+        numerical_columns = ['age', 'balance', 'day', 'campaign', 'pdays', 'previous']
         categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
 
         super().__init__(

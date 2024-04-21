@@ -25,12 +25,15 @@ class BaseFlowDataset:
         List of numerical column names
     categorical_columns
         List of categorical column names
+    ordered_categories_dct
+        [Optional] Dictionary where keys are ordinal column names,
+         and values are lists of ordered categories for these columns
 
     """
 
     def __init__(self, init_features_df: pd.DataFrame, X_train_val: pd.DataFrame, X_test: pd.DataFrame,
-                 y_train_val: pd.DataFrame, y_test: pd.DataFrame,
-                 target: str, numerical_columns: list, categorical_columns: list):
+                 y_train_val: pd.DataFrame, y_test: pd.DataFrame, target: str,
+                 numerical_columns: list, categorical_columns: list, ordered_categories_dct: dict = dict()):
         # Validate input sets
         if not isinstance(init_features_df, pd.DataFrame) or not isinstance(X_train_val, pd.DataFrame) \
                 or not isinstance(X_test, pd.DataFrame):
@@ -45,5 +48,6 @@ class BaseFlowDataset:
         self.numerical_columns = numerical_columns
         self.categorical_columns = categorical_columns
         self.features = numerical_columns + categorical_columns
+        self.ordered_categories_dct = ordered_categories_dct
         self.target = target
         self.columns_with_nulls = self.init_features_df.columns[self.init_features_df.isna().any().to_list()].to_list()
