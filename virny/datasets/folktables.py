@@ -70,11 +70,6 @@ class ACSIncomeDataset(BaseDataLoader):
         ordered_categories_dct = {
             'SCHL': [str(i) for i in range(1, 25)]
         }
-        for col in ordered_categories_dct.keys():
-            ordered_cats = ordered_categories_dct[col]
-            # Align ordered_cats with subsampled acs_data
-            aligned_ordered_cats = [cat for cat in ordered_cats if cat in acs_data[col].unique()]
-            ordered_categories_dct[col] = aligned_ordered_cats
 
         if with_nulls:
             X_data = acs_data[features]
@@ -91,6 +86,12 @@ class ACSIncomeDataset(BaseDataLoader):
         y_data = acs_data[target].apply(lambda x: int(x > 50_000))
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
+
+        # Align ordered_cats with subsampled acs_data
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
 
         super().__init__(
             full_df=full_df,
@@ -156,8 +157,15 @@ class ACSEmploymentDataset(BaseDataLoader):
 
         features = ACSEmployment.features
         target = ACSEmployment.target
-        categorical_columns = ['MAR', 'MIL', 'ESP', 'MIG', 'DREM', 'NATIVITY', 'DIS', 'DEAR', 'DEYE', 'SEX', 'RAC1P', 'RELP', 'CIT', 'ANC','SCHL']
+        categorical_columns = ['MAR', 'MIL', 'ESP', 'MIG', 'DREM', 'NATIVITY', 'DIS', 'DEAR', 'DEYE', 'SEX', 'RAC1P',
+                               'RELP', 'CIT', 'ANC','SCHL']
         numerical_columns = ['AGEP']
+
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'SCHL': [str(i) for i in range(1, 25)]
+        }
 
         if with_nulls is True:
             X_data = acs_data[features]
@@ -175,11 +183,18 @@ class ACSEmploymentDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
 
+        # Align ordered_cats with subsampled acs_data
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
         super().__init__(
             full_df=full_df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -222,8 +237,15 @@ class ACSMobilityDataset(BaseDataLoader):
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSMobility.features
         target = ACSMobility.target
-        categorical_columns = ['MAR','SEX','DIS','ESP','CIT','MIL','ANC','NATIVITY','RELP','DEAR','DEYE','DREM','RAC1P','GCL','COW','ESR']
-        numerical_columns = ['AGEP', 'SCHL', 'PINCP', 'WKHP', 'JWMNP']
+        categorical_columns = ['MAR', 'SEX', 'DIS', 'ESP', 'CIT', 'MIL', 'ANC', 'NATIVITY', 'RELP', 'DEAR', 'DEYE',
+                               'DREM', 'RAC1P', 'GCL', 'COW', 'ESR', 'SCHL']
+        numerical_columns = ['AGEP', 'PINCP', 'WKHP', 'JWMNP']
+
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'SCHL': [str(i) for i in range(1, 25)]
+        }
 
         if with_nulls:
             X_data = acs_data[features]
@@ -238,11 +260,18 @@ class ACSMobilityDataset(BaseDataLoader):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([filtered_X_data, y_data], axis=1)
 
+        # Align ordered_cats with subsampled acs_data
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
         super().__init__(
             full_df=full_df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
             X_data=filtered_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -302,8 +331,15 @@ class ACSPublicCoverageDataset(BaseDataLoader):
 
         features = ACSPublicCoverage.features
         target = ACSPublicCoverage.target
-        categorical_columns = ['SCHL','MAR','SEX','DIS','ESP','CIT','MIG','MIL','ANC','NATIVITY','DEAR','DEYE','DREM','ESR','ST','FER','RAC1P']
+        categorical_columns = ['SCHL', 'MAR', 'SEX', 'DIS', 'ESP', 'CIT', 'MIG', 'MIL', 'ANC', 'NATIVITY', 'DEAR',
+                               'DEYE', 'DREM', 'ESR', 'ST', 'FER', 'RAC1P']
         numerical_columns = ['AGEP', 'PINCP']
+
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'SCHL': [str(i) for i in range(1, 25)]
+        }
 
         if with_nulls is True:
             X_data = acs_data[features]
@@ -321,11 +357,18 @@ class ACSPublicCoverageDataset(BaseDataLoader):
         columns_with_nulls = optimized_X_data.columns[optimized_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([optimized_X_data, y_data], axis=1)
 
+        # Align ordered_cats with subsampled acs_data
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
         super().__init__(
             full_df=full_df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -368,8 +411,14 @@ class ACSTravelTimeDataset(BaseDataLoader):
         acs_data = data_source.get_data(states=state, download=True)
         features = ACSTravelTime.features
         target = ACSTravelTime.target
-        categorical_columns = ['MAR','SEX','DIS','ESP','MIG','RELP','RAC1P','PUMA','ST','CIT','OCCP','POWPUMA','POVPIP']
+        categorical_columns = ['MAR', 'SEX', 'DIS', 'ESP', 'MIG', 'RELP', 'RAC1P', 'PUMA', 'ST', 'CIT', 'OCCP', 'POWPUMA', 'POVPIP']
         numerical_columns = ['AGEP', 'SCHL']
+
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'SCHL': [str(i) for i in range(1, 25)]
+        }
 
         if with_nulls:
             X_data = acs_data[features]
@@ -384,11 +433,18 @@ class ACSTravelTimeDataset(BaseDataLoader):
         columns_with_nulls = filtered_X_data.columns[filtered_X_data.isna().any().to_list()].to_list()
         full_df = pd.concat([filtered_X_data, y_data], axis=1)
 
+        # Align ordered_cats with subsampled acs_data
+        for col in ordered_categories_dct.keys():
+            ordered_cats = ordered_categories_dct[col]
+            aligned_ordered_cats = [cat for cat in ordered_cats if cat in full_df[col].unique()]
+            ordered_categories_dct[col] = aligned_ordered_cats
+
         super().__init__(
             full_df=full_df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct,
             X_data=filtered_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
