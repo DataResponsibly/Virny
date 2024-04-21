@@ -30,6 +30,7 @@ class CardiovascularDiseaseDataset(BaseDataLoader):
         # Preprocessing
         df = df.drop(['id'], axis=1)
         df['age'] = (df['age'] / 365).astype(int)
+        df['BPLevel'] = df['BPLevel'].str.strip().str.lower()
 
         columns_to_cast = ['gender', 'cholesterol', 'gluc', 'smoke', 'alco', 'active']
         columns_to_cast_dct = {col: str for col in columns_to_cast}
@@ -39,11 +40,23 @@ class CardiovascularDiseaseDataset(BaseDataLoader):
         numerical_columns = ['age', 'height', 'weight', 'ap_hi', 'ap_lo']
         categorical_columns = [column for column in df.columns if column not in numerical_columns + [target]]
 
+        # Create a dictionary of ordered categories for ordinal categorical columns.
+        # It can be useful for preprocessing of ordinal categorical columns if exist.
+        ordered_categories_dct = {
+            'PhysicallyActive': ['none', 'less than half an hr', 'more than half an hr', 'one hr or more'],
+            'Age': ['less than 40', '40-49', '50-59', '60 or older'],
+            'JunkFood': ['occasionally', 'often', 'very often', 'always'],
+            'Stress': ['not at all', 'sometimes', 'very often', 'always'],
+            'BPLevel': ['low', 'normal', 'high'],
+            'UriationFreq': ['not much', 'quite often'],
+        }
+
         super().__init__(
             full_df=df,
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
+            ordered_categories_dct=ordered_categories_dct
         )
 
 
