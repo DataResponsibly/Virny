@@ -90,7 +90,6 @@ class DiabetesDataset2019(BaseDataLoader):
         # It can be useful for preprocessing of ordinal categorical columns if exist.
         ordered_categories_dct = {
             'PhysicallyActive': ['none', 'less than half an hr', 'more than half an hr', 'one hr or more'],
-            'Age': ['less than 40', '40-49', '50-59', '60 or older'],
             'JunkFood': ['occasionally', 'often', 'very often', 'always'],
             'Stress': ['not at all', 'sometimes', 'very often', 'always'],
             'BPLevel': ['low', 'normal', 'high'],
