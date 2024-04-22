@@ -39,6 +39,19 @@ class BaseFlowDataset:
                 or not isinstance(X_test, pd.DataFrame):
             raise ValueError("Input feature sets must be in a pd.DataFrame format")
 
+        assert X_test.index.isin(init_features_df.index).all(), \
+            ("Not all indexes of X_test are present in init_features_df. "
+             "It is important to correctly compute metrics for protected groups in the test set.")
+        assert y_test.index.isin(init_features_df.index).all(), \
+            ("Not all indexes of y_test are present in init_features_df. "
+             "It is important to correctly compute metrics for protected groups in the test set.")
+
+        assert X_train_val.index.equals(y_train_val.index) is True, \
+            "Indexes of X_train_val and y_train_val are different"
+        assert X_test.index.equals(y_test.index) is True, \
+            "Indexes of X_test and y_test should be the same to correctly compute metrics for protected groups in the test set"
+
+        # Define parameters
         self.init_features_df = init_features_df
         self.X_train_val = X_train_val
         self.X_test = X_test
@@ -50,4 +63,3 @@ class BaseFlowDataset:
         self.features = numerical_columns + categorical_columns
         self.ordered_categories_dct = ordered_categories_dct
         self.target = target
-        self.columns_with_nulls = self.init_features_df.columns[self.init_features_df.isna().any().to_list()].to_list()
