@@ -154,6 +154,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
+            computation_start_date_time = datetime.now()
             model_metrics_df = compute_one_model_metrics(base_model=base_model,
                                                          n_estimators=n_estimators,
                                                          dataset=dataset,
@@ -170,6 +171,10 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                          with_predict_proba=with_predict_proba,
                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                          verbose=verbose)
+            computation_end_date_time = datetime.now()
+            computation_runtime = (computation_end_date_time - computation_start_date_time).total_seconds() / 60.0
+            model_metrics_df['Runtime_in_Mins'] = computation_runtime
+
             models_metrics_dct[model_name] = model_metrics_df
 
         except Exception as err:

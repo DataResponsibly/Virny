@@ -49,7 +49,8 @@ class BaseFlowDataset:
         assert X_train_val.index.equals(y_train_val.index) is True, \
             "Indexes of X_train_val and y_train_val are different"
         assert X_test.index.equals(y_test.index) is True, \
-            "Indexes of X_test and y_test should be the same to correctly compute metrics for protected groups in the test set"
+            ("Indexes of X_test and y_test should be the same to correctly compute metrics "
+             "for protected groups in the test set")
 
         # Define parameters
         self.init_features_df = init_features_df
