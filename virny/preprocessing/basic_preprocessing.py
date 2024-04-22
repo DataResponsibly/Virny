@@ -3,11 +3,12 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
+from virny.configs.constants import INTERSECTION_SIGN
 from virny.datasets.base import BaseDataLoader
 from virny.custom_classes.base_dataset import BaseFlowDataset
 
 
-def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTransformer,
+def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTransformer, sensitive_attributes_dct: dict,
                        test_set_fraction: float, dataset_split_seed: int) -> BaseFlowDataset:
     """
     Preprocess an input dataset using sklearn ColumnTransformer. Split the dataset on train and test using test_set_fraction.
@@ -19,6 +20,8 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
         Instance of BaseDataLoader that contains a target, numerical, and categorical columns.
     column_transformer
         Instance of sklearn ColumnTransformer to preprocess categorical and numerical columns.
+    sensitive_attributes_dct
+        Dictionary of sensitive attribute names and their disadvantaged values.
     test_set_fraction
         Fraction from 0 to 1. Used to split the input dataset on the train and test sets.
     dataset_split_seed
@@ -39,8 +42,9 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
     column_transformer = column_transformer.set_output(transform="pandas")  # Set transformer output to a pandas df
     X_train_features = column_transformer.fit_transform(X_train_val)
     X_test_features = column_transformer.transform(X_test)
+    sensitive_attrs = [attr for attr in sensitive_attributes_dct.keys() if INTERSECTION_SIGN not in attr]
 
-    return BaseFlowDataset(init_features_df=data_loader.full_df.drop(data_loader.target, axis=1, errors='ignore'),
+    return BaseFlowDataset(init_sensitive_attrs_df=data_loader.full_df[sensitive_attrs],
                            X_train_val=X_train_features,
                            X_test=X_test_features,
                            y_train_val=y_train_val,

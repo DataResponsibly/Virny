@@ -1,7 +1,5 @@
 
-dataset_name: Law_School
+dataset_name: COMPAS_Without_Sensitive_Attributes
 bootstrap_fraction: 0.8
-computation_mode: error_analysis
 n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
-sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male&race': None}
-postprocessing_sensitive_attribute: 'race_binary'
+sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}

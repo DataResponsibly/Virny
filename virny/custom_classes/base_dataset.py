@@ -8,8 +8,8 @@ class BaseFlowDataset:
 
     Parameters
     ----------
-    init_features_df
-        Full train + test non-preprocessed dataset of features without the target column.
+    init_sensitive_attrs_df
+        Full train + test non-preprocessed dataset of sensitive attributes with initial indexes.
          It is used for creating test groups.
     X_train_val
         Train dataframe of features
@@ -31,19 +31,19 @@ class BaseFlowDataset:
 
     """
 
-    def __init__(self, init_features_df: pd.DataFrame, X_train_val: pd.DataFrame, X_test: pd.DataFrame,
+    def __init__(self, init_sensitive_attrs_df: pd.DataFrame, X_train_val: pd.DataFrame, X_test: pd.DataFrame,
                  y_train_val: pd.DataFrame, y_test: pd.DataFrame, target: str,
                  numerical_columns: list, categorical_columns: list, ordered_categories_dct: dict = dict()):
         # Validate input sets
-        if not isinstance(init_features_df, pd.DataFrame) or not isinstance(X_train_val, pd.DataFrame) \
+        if not isinstance(init_sensitive_attrs_df, pd.DataFrame) or not isinstance(X_train_val, pd.DataFrame) \
                 or not isinstance(X_test, pd.DataFrame):
             raise ValueError("Input feature sets must be in a pd.DataFrame format")
 
-        assert X_test.index.isin(init_features_df.index).all(), \
-            ("Not all indexes of X_test are present in init_features_df. "
+        assert X_test.index.isin(init_sensitive_attrs_df.index).all(), \
+            ("Not all indexes of X_test are present in init_sensitive_attrs_df. "
              "It is important to correctly compute metrics for protected groups in the test set.")
-        assert y_test.index.isin(init_features_df.index).all(), \
-            ("Not all indexes of y_test are present in init_features_df. "
+        assert y_test.index.isin(init_sensitive_attrs_df.index).all(), \
+            ("Not all indexes of y_test are present in init_sensitive_attrs_df. "
              "It is important to correctly compute metrics for protected groups in the test set.")
 
         assert X_train_val.index.equals(y_train_val.index) is True, \
@@ -53,7 +53,7 @@ class BaseFlowDataset:
              "for protected groups in the test set")
 
         # Define parameters
-        self.init_features_df = init_features_df
+        self.init_sensitive_attrs_df = init_sensitive_attrs_df
         self.X_train_val = X_train_val
         self.X_test = X_test
         self.y_train_val = y_train_val

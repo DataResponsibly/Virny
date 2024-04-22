@@ -26,8 +26,12 @@ def test_subgroup_variance_and_error_analyzers(COMPAS_y_test, COMPAS_RF_bootstra
         ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), data_loader.categorical_columns),
         ('numerical_features', StandardScaler(), data_loader.numerical_columns),
     ])
-    base_flow_dataset = preprocess_dataset(data_loader, column_transformer, test_set_fraction, dataset_split_seed)
-    test_protected_groups = create_test_protected_groups(base_flow_dataset.X_test, base_flow_dataset.init_features_df,
+    base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                           column_transformer=column_transformer,
+                                           sensitive_attributes_dct=sensitive_attributes_dct,
+                                           test_set_fraction=test_set_fraction,
+                                           dataset_split_seed=dataset_split_seed)
+    test_protected_groups = create_test_protected_groups(base_flow_dataset.X_test, base_flow_dataset.init_sensitive_attrs_df,
                                                          sensitive_attributes_dct)
 
     y_preds, prediction_metrics = count_prediction_metrics(COMPAS_y_test, COMPAS_RF_bootstrap_predictions)

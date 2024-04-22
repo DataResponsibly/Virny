@@ -242,7 +242,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
     """
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
-    test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_features_df, sensitive_attributes_dct)
+    test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_sensitive_attrs_df, sensitive_attributes_dct)
     if verbose >= 2:
         print('\nProtected groups splits:')
         for g in test_protected_groups.keys():
