@@ -35,6 +35,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         Name of dataset, used for correct results naming
     n_estimators
         Number of estimators in ensemble to measure base_model stability
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
     with_predict_proba
         [Optional] A flag if model can return probabilities for its predictions.
          If no, only metrics based on labels (not labels and probabilities) will be computed.
@@ -49,7 +51,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
 
     def __init__(self, base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-                 dataset_name: str, n_estimators: int, with_predict_proba: bool = True,
+                 dataset_name: str, n_estimators: int, random_state: int = None, with_predict_proba: bool = True,
                  notebook_logs_stdout: bool = False, verbose: int = 0):
         self.base_model = base_model
         self.base_model_name = base_model_name
@@ -57,9 +59,10 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.dataset_name = dataset_name
         self.n_estimators = n_estimators
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
+        self.random_state = random_state
+        self.with_predict_proba = with_predict_proba
         self.models_predictions = None
         self.prediction_metrics = None
-        self.with_predict_proba = with_predict_proba
 
         self._notebook_logs_stdout = notebook_logs_stdout
         self._verbose = verbose
@@ -145,11 +148,28 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
+
+            # If True, fit the classifier. Otherwise, use already fitted classifier.
             if with_fit:
-                X_sample, y_sample = generate_bootstrap(self.X_train, self.y_train, boostrap_size, with_replacement)
+                classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
+                X_sample, y_sample = generate_bootstrap(features=self.X_train,
+                                                        labels=self.y_train,
+                                                        boostrap_size=boostrap_size,
+                                                        with_replacement=with_replacement,
+                                                        random_state=classifier_random_state)
+                classifier.set_params(random_state=classifier_random_state)
                 classifier = self._fit_model(classifier, X_sample, y_sample)
-            models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+
+            # Use a predict_proba method if the classifier supports it.
+            # Note that model predictions do not preserve X_test indexes.
+            # Indexes of the predictions will be aligned with X_test later in the pipeline.
+            if self.with_predict_proba:
+                models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+            else:
+                models_predictions[idx] = self._batch_predict(classifier, self.X_test)
+
             self.models_lst[idx] = classifier
+
             # Force garbage collection to avoid out of memory error
             if with_fit and ((idx + 1) % 10 == 0 or (idx + 1) == self.n_estimators):
                 gc.collect()

@@ -6,8 +6,9 @@ from virny.user_interfaces.multiple_models_api import run_metrics_computation
 
 
 def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
-                                   custom_tbl_fields_dct: dict, db_writer_func,
-                                   postprocessor=None, notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
+                                   custom_tbl_fields_dct: dict, db_writer_func, postprocessor=None,
+                                   with_predict_proba: bool = True, notebook_logs_stdout: bool = False,
+                                   verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
@@ -28,6 +29,10 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
         Python function object has one argument (run_models_metrics_df) and save this metrics df to a target database
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -40,11 +45,6 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
     if notebook_logs_stdout:
         verbose = 0
 
-    # Check if a type of postprocessing_sensitive_attribute is not NoneType.
-    # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
-    postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \
-        if type(config.postprocessing_sensitive_attribute) != type(None) else None
-
     multiple_models_metrics_dct = dict()
     run_models_metrics_df = pd.DataFrame()
     models_metrics_dct = run_metrics_computation(dataset=dataset,
@@ -53,11 +53,13 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
                                                  models_config=models_config,
                                                  n_estimators=config.n_estimators,
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                 random_state=config.random_state,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
                                                  postprocessor=postprocessor,
-                                                 postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
+                                                 postprocessing_sensitive_attribute=config.postprocessing_sensitive_attribute,
                                                  save_results=False,
+                                                 with_predict_proba=with_predict_proba,
                                                  notebook_logs_stdout=notebook_logs_stdout,
                                                  verbose=verbose)
 

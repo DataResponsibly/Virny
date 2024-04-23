@@ -13,7 +13,7 @@ from virny.utils.common_helpers import save_metrics_to_file
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, postprocessor=None,
+                                save_results_dir_path: str, postprocessor=None, with_predict_proba: bool = True,
                                 notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
@@ -33,6 +33,10 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         Location where to save result files with metrics
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -48,11 +52,6 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
     start_datetime = datetime.now(timezone.utc)
     os.makedirs(save_results_dir_path, exist_ok=True)
 
-    # Check if a type of postprocessing_sensitive_attribute is not NoneType.
-    # In other words, check if postprocessing_sensitive_attribute is defined in a config yaml.
-    postprocessing_sensitive_attribute = config.postprocessing_sensitive_attribute \
-        if type(config.postprocessing_sensitive_attribute) != type(None) else None
-
     model_metrics_dct = dict()
     models_metrics_dct = run_metrics_computation(dataset=dataset,
                                                  bootstrap_fraction=config.bootstrap_fraction,
@@ -60,11 +59,13 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
                                                  models_config=models_config,
                                                  n_estimators=config.n_estimators,
                                                  sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                 random_state=config.random_state,
                                                  model_setting=config.model_setting,
                                                  computation_mode=config.computation_mode,
                                                  postprocessor=postprocessor,
-                                                 postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
+                                                 postprocessing_sensitive_attribute=config.postprocessing_sensitive_attribute,
                                                  save_results=False,
+                                                 with_predict_proba=with_predict_proba,
                                                  notebook_logs_stdout=notebook_logs_stdout,
                                                  verbose=verbose)
 
@@ -81,10 +82,12 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
 
 def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                             models_config: dict, n_estimators: int, sensitive_attributes_dct: dict,
-                            model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None,
-                            postprocessor=None, postprocessing_sensitive_attribute: str = None,
+                            random_state: int = None, model_setting: str = ModelSetting.BATCH.value,
+                            computation_mode: str = None, postprocessor=None,
+                            postprocessing_sensitive_attribute: str = None,
                             save_results: bool = True, save_results_dir_path: str = None,
-                            notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
+                            with_predict_proba: bool = True, notebook_logs_stdout: bool = False,
+                            verbose: int = 0) -> dict:
     """
     Compute stability and accuracy metrics for each model in models_config.
     Save results in `save_results_dir_path` folder.
@@ -106,6 +109,8 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
     model_setting
         [Optional] Currently, only batch models are supported. Default: 'batch'.
     computation_mode
@@ -118,6 +123,10 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
         [Optional] If to save result metrics in a file
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -144,11 +153,13 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
+            computation_start_date_time = datetime.now()
             model_metrics_df = compute_one_model_metrics(base_model=base_model,
                                                          n_estimators=n_estimators,
                                                          dataset=dataset,
                                                          bootstrap_fraction=bootstrap_fraction,
                                                          sensitive_attributes_dct=sensitive_attributes_dct,
+                                                         random_state=random_state,
                                                          model_setting=model_setting,
                                                          computation_mode=computation_mode,
                                                          dataset_name=dataset_name,
@@ -157,8 +168,13 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
                                                          postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
                                                          save_results=save_results,
                                                          save_results_dir_path=save_results_dir_path,
+                                                         with_predict_proba=with_predict_proba,
                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                          verbose=verbose)
+            computation_end_date_time = datetime.now()
+            computation_runtime = (computation_end_date_time - computation_start_date_time).total_seconds() / 60.0
+            model_metrics_df['Runtime_in_Mins'] = computation_runtime
+
             models_metrics_dct[model_name] = model_metrics_df
 
         except Exception as err:
@@ -173,9 +189,10 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
 
 def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDataset, bootstrap_fraction: float,
                               sensitive_attributes_dct: dict, dataset_name: str, base_model_name: str,
-                              postprocessor=None, postprocessing_sensitive_attribute: str = None,
-                              model_setting: str = ModelSetting.BATCH.value, computation_mode: str = None, save_results: bool = True,
-                              save_results_dir_path: str = None, notebook_logs_stdout: bool = False, verbose: int = 0):
+                              random_state: int = None, model_setting: str = ModelSetting.BATCH.value,
+                              computation_mode: str = None, postprocessor=None, postprocessing_sensitive_attribute: str = None,
+                              save_results: bool = True, save_results_dir_path: str = None, with_predict_proba: bool = True,
+                              notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute subgroup metrics for the base model.
     Save results in `save_results_dir_path` folder.
@@ -199,18 +216,24 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
         Dataset name to name a result file with metrics
     base_model_name
         Model name to name a result file with metrics
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
+    model_setting
+        [Optional] Currently, only batch models are supported. Default: 'batch'.
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
     postprocessing_sensitive_attribute
         [Optional] Sensitive attribute name to apply postprocessor only to this attribute predictions
     save_results
         [Optional] If to save result metrics in a file
-    model_setting
-        [Optional] Currently, only batch models are supported. Default: 'batch'.
-    computation_mode
-        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     save_results_dir_path
         [Optional] Location where to save result files with metrics
+    with_predict_proba
+        [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,
+         False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
+         Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
@@ -221,7 +244,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
     """
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
 
-    test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_features_df, sensitive_attributes_dct)
+    test_protected_groups = create_test_protected_groups(dataset.X_test, dataset.init_sensitive_attrs_df, sensitive_attributes_dct)
     if verbose >= 2:
         print('\nProtected groups splits:')
         for g in test_protected_groups.keys():
@@ -237,9 +260,11 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=test_protected_groups,
+                                                          random_state=random_state,
                                                           computation_mode=computation_mode,
                                                           postprocessor=postprocessor,
                                                           postprocessing_sensitive_attribute=postprocessing_sensitive_attribute,
+                                                          with_predict_proba=with_predict_proba,
                                                           notebook_logs_stdout=notebook_logs_stdout,
                                                           verbose=verbose)
     y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
@@ -264,6 +289,7 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Name'] = base_model_name
     metrics_df['Model_Params'] = str(base_model.get_params())
+    metrics_df['Virny_Random_State'] = random_state
 
     if save_results:
         # Save metrics

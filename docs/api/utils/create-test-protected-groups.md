@@ -10,7 +10,7 @@ Return a dictionary where keys are subgroup names, and values are X_test row ind
 
     Test feature set
 
-- **init_features_df** (*pandas.core.frame.DataFrame*)
+- **init_sensitive_attrs_df** (*pandas.core.frame.DataFrame*)
 
     Initial full dataset without preprocessing
 

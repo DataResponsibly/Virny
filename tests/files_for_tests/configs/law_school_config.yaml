@@ -1,0 +1,4 @@
+dataset_name: law_school
+bootstrap_fraction: 0.8
+n_estimators: 50
+sensitive_attributes_dct: {'male': '0', 'race': 'Non-White', 'male & race': None}
