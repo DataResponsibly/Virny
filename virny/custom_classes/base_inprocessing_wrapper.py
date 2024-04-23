@@ -44,3 +44,8 @@ class BaseInprocessingWrapper(metaclass=abc.ABCMeta):
     def get_params(self):
         """Returns parameters of the wrapper. Alignment with sklearn API."""
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_params(self, random_state: int):
+        """Set a random state of the inprocessor."""
+        raise NotImplementedError

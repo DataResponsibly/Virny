@@ -23,7 +23,9 @@ def validate_config(config_obj):
         Object with parameters defined in a yaml file
 
     """
-    # ================== Required parameters ==================
+    # ============================================================================================================
+    # Required parameters
+    # ============================================================================================================
     if not isinstance(config_obj.dataset_name, str):
         raise ValueError('dataset_name must be string')
 
@@ -54,7 +56,9 @@ def validate_config(config_obj):
                     raise ValueError('Intersectional attributes in sensitive_attributes_dct must contain '
                                      'single sensitive attributes that also exist in sensitive_attributes_dct')
 
-    # ================== Optional parameters ==================
+    # ============================================================================================================
+    # Optional parameters
+    # ============================================================================================================
     if config_obj.model_setting is not None \
             and not isinstance(config_obj.model_setting, str) \
             and config_obj.model_setting not in ModelSetting:
@@ -66,6 +70,14 @@ def validate_config(config_obj):
             and config_obj.computation_mode not in ComputationMode:
         raise ValueError('computation_mode must be a string that is included in the ComputationMode enum. '
                          'Refer to this function documentation for more details!')
+
+    # ============================================================================================================
+    # Default parameters
+    # ============================================================================================================
+    if 'postprocessing_sensitive_attribute' not in config_obj:
+        config_obj.postprocessing_sensitive_attribute = None
+    if 'random_state' not in config_obj:
+        config_obj.random_state = None
 
     return True
 
@@ -82,15 +94,6 @@ def str_to_float(str_var: str, var_name: str):
         return float(str_var)
     else:
         raise ValueError(f"{var_name} must be a float number with a '.' separator.")
-
-
-def reset_model_seed(model, new_seed, verbose):
-    if 'random_state' in model.get_params():
-        model.set_params(random_state=new_seed)
-        if verbose >= 1:
-            print('Model seed: ', model.get_params().get('random_state', None))
-
-    return model
 
 
 def save_metrics_to_file(metrics_df, result_filename, save_dir_path):

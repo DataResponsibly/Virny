@@ -59,6 +59,7 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
                                                                          models_config=models_config,
                                                                          n_estimators=config.n_estimators,
                                                                          sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                                         random_state=config.random_state,
                                                                          model_setting=config.model_setting,
                                                                          computation_mode=config.computation_mode,
                                                                          with_predict_proba=with_predict_proba,
@@ -96,7 +97,8 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
 
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
-                                                    sensitive_attributes_dct: dict, model_setting: str = ModelSetting.BATCH.value,
+                                                    sensitive_attributes_dct: dict, random_state: int = None,
+                                                    model_setting: str = ModelSetting.BATCH.value,
                                                     computation_mode: str = None, with_predict_proba: bool = True,
                                                     notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
     """
@@ -122,6 +124,8 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
     sensitive_attributes_dct
         A dictionary where keys are sensitive attribute names (including attributes intersections),
          and values are privilege values for these attributes
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
     model_setting
         Currently, only batch models are supported. Default: 'batch'.
     computation_mode
@@ -162,6 +166,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
                                                                                       extra_test_sets_lst=extra_test_sets_lst,
                                                                                       bootstrap_fraction=bootstrap_fraction,
                                                                                       sensitive_attributes_dct=sensitive_attributes_dct,
+                                                                                      random_state=random_state,
                                                                                       model_setting=model_setting,
                                                                                       computation_mode=computation_mode,
                                                                                       dataset_name=dataset_name,
@@ -188,7 +193,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
 def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
                                                       dataset: BaseFlowDataset, extra_test_sets_lst: list,
                                                       bootstrap_fraction: float, sensitive_attributes_dct: dict,
-                                                      dataset_name: str, base_model_name: str,
+                                                      dataset_name: str, base_model_name: str, random_state: int = None,
                                                       model_setting: str = ModelSetting.BATCH.value,
                                                       computation_mode: str = None, with_predict_proba: bool = True,
                                                       notebook_logs_stdout: bool = False, verbose: int = 0):
@@ -218,8 +223,10 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
         Dataset name to name a result file with metrics
     base_model_name
         Model name to name a result file with metrics
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
     model_setting
-        Currently, only batch models are supported. Default: 'batch'.
+        [Optional] Currently, only batch models are supported. Default: 'batch'.
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     with_predict_proba
@@ -244,6 +251,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
                                                           dataset_name=dataset_name,
                                                           sensitive_attributes_dct=sensitive_attributes_dct,
                                                           test_protected_groups=dict(),  # stub for this attribute
+                                                          random_state=random_state,
                                                           computation_mode=computation_mode,
                                                           with_predict_proba=with_predict_proba,
                                                           notebook_logs_stdout=notebook_logs_stdout,
@@ -286,6 +294,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
         metrics_df = metrics_df.rename(columns={"index": "Metric"})
         metrics_df['Model_Name'] = base_model_name
         metrics_df['Model_Params'] = str(base_model.get_params())
+        metrics_df['Virny_Random_State'] = random_state
 
         all_test_sets_metrics_lst.append(metrics_df)
 

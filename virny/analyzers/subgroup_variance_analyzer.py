@@ -37,6 +37,8 @@ class SubgroupVarianceAnalyzer:
         One of postprocessors from aif360 (https://aif360.readthedocs.io/en/stable/modules/algorithms.html#module-aif360.algorithms.postprocessing)
     postprocessing_sensitive_attribute
         A sensitive attribute to use for post-processing
+    random_state
+        [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
     computation_mode
         [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     with_predict_proba
@@ -54,7 +56,7 @@ class SubgroupVarianceAnalyzer:
     def __init__(self, model_setting: ModelSetting, n_estimators: int, base_model, base_model_name: str,
                  bootstrap_fraction: float, dataset: BaseFlowDataset, dataset_name: str,
                  sensitive_attributes_dct: dict, test_protected_groups: dict, postprocessor=None,
-                 postprocessing_sensitive_attribute : str = None, computation_mode: str = None,
+                 postprocessing_sensitive_attribute : str = None, random_state: int = None, computation_mode: str = None,
                  with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
 
         with_predict_proba = False if postprocessor is not None else with_predict_proba
@@ -73,6 +75,7 @@ class SubgroupVarianceAnalyzer:
                                                                                        dataset_name=dataset_name,
                                                                                        target_column=dataset.target,
                                                                                        n_estimators=n_estimators,
+                                                                                       random_state=random_state,
                                                                                        with_predict_proba=with_predict_proba,
                                                                                        notebook_logs_stdout=notebook_logs_stdout,
                                                                                        verbose=verbose)
@@ -87,6 +90,7 @@ class SubgroupVarianceAnalyzer:
                                                                          dataset_name=dataset_name,
                                                                          target_column=dataset.target,
                                                                          n_estimators=n_estimators,
+                                                                         random_state=random_state,
                                                                          with_predict_proba=with_predict_proba,
                                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
