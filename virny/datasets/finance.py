@@ -1,4 +1,6 @@
 import pathlib
+
+import numpy as np
 import pandas as pd
 
 from virny.datasets.base import BaseDataLoader
@@ -85,16 +87,24 @@ class BankMarketingDataset(BaseDataLoader):
         dataset_path = pathlib.Path(__file__).parent.joinpath('data').joinpath(filename)
         df = pd.read_csv(dataset_path)
 
+        if subsample_size:
+            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
+                else df.sample(subsample_size)
+            df = df.reset_index(drop=True)
+
         # 'duration' attribute highly affects the output target (e.g., if duration=0 then y='no').
         # Yet, the duration is not known before a call is performed.
         # Also, after the end of the call y is obviously known.
         # Source: https://archive.ics.uci.edu/dataset/222/bank+marketing
         df = df.drop(columns=['duration'])
 
-        if subsample_size:
-            df = df.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
-                else df.sample(subsample_size)
-            df = df.reset_index(drop=True)
+        # Remove columns with a great percentage of 'unknown' values
+        df = df.drop(columns=['contact', 'poutcome'])
+
+        # Replace 'unknown' marker with NaN
+        for col in df.columns:
+            if 'unknown' in df[col].unique():
+                df[col] = df[col].replace({'unknown': np.nan})
 
         # Target preprocessing
         target = 'y'
