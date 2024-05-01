@@ -65,12 +65,6 @@ class ACSIncomeDataset(BaseDataLoader):
         categorical_columns = ['SCHL', 'COW', 'MAR', 'OCCP', 'POBP', 'RELP', 'SEX', 'RAC1P']
         numerical_columns = ['AGEP', 'WKHP']
 
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'SCHL': [str(i) for i in range(1, 25)]
-        }
-
         if with_nulls:
             X_data = acs_data[features]
         else:
@@ -92,7 +86,6 @@ class ACSIncomeDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -152,14 +145,8 @@ class ACSEmploymentDataset(BaseDataLoader):
         features = ACSEmployment.features
         target = ACSEmployment.target
         categorical_columns = ['MAR', 'MIL', 'ESP', 'MIG', 'DREM', 'NATIVITY', 'DIS', 'DEAR', 'DEYE', 'SEX', 'RAC1P',
-                               'RELP', 'CIT', 'ANC','SCHL']
+                               'RELP', 'CIT', 'ANC', 'SCHL']
         numerical_columns = ['AGEP']
-
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'SCHL': [str(i) for i in range(1, 25)]
-        }
 
         if with_nulls is True:
             X_data = acs_data[features]
@@ -182,7 +169,6 @@ class ACSEmploymentDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -229,12 +215,6 @@ class ACSMobilityDataset(BaseDataLoader):
                                'DREM', 'RAC1P', 'GCL', 'COW', 'ESR', 'SCHL']
         numerical_columns = ['AGEP', 'PINCP', 'WKHP', 'JWMNP']
 
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'SCHL': [str(i) for i in range(1, 25)]
-        }
-
         if with_nulls:
             X_data = acs_data[features]
         else:
@@ -253,7 +233,6 @@ class ACSMobilityDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct,
             X_data=filtered_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -317,12 +296,6 @@ class ACSPublicCoverageDataset(BaseDataLoader):
                                'DEYE', 'DREM', 'ESR', 'ST', 'FER', 'RAC1P']
         numerical_columns = ['AGEP', 'PINCP']
 
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'SCHL': [str(i) for i in range(1, 25)]
-        }
-
         if with_nulls is True:
             X_data = acs_data[features]
         else:
@@ -344,7 +317,6 @@ class ACSPublicCoverageDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct,
             X_data=optimized_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,
@@ -390,12 +362,6 @@ class ACSTravelTimeDataset(BaseDataLoader):
         categorical_columns = ['MAR', 'SEX', 'DIS', 'ESP', 'MIG', 'RELP', 'RAC1P', 'PUMA', 'ST', 'CIT', 'OCCP', 'POWPUMA', 'POVPIP']
         numerical_columns = ['AGEP', 'SCHL']
 
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'SCHL': [str(i) for i in range(1, 25)]
-        }
-
         if with_nulls:
             X_data = acs_data[features]
         else:
@@ -414,7 +380,6 @@ class ACSTravelTimeDataset(BaseDataLoader):
             target=target,
             numerical_columns=numerical_columns,
             categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct,
             X_data=filtered_X_data,
             y_data=y_data,
             columns_with_nulls=columns_with_nulls,

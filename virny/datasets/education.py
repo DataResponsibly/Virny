@@ -84,17 +84,9 @@ class LawSchoolDataset(BaseDataLoader):
         numerical_columns = ['decile1b', 'decile3', 'lsat', 'ugpa', 'zfygpa', 'zgpa']
         categorical_columns = ['fulltime', 'fam_inc', 'male', 'tier', 'race']
 
-        # Create a dictionary of ordered categories for ordinal categorical columns.
-        # It can be useful for preprocessing of ordinal categorical columns if exist.
-        ordered_categories_dct = {
-            'fam_inc': [str(i) for i in range(1, 5 + 1)],
-            'tier': [str(i) for i in range(1, 6 + 1)],
-        }
-
         super().__init__(
             full_df=df,
             target=target,
             numerical_columns=numerical_columns,
-            categorical_columns=categorical_columns,
-            ordered_categories_dct=ordered_categories_dct
+            categorical_columns=categorical_columns
         )

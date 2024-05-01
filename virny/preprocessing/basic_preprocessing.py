@@ -51,8 +51,7 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
                            y_test=y_test,
                            target=data_loader.target,
                            numerical_columns=data_loader.numerical_columns,
-                           categorical_columns=data_loader.categorical_columns,
-                           ordered_categories_dct=data_loader.ordered_categories_dct)
+                           categorical_columns=data_loader.categorical_columns)
 
 
 def get_dummies(data: pd.DataFrame, categorical_columns: list, numerical_columns: list):
