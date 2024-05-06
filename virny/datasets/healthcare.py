@@ -75,12 +75,15 @@ class DiabetesDataset2019(BaseDataLoader):
             df = df.dropna(how='any',axis=0)
             df = df.reset_index(drop=True)
 
-        # Preprocessing
+        # Preprocess features
         df = df.rename(columns={'Pregancies': 'Pregnancies'})
+        df['RegularMedicine'].replace('o', 'no', inplace=True)
+        df['BPLevel'] = df['BPLevel'].str.strip().str.lower()
+
+        # Preprocess a target
         df['Diabetic'] = df['Diabetic'].str.strip()
         df['Diabetic'].replace('no', 0, inplace=True)
         df['Diabetic'].replace('yes', 1, inplace=True)
-        df['BPLevel'] = df['BPLevel'].str.strip().str.lower()
 
         target = 'Diabetic'
         numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregnancies']
