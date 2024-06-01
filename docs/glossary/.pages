@@ -1,4 +1,5 @@
 title: Glossary 📖
 nav:
     - bootstrap_approach.md
-    - performance_dimensions.md
+    - overall_performance_dimensions.md
+    - disparity_performance_dimensions.md
