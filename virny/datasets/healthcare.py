@@ -49,7 +49,7 @@ class CardiovascularDiseaseDataset(BaseDataLoader):
 
 class DiabetesDataset2019(BaseDataLoader):
     """
-    Dataset class for the Diabetes dataset 2019 that contains sensitive attributes among feature columns.
+    Dataset class for the Diabetes 2019 dataset that contains sensitive attributes among feature columns.
     Source and broad description: https://www.kaggle.com/datasets/tigganeha4/diabetes-dataset-2019/data
 
     Parameters
