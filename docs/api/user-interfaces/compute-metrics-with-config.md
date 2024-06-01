@@ -26,6 +26,10 @@ Return a dictionary where keys are model names, and values are metrics for sensi
 
     [Optional] Postprocessor object to apply to model predictions before metrics computation
 
+- **with_predict_proba** (*bool*) – defaults to `True`
+
+    [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,  False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.  Ignored when a postprocessor is not None, and set to False in this case.
+
 - **notebook_logs_stdout** (*bool*) – defaults to `False`
 
     [Optional] True, if this interface was execute in a Jupyter notebook,  False, otherwise.

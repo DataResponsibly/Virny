@@ -12,7 +12,7 @@ Return a dictionary where keys are subgroup names, and values are X_test row ind
 
 - **init_sensitive_attrs_df** (*pandas.core.frame.DataFrame*)
 
-    Initial full dataset without preprocessing
+    Initial full dataset of sensitive attributes without preprocessing
 
 - **sensitive_attributes_dct** (*dict*)
 

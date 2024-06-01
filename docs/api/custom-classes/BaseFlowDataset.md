@@ -8,7 +8,7 @@ Dataset class with custom train and test splits that is used as input for metric
 
 - **init_sensitive_attrs_df** (*pandas.core.frame.DataFrame*)
 
-    Full train + test non-preprocessed dataset of features without the target column.  It is used for creating test groups.
+    Full train + test non-preprocessed dataset of sensitive attributes with initial indexes.  It is used for creating test groups.
 
 - **X_train_val** (*pandas.core.frame.DataFrame*)
 

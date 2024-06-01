@@ -14,7 +14,7 @@ Subsequently, the tool utilizes the output from Virny to construct an interactiv
 This application allows users to scrutinize dataset properties related to protected groups, compare models 
 across diverse performance dimensions, and generate a comprehensive nutritional label for the most optimal model.
 
-![UI view of the second screen in the interactive web app](../examples/Interactive_Web_App_Demo_files/UI_View.png)
+![UI view of the second screen in the interactive web app](./virnyview_overview_files/UI_View.png)
 *Figure 1. A sample UI view of the second screen in the interactive web app.*
 
 The application comprises six screens, each featuring user input options and a corresponding visualization 
@@ -33,7 +33,7 @@ concerning multiple protected groups and performance dimensions.
 
 The user flow comprises six steps, as illustrated in Figures 2 and 3, and can be outlined as follows.
 
-![Steps 1-4 in the user flow for responsible model selection](../examples/Interactive_Web_App_Demo_files/Step1-4.png)
+![Steps 1-4 in the user flow for responsible model selection](./virnyview_overview_files/Step1-4.png)
 *Figure 2. Steps 1-4 in the user flow for responsible model selection.*
 
 _**Step 1**: Analyze demographic composition of the dataset._
@@ -69,7 +69,7 @@ Subsequently, users can choose one or two models for a detailed breakdown of per
 and generate a comprehensive nutritional label in the later steps.
 
 
-![Steps 5-6 in the user flow for responsible model selection](../examples/Interactive_Web_App_Demo_files/Step5-6.png)
+![Steps 5-6 in the user flow for responsible model selection](./virnyview_overview_files/Step5-6.png)
 *Figure 3. Steps 5-6 in the user flow for responsible model selection.*
 
 _**Step 5**: Generate a nutritional label for the selected model._
