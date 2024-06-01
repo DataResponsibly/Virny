@@ -1,4 +1,4 @@
-## 📖 Library Overview
+## 📖 Virny Overview
 
 ![Virny_Architecture](https://github.com/DataResponsibly/Virny/assets/42843889/91620e0f-11ff-4093-8fb6-c88c90bff711)
 

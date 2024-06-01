@@ -4,7 +4,7 @@
 * [Demonstrative Jupyter notebooks for the Virny capabilities](https://huggingface.co/spaces/denys-herasymuk/virny-demo/tree/main/notebooks)
 
 
-## Application overview
+## Application Overview
 
 _VirnyView_ serves as a visualization component within the Virny model profiling library, empowering data scientists
 _to engage in responsible model selection_ and _to generate a nutritional label for their model_. Users can declaratively
@@ -14,7 +14,7 @@ Subsequently, the tool utilizes the output from Virny to construct an interactiv
 This application allows users to scrutinize dataset properties related to protected groups, compare models 
 across diverse performance dimensions, and generate a comprehensive nutritional label for the most optimal model.
 
-![UI view of the second screen in the interactive web app](./Interactive_Web_App_Demo_files/UI_View.png)
+![UI view of the second screen in the interactive web app](../examples/Interactive_Web_App_Demo_files/UI_View.png)
 *Figure 1. A sample UI view of the second screen in the interactive web app.*
 
 The application comprises six screens, each featuring user input options and a corresponding visualization 
@@ -23,7 +23,7 @@ overall metrics, and disparity metrics across various model dimensions. This sel
 Refer to Figure 1 for a visual representation of the sample web interface showcasing these screens.
 
 
-## User flow description
+## User Flow Description
 
 Our tool is developed with a user-friendly flow design specifically tailored to guide users through a responsible model selection process.
 This streamlined flow reduces the complexity associated with numerous model types and pre-, in-, and post-processing techniques.
@@ -33,7 +33,7 @@ concerning multiple protected groups and performance dimensions.
 
 The user flow comprises six steps, as illustrated in Figures 2 and 3, and can be outlined as follows.
 
-![Steps 1-4 in the user flow for responsible model selection](./Interactive_Web_App_Demo_files/Step1-4.png)
+![Steps 1-4 in the user flow for responsible model selection](../examples/Interactive_Web_App_Demo_files/Step1-4.png)
 *Figure 2. Steps 1-4 in the user flow for responsible model selection.*
 
 _**Step 1**: Analyze demographic composition of the dataset._
@@ -69,7 +69,7 @@ Subsequently, users can choose one or two models for a detailed breakdown of per
 and generate a comprehensive nutritional label in the later steps.
 
 
-![Steps 5-6 in the user flow for responsible model selection](./Interactive_Web_App_Demo_files/Step5-6.png)
+![Steps 5-6 in the user flow for responsible model selection](../examples/Interactive_Web_App_Demo_files/Step5-6.png)
 *Figure 3. Steps 5-6 in the user flow for responsible model selection.*
 
 _**Step 5**: Generate a nutritional label for the selected model._
