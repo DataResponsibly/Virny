@@ -62,6 +62,8 @@ TEST_SET_FRACTION = 0.2
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
 * **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
 * **computation_mode**: str, 'default' or 'error_analysis'. Name of the computation mode. When a default computation mode measures metrics for sex_priv and sex_dis, an `error_analysis` mode measures metrics for (sex_priv, sex_priv_correct, sex_priv_incorrect) and (sex_dis, sex_dis_correct, sex_dis_incorrect). Therefore, a user can analyze how a model is certain about its incorrect predictions.

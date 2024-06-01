@@ -51,9 +51,9 @@ In contrast to existing fairness software libraries and model card generating fr
 4. Virny implements streamlined flow design tailored for **responsible model selection**, reducing the complexity associated with numerous model types, performance dimensions, and data-centric and model-centric interventions.
 
 
-## 💡 Full List of Features
+## 💡 List of Features
 
-* Entire pipeline for profiling model accuracy, stability, uncertainty, and fairness
+* Profiling of all normatively important performance dimensions: accuracy, stability, uncertainty, and fairness
 * Ability to analyze non-binary sensitive attributes and their intersections
 * Convenient metric computation interfaces: an interface for multiple models, an interface for multiple test sets, and an interface for saving results into a user-defined database
 * Interactive _VirnyView_ visualizer that profiles dataset properties related to protected groups, computes comprehensive [nutritional labels](http://sites.computer.org/debull/A19sept/p13.pdf) for individual models, compares multiple models according to multiple metrics, and guides users through model selection
@@ -63,21 +63,27 @@ In contrast to existing fairness software libraries and model card generating fr
 * Data loaders with subsampling for popular fair-ML benchmark datasets
 * User-friendly parameters input via config yaml files
 
-
-## 📖 Library Overview
-
-![Virny_Architecture](https://github.com/DataResponsibly/Virny/assets/42843889/91620e0f-11ff-4093-8fb6-c88c90bff711)
-
-The software framework decouples the process of model profiling into several stages, including **subgroup metric computation**,
-**disparity metric composition**, and **metric visualization**. This separation empowers data scientists with greater control and
-flexibility in employing the library, both during model development and for post-deployment monitoring. The above figure demonstrates
-how the library constructs a pipeline for model analysis. Inputs to a user interface are shown in green, pipeline stages are shown in blue,
-and the output of each stage is shown in purple.
+Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview.
 
 
 ## 🤗 Affiliations
 
 ![NYU-UCU-Logos](https://user-images.githubusercontent.com/42843889/216840888-071bf184-f0e3-4a3e-94dc-c0d1c7784143.png)
+
+
+## 💬 Citation
+
+If Virny has been useful to you, and you would like to cite it in a scientific publication, please refer to the [paper](https://dl.acm.org/doi/abs/10.1145/3626246.3654738) published at SIGMOD:
+
+```bibtex
+@inproceedings{herasymuk2024responsible,
+  title={Responsible Model Selection with Virny and VirnyView},
+  author={Herasymuk, Denys and Arif Khan, Falaah and Stoyanovich, Julia},
+  booktitle={Companion of the 2024 International Conference on Management of Data},
+  pages={488--491},
+  year={2024}
+}
+```
 
 
 ## 📝 License

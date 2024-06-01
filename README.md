@@ -81,7 +81,7 @@ In contrast to existing fairness software libraries and model card generating fr
 
 ## 💡 List of Features
 
-* Entire pipeline for profiling model accuracy, stability, uncertainty, and fairness
+* Profiling of all normatively important performance dimensions: accuracy, stability, uncertainty, and fairness
 * Ability to analyze non-binary sensitive attributes and their intersections
 * Convenient metric computation interfaces: an interface for multiple models, an interface for multiple test sets, and an interface for saving results into a user-defined database
 * Interactive _VirnyView_ visualizer that profiles dataset properties related to protected groups, computes comprehensive [nutritional labels](http://sites.computer.org/debull/A19sept/p13.pdf) for individual models, compares multiple models according to multiple metrics, and guides users through model selection

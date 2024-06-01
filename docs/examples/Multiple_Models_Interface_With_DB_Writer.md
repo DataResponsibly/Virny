@@ -59,6 +59,8 @@ DATASET_SPLIT_SEED = 42
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
 * **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
 * **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
