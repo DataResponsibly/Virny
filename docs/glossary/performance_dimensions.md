@@ -51,10 +51,10 @@ Label Stability[^1] is defined as the normalized absolute difference between the
 a sample is classified as positive or negative:
 
 $$ 
-\text{Label Stability } U_{h, \text{stability}}(x^*) = \frac{1}{m} (\sum_{j=1}^m \mathbf{1}[h_{D_j}(x^*)>=0.5] - \sum_{i=1}^m \mathbf{1}[h_{D_i}(x^*)<0.5])
+U_{h, \text{stability}}(x) = \frac{1}{m} (\sum_{j=1}^m \mathbf{1}[h_{D_j}(x)>=0.5] - \sum_{i=1}^m \mathbf{1}[h_{D_i}(x)<0.5])
 $$
 
-where $x^*$ is an unseen test sample, and $h_{D_j}(x)$ is the predicted probability of the positive class of the $j^{\text{th}}$ model in the ensemble that has $m$ estimators.
+where $x$ is an unseen test sample, and $h_{D_j}(x)$ is the predicted probability of the positive class of the $j^{\text{th}}$ model in the ensemble that has $m$ estimators.
 
 Thus, Label Stability is a metric used to evaluate the level of disagreement between estimators in the ensemble. 
 When the absolute difference is large, the label is more stable. On the other hand, if the difference is exactly zero, 
