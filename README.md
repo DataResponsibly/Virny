@@ -105,6 +105,21 @@ how the library constructs a pipeline for model analysis. Inputs to a user inter
 and the output of each stage is shown in purple.
 
 
+## 💬 Citation
+
+If Virny has been useful to you, and you would like to cite it in a scientific publication, please refer to the paper published at SIGMOD:
+
+```bibtex
+@inproceedings{herasymuk2024responsible,
+  title={Responsible Model Selection with Virny and VirnyView},
+  author={Herasymuk, Denys and Arif Khan, Falaah and Stoyanovich, Julia},
+  booktitle={Companion of the 2024 International Conference on Management of Data},
+  pages={488--491},
+  year={2024}
+}
+```
+
+
 ## 🤗 Affiliations
 
 ![NYU-UCU-Logos](https://user-images.githubusercontent.com/42843889/216840888-071bf184-f0e3-4a3e-94dc-c0d1c7784143.png)
