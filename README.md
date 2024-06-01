@@ -79,7 +79,7 @@ In contrast to existing fairness software libraries and model card generating fr
 4. Virny implements streamlined flow design tailored for **responsible model selection**, reducing the complexity associated with numerous model types, performance dimensions, and data-centric and model-centric interventions.
 
 
-## 💡 Full List of Features
+## 💡 List of Features
 
 * Entire pipeline for profiling model accuracy, stability, uncertainty, and fairness
 * Ability to analyze non-binary sensitive attributes and their intersections
@@ -94,20 +94,14 @@ In contrast to existing fairness software libraries and model card generating fr
 Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview.
 
 
-## 📖 Library Overview
+## 🤗 Affiliations
 
-![Virny_Architecture](https://github.com/DataResponsibly/Virny/assets/42843889/91620e0f-11ff-4093-8fb6-c88c90bff711)
-
-The software framework decouples the process of model profiling into several stages, including **subgroup metric computation**,
-**disparity metric composition**, and **metric visualization**. This separation empowers data scientists with greater control and
-flexibility in employing the library, both during model development and for post-deployment monitoring. The above figure demonstrates
-how the library constructs a pipeline for model analysis. Inputs to a user interface are shown in green, pipeline stages are shown in blue,
-and the output of each stage is shown in purple.
+![NYU-UCU-Logos](https://user-images.githubusercontent.com/42843889/216840888-071bf184-f0e3-4a3e-94dc-c0d1c7784143.png)
 
 
 ## 💬 Citation
 
-If Virny has been useful to you, and you would like to cite it in a scientific publication, please refer to the paper published at SIGMOD:
+If Virny has been useful to you, and you would like to cite it in a scientific publication, please refer to the [paper](https://dl.acm.org/doi/abs/10.1145/3626246.3654738) published at SIGMOD:
 
 ```bibtex
 @inproceedings{herasymuk2024responsible,
@@ -118,11 +112,6 @@ If Virny has been useful to you, and you would like to cite it in a scientific p
   year={2024}
 }
 ```
-
-
-## 🤗 Affiliations
-
-![NYU-UCU-Logos](https://user-images.githubusercontent.com/42843889/216840888-071bf184-f0e3-4a3e-94dc-c0d1c7784143.png)
 
 
 ## 📝 License
