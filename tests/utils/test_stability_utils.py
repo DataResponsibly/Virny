@@ -70,6 +70,7 @@ def test_generate_bootstrap_true1(compas_without_sensitive_attrs_dataset_class, 
     ])
     base_flow_ds = preprocess_dataset(compas_without_sensitive_attrs_dataset_class,
                                       column_transformer,
+                                      sensitive_attributes_dct={'sex': 1, 'race': 'African-American', 'sex&race': None},
                                       test_set_fraction=0.2,
                                       dataset_split_seed=42)
     boostrap_size = int(config_params.bootstrap_fraction * base_flow_ds.X_train_val.shape[0])

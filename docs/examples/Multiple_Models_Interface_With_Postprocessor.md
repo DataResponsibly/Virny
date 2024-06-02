@@ -84,9 +84,11 @@ models_params_for_tuning = {
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
-* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
-
 * **computation_mode**: str, 'default' or 'error_analysis'. Name of the computation mode. When a default computation mode measures metrics for sex_priv and sex_dis, an `error_analysis` mode measures metrics for (sex_priv, sex_priv_correct, sex_priv_incorrect) and (sex_dis, sex_dis_correct, sex_dis_incorrect). Therefore, a user can analyze how a model is certain about its incorrect predictions.
+
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
+* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
 * **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
 
@@ -102,8 +104,9 @@ config_yaml_content = """
 dataset_name: Law_School
 bootstrap_fraction: 0.8
 computation_mode: error_analysis
+random_state: 42
 n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
-sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male&race': None}
+sensitive_attributes_dct: {'male': '0', 'race': 'Non-White', 'male&race': None}
 postprocessing_sensitive_attribute: 'race_binary'
 """
 
@@ -121,7 +124,7 @@ SAVE_RESULTS_DIR_PATH = os.path.join(ROOT_DIR, 'results', f'{config.dataset_name
 
 
 ```python
-from virny.datasets.data_loaders import LawSchoolDataset
+from virny.datasets import LawSchoolDataset
 
 data_loader = LawSchoolDataset()
 data_loader.X_data[data_loader.X_data.columns[:5]].head()
@@ -215,7 +218,11 @@ column_transformer = ColumnTransformer(transformers=[
 # Create a binary race column for postprocessing since aif360 postprocessors can postprocess a dataset only based on binary columns.
 data_loader.X_data['race_binary'] = data_loader.X_data['race'].apply(lambda x: 1 if x == 'White' else 0)
 
-base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET_FRACTION, DATASET_SPLIT_SEED)
+base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                       column_transformer=column_transformer,
+                                       sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                       test_set_fraction=TEST_SET_FRACTION,
+                                       dataset_split_seed=DATASET_SPLIT_SEED)
 base_flow_dataset.X_train_val['race_binary'] = data_loader.X_data.loc[base_flow_dataset.X_train_val.index, 'race_binary']
 base_flow_dataset.X_test['race_binary'] = data_loader.X_data.loc[base_flow_dataset.X_test.index, 'race_binary']
 ```
@@ -240,11 +247,11 @@ tuned_params_df, models_config = tune_ML_models(models_params_for_tuning, base_f
 tuned_params_df
 ```
 
-    2024/01/29, 15:01:08: Tuning LogisticRegression...
-    2024/01/29, 15:01:10: Tuning for LogisticRegression is finished [F1 score = 0.6563618630035558, Accuracy = 0.8987258083904316]
+    2024/06/02, 00:35:52: Tuning LogisticRegression...
+    2024/06/02, 00:35:54: Tuning for LogisticRegression is finished [F1 score = 0.6563618630035558, Accuracy = 0.8987258083904316]
     
-    2024/01/29, 15:01:10: Tuning RandomForestClassifier...
-    2024/01/29, 15:01:12: Tuning for RandomForestClassifier is finished [F1 score = 0.6538551003755212, Accuracy = 0.8980646712345234]
+    2024/06/02, 00:35:54: Tuning RandomForestClassifier...
+    2024/06/02, 00:35:56: Tuning for RandomForestClassifier is finished [F1 score = 0.6538551003755212, Accuracy = 0.8980646712345234]
 
 
 
@@ -392,29 +399,29 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>0</th>
       <td>Jitter</td>
-      <td>0.044428</td>
-      <td>0.041003</td>
-      <td>0.035846</td>
-      <td>0.093184</td>
-      <td>0.048953</td>
+      <td>0.044141</td>
+      <td>0.040939</td>
+      <td>0.035644</td>
+      <td>0.094502</td>
+      <td>0.048374</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Label_Stability</td>
-      <td>0.949750</td>
-      <td>0.954358</td>
-      <td>0.961986</td>
-      <td>0.877183</td>
-      <td>0.943661</td>
+      <td>0.949913</td>
+      <td>0.953970</td>
+      <td>0.961893</td>
+      <td>0.873803</td>
+      <td>0.944554</td>
     </tr>
     <tr>
       <th>2</th>
       <td>TPR</td>
-      <td>0.994635</td>
+      <td>0.994903</td>
       <td>0.994884</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.994297</td>
+      <td>0.994930</td>
     </tr>
     <tr>
       <th>3</th>
@@ -428,20 +435,20 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>4</th>
       <td>PPV</td>
-      <td>0.903069</td>
+      <td>0.903092</td>
       <td>0.913712</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.888952</td>
+      <td>0.889015</td>
     </tr>
     <tr>
       <th>5</th>
       <td>FNR</td>
-      <td>0.005365</td>
+      <td>0.005097</td>
       <td>0.005116</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.005703</td>
+      <td>0.005070</td>
     </tr>
     <tr>
       <th>6</th>
@@ -455,41 +462,32 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>7</th>
       <td>Accuracy</td>
-      <td>0.899519</td>
+      <td>0.899760</td>
       <td>0.910051</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.885603</td>
+      <td>0.886161</td>
     </tr>
     <tr>
       <th>8</th>
       <td>F1</td>
-      <td>0.946643</td>
+      <td>0.946777</td>
       <td>0.952572</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.938678</td>
+      <td>0.938995</td>
     </tr>
     <tr>
       <th>9</th>
       <td>Selection-Rate</td>
-      <td>0.987019</td>
+      <td>0.987260</td>
       <td>0.988598</td>
       <td>0.992575</td>
       <td>0.948357</td>
-      <td>0.984933</td>
+      <td>0.985491</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>Positive-Rate</td>
-      <td>1.101395</td>
-      <td>1.088837</td>
-      <td>1.000000</td>
-      <td>18.363636</td>
-      <td>1.118504</td>
-    </tr>
-    <tr>
-      <th>11</th>
       <td>Sample_Size</td>
       <td>4160.000000</td>
       <td>2368.000000</td>
@@ -561,17 +559,17 @@ models_composed_metrics_df
     <tr>
       <th>0</th>
       <td>Accuracy_Difference</td>
-      <td>-0.024448</td>
-      <td>-0.195943</td>
-      <td>-0.173922</td>
+      <td>-0.023890</td>
+      <td>-0.196227</td>
+      <td>-0.174183</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Equalized_Odds_FNR</td>
-      <td>0.000587</td>
-      <td>-0.006129</td>
-      <td>-0.005741</td>
+      <td>-0.000047</td>
+      <td>-0.005823</td>
+      <td>-0.005454</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
@@ -585,41 +583,41 @@ models_composed_metrics_df
     <tr>
       <th>3</th>
       <td>Jitter_Difference</td>
-      <td>0.007950</td>
-      <td>0.033568</td>
-      <td>0.050556</td>
+      <td>0.007435</td>
+      <td>0.034351</td>
+      <td>0.049795</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>4</th>
       <td>Label_Stability_Ratio</td>
-      <td>0.988791</td>
-      <td>0.944396</td>
-      <td>0.920733</td>
+      <td>0.990130</td>
+      <td>0.943974</td>
+      <td>0.924259</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>5</th>
       <td>Label_Stability_Difference</td>
-      <td>-0.010697</td>
-      <td>-0.053262</td>
-      <td>-0.075760</td>
+      <td>-0.009416</td>
+      <td>-0.053678</td>
+      <td>-0.072383</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>Disparate_Impact</td>
-      <td>1.027247</td>
-      <td>1.281367</td>
-      <td>1.247873</td>
+      <td>Statistical_Parity_Difference</td>
+      <td>-0.003107</td>
+      <td>0.015031</td>
+      <td>0.013838</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>Statistical_Parity_Difference</td>
-      <td>-0.003665</td>
-      <td>0.015315</td>
-      <td>0.014099</td>
+      <td>Disparate_Impact</td>
+      <td>0.996857</td>
+      <td>1.015261</td>
+      <td>1.014032</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
@@ -633,89 +631,89 @@ models_composed_metrics_df
     <tr>
       <th>9</th>
       <td>Equalized_Odds_TPR</td>
-      <td>-0.000587</td>
-      <td>0.006129</td>
-      <td>0.005741</td>
+      <td>0.000047</td>
+      <td>0.005823</td>
+      <td>0.005454</td>
       <td>LogisticRegression</td>
     </tr>
     <tr>
       <th>10</th>
       <td>Accuracy_Difference</td>
-      <td>-0.012594</td>
-      <td>-0.157805</td>
-      <td>-0.114099</td>
+      <td>-0.020693</td>
+      <td>-0.158407</td>
+      <td>-0.134267</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>11</th>
       <td>Equalized_Odds_FNR</td>
-      <td>0.001093</td>
-      <td>0.014145</td>
-      <td>0.014464</td>
+      <td>0.004134</td>
+      <td>0.020908</td>
+      <td>0.029136</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>12</th>
       <td>Equalized_Odds_FPR</td>
-      <td>-0.109191</td>
-      <td>-0.081198</td>
-      <td>-0.180871</td>
+      <td>-0.058218</td>
+      <td>-0.104439</td>
+      <td>-0.140207</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>13</th>
       <td>Jitter_Difference</td>
-      <td>0.011503</td>
-      <td>0.093584</td>
-      <td>0.104403</td>
+      <td>0.009800</td>
+      <td>0.093877</td>
+      <td>0.101423</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>14</th>
       <td>Label_Stability_Ratio</td>
-      <td>0.980684</td>
-      <td>0.846239</td>
-      <td>0.824561</td>
+      <td>0.981678</td>
+      <td>0.844858</td>
+      <td>0.825698</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>15</th>
       <td>Label_Stability_Difference</td>
-      <td>-0.018378</td>
-      <td>-0.148557</td>
-      <td>-0.167866</td>
+      <td>-0.017405</td>
+      <td>-0.149755</td>
+      <td>-0.166575</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>16</th>
-      <td>Disparate_Impact</td>
-      <td>1.013982</td>
-      <td>1.194074</td>
-      <td>1.135934</td>
+      <td>Statistical_Parity_Difference</td>
+      <td>-0.013514</td>
+      <td>-0.061529</td>
+      <td>-0.076446</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>Statistical_Parity_Difference</td>
-      <td>-0.016334</td>
-      <td>-0.052917</td>
-      <td>-0.075504</td>
+      <td>Disparate_Impact</td>
+      <td>0.986242</td>
+      <td>0.937586</td>
+      <td>0.922193</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>18</th>
       <td>Equalized_Odds_TNR</td>
-      <td>0.109191</td>
-      <td>0.081198</td>
-      <td>0.180871</td>
+      <td>0.058218</td>
+      <td>0.104439</td>
+      <td>0.140207</td>
       <td>RandomForestClassifier</td>
     </tr>
     <tr>
       <th>19</th>
       <td>Equalized_Odds_TPR</td>
-      <td>-0.001093</td>
-      <td>-0.014145</td>
-      <td>-0.014464</td>
+      <td>-0.004134</td>
+      <td>-0.020908</td>
+      <td>-0.029136</td>
       <td>RandomForestClassifier</td>
     </tr>
   </tbody>
@@ -747,13 +745,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-26673c62996e4ea6b560ef6f159d11c0"></div>
+<div id="altair-viz-2b16e75ab1794ba3934c83da650c9449"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-26673c62996e4ea6b560ef6f159d11c0") {
-      outputDiv = document.getElementById("altair-viz-26673c62996e4ea6b560ef6f159d11c0");
+    if (outputDiv.id !== "altair-viz-2b16e75ab1794ba3934c83da650c9449") {
+      outputDiv = document.getElementById("altair-viz-2b16e75ab1794ba3934c83da650c9449");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -799,7 +797,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-ca06945ca98a634665b1193b00a49b23"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-ca06945ca98a634665b1193b00a49b23": [{"overall": 0.8995192307692308, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.946642838907327, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.9030686799805164, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.9870192307692308, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.0787037037037037, "metric": "TNR", "model_name": "LogisticRegression"}, {"overall": 0.9946351931330472, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.9050480769230768, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.9493524810873188, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.9093588798820929, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.9786057692307693, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.1458333333333333, "metric": "TNR", "model_name": "RandomForestClassifier"}, {"overall": 0.9930257510729614, "metric": "TPR", "model_name": "RandomForestClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-e375c8a67e434d2b83591104119a1e44"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-e375c8a67e434d2b83591104119a1e44": [{"overall": 0.8997596153846154, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.9467772814294833, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.90309228147066, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.9872596153846154, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.0787037037037037, "metric": "TNR", "model_name": "LogisticRegression"}, {"overall": 0.9949034334763948, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.9024038461538462, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.9478818998716304, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.9089118660758247, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.9764423076923076, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.1435185185185185, "metric": "TNR", "model_name": "RandomForestClassifier"}, {"overall": 0.990343347639485, "metric": "TPR", "model_name": "RandomForestClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 
@@ -816,13 +814,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-2b8aa60f6e3d4fddb4380ca7caf41c4e"></div>
+<div id="altair-viz-868f4cc36a9749e6afd91ebd75521c0f"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-2b8aa60f6e3d4fddb4380ca7caf41c4e") {
-      outputDiv = document.getElementById("altair-viz-2b8aa60f6e3d4fddb4380ca7caf41c4e");
+    if (outputDiv.id !== "altair-viz-868f4cc36a9749e6afd91ebd75521c0f") {
+      outputDiv = document.getElementById("altair-viz-868f4cc36a9749e6afd91ebd75521c0f");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -868,7 +866,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-cb7f78666f39ea7e9ff2b82f8328e8be"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Label_Stability", "Jitter"], "title": "Stability Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-cb7f78666f39ea7e9ff2b82f8328e8be": [{"overall": 0.044427786499215, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.94975, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.041256671899529, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9435192307692308, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-aef3c30529bc9bb1916dccf6536b6639"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Label_Stability", "Jitter"], "title": "Stability Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-aef3c30529bc9bb1916dccf6536b6639": [{"overall": 0.0441414835164834, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9499134615384616, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.0416481554160125, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9424519230769232, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 

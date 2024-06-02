@@ -24,7 +24,6 @@ FPR = 'FPR'
 F1 = 'F1'
 ACCURACY = 'Accuracy'
 SELECTION_RATE = 'Selection-Rate'
-POSITIVE_RATE = 'Positive-Rate'
 
 # Stability metrics
 STD = 'Std'

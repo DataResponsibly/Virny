@@ -28,7 +28,6 @@ def test_overall_accuracy_metrics_computation():
     expected_ACCURACY = (TP+TN)/(TP+TN+FP+FN)
     expected_F1 = (2*TP)/(2*TP+FP+FN)
     expected_SELECTION_RATE = (TP+FP)/(TP+FP+TN+FN)
-    expected_POSITIVE_RATE = (TP+FP)/(TP+FN)
 
     assert abs(prediction_metrics[TPR] - expected_TPR) < alpha
     assert abs(prediction_metrics[TNR] - expected_TNR) < alpha
@@ -38,4 +37,3 @@ def test_overall_accuracy_metrics_computation():
     assert abs(prediction_metrics[ACCURACY] - expected_ACCURACY) < alpha
     assert abs(prediction_metrics[F1] - expected_F1) < alpha
     assert abs(prediction_metrics[SELECTION_RATE] - expected_SELECTION_RATE) < alpha
-    assert abs(prediction_metrics[POSITIVE_RATE] - expected_POSITIVE_RATE) < alpha

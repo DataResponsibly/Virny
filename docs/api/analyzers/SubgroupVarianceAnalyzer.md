@@ -50,9 +50,17 @@ Analyzer to compute variance metrics for subgroups.
 
     A sensitive attribute to use for post-processing
 
+- **random_state** (*int*) – defaults to `None`
+
+    [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
+
 - **computation_mode** (*str*) – defaults to `None`
 
     [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
+
+- **with_predict_proba** (*bool*) – defaults to `True`
+
+    [Optional] True, if models in models_config have a predict_proba method and can return probabilities for predictions,  False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.  Ignored when a postprocessor is not None, and set to False in this case.
 
 - **notebook_logs_stdout** (*bool*) – defaults to `False`
 

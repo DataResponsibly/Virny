@@ -1,5 +1,6 @@
 import os
 import pytest
+import numpy as np
 import pandas as pd
 
 from munch import DefaultMunch
@@ -23,6 +24,56 @@ def get_root_dir():
             root_dir = os.path.join('..', '..')
             
     return root_dir
+
+
+def compare_metric_dfs_v2(df1, df2):
+    # Check shape
+    if not df1.shape == df2.shape:
+        return False
+
+    # Check column names
+    if not sorted(df1.columns.tolist()) == sorted(df2.columns.tolist()):
+        return False
+
+    # Check values
+    df1 = df1.sort_values(by='Metric').reset_index(drop=True)
+    df2 = df2.sort_values(by='Metric').reset_index(drop=True)
+
+    if not df1.equals(df2):
+        return False
+
+    return True
+
+
+def compare_metric_dfs_with_tolerance(df1, df2, tolerance=1e-6):
+    # Check shape
+    if not df1.shape == df2.shape:
+        return False
+
+    # Check column names
+    if not sorted(df1.columns.tolist()) == sorted(df2.columns.tolist()):
+        return False
+
+    # Check values
+    df1 = df1.sort_values(by='Metric').reset_index(drop=True)
+    df2 = df2.sort_values(by='Metric').reset_index(drop=True)
+
+    categorical_cols = ['Metric', 'Model_Name', 'Model_Params']
+    numerical_cols = [col for col in df1.columns if col not in categorical_cols]
+
+    # Compare numerical columns with tolerance
+    close_numerical = np.isclose(df1[numerical_cols], df2[numerical_cols], atol=tolerance).all(axis=0)
+
+    # Compare categorical columns directly
+    equal_categorical = (df1[categorical_cols] == df2[categorical_cols]).all()
+
+    # Combine both results
+    overall_equal = close_numerical.all() and equal_categorical.all()
+
+    if not overall_equal:
+        return False
+
+    return True
 
 
 def compare_metric_dfs(expected_composed_metrics_df, actual_composed_metrics_df,
@@ -90,7 +141,7 @@ def models_config():
 
 @pytest.fixture(scope='package')
 def compas_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
+    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'data', 'COMPAS.csv')
     df = pd.read_csv(dataset_path)
 
     int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',
@@ -111,7 +162,7 @@ def compas_dataset_class():
 
 @pytest.fixture(scope='package')
 def compas_without_sensitive_attrs_dataset_class():
-    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'COMPAS.csv')
+    dataset_path = os.path.join(ROOT_DIR, 'virny', 'datasets', 'data', 'COMPAS.csv')
     df = pd.read_csv(dataset_path)
 
     int_columns = ['recidivism', 'age', 'age_cat_25 - 45', 'age_cat_Greater than 45',

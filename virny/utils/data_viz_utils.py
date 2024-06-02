@@ -9,6 +9,7 @@ from altair.utils.schemapi import Undefined
 
 from virny.configs.constants import *
 from virny.utils.common_helpers import check_substring_in_list
+from virny.utils.protected_groups_partitioning import create_test_protected_groups
 
 
 def rank_with_tolerance(pd_series: pd.Series, tolerance: float = 0.001):
@@ -101,7 +102,7 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     models_distances_matrix = model_metrics_matrix.copy(deep=True).T
     metric_names = models_distances_matrix.columns
     for metric_name in metric_names:
-        if check_substring_in_list(metric_name, ['TPR', 'TNR', 'PPV', 'Accuracy', 'F1', 'Label_Stability', 'Positive-Rate']):
+        if check_substring_in_list(metric_name, ['TPR', 'TNR', 'PPV', 'Accuracy', 'F1', 'Label_Stability']):
             # Cast a metric to a case when the closer value to one is the better
             models_distances_matrix[metric_name] = 1 - models_distances_matrix[metric_name]
         models_distances_matrix[metric_name] = models_distances_matrix[metric_name].abs()
@@ -113,6 +114,39 @@ def create_subgroup_sorted_matrix_by_rank(model_metrics_matrix, tolerance) -> np
     )
 
     return sorted_matrix_by_rank
+
+
+def create_dataset_stats_bar_chart(X_data, y_data, sensitive_attrs_dct):
+    # Partition on protected groups
+    protected_groups = create_test_protected_groups(X_data, X_data, sensitive_attrs_dct)
+
+    # Create a df with group proportions and group base rates
+    subgroup_proportions_dct = compute_proportions(protected_groups, X_data)
+    subgroup_base_rates_dct = compute_base_rates(protected_groups, y_data)
+    subgroup_relative_base_rates_dct = dict()
+    for subgroup in subgroup_proportions_dct.keys():
+        pct = subgroup_base_rates_dct[subgroup]['percentage'] * subgroup_proportions_dct[subgroup]['percentage']
+        subgroup_relative_base_rates_dct[subgroup] = {'percentage': pct, 'num_rows': subgroup_base_rates_dct[subgroup]['num_rows']}
+
+    stats_df = pd.DataFrame(columns=['Subgroup', 'Percentage', 'Num_Rows', 'Statistics_Type'])
+    for subgroup in subgroup_proportions_dct.keys():
+        stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_proportions_dct[subgroup]['percentage'],
+                                             subgroup_proportions_dct[subgroup]['num_rows'], 'Proportion']
+        stats_df.loc[len(stats_df.index)] = [subgroup, subgroup_relative_base_rates_dct[subgroup]['percentage'],
+                                             subgroup_relative_base_rates_dct[subgroup]['num_rows'], 'Base_Rate']
+
+    # Create a row facet bar chart
+    facet_sort_by_lst = ['overall'] + [grp for grp in stats_df.Subgroup.unique() if grp.lower() != 'overall']
+    col_facet_bar_chart = create_col_facet_bar_chart(stats_df,
+                                                     x_col='Statistics_Type',
+                                                     y_col='Num_Rows',
+                                                     facet_column_name='Subgroup',
+                                                     text_labels_column='Percentage',
+                                                     x_sort_by_lst=['Proportion', 'Base_Rate'],
+                                                     facet_sort_by_lst=facet_sort_by_lst,
+                                                     color_legend_title='Statistics Type',
+                                                     facet_title='')
+    return col_facet_bar_chart
 
 
 def create_col_facet_bar_chart(df, x_col, y_col, facet_column_name, text_labels_column, x_sort_by_lst=Undefined,
@@ -393,7 +427,6 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
         PPV: 'C1',
         ACCURACY: 'C1',
         F1: 'C1',
-        POSITIVE_RATE: 'C1',
         # C2
         EQUALIZED_ODDS_TPR: 'C2',
         EQUALIZED_ODDS_FPR: 'C2',

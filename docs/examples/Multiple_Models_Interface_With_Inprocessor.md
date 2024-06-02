@@ -57,6 +57,10 @@ TEST_SET_FRACTION = 0.2
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
+* **computation_mode**: str, 'default' or 'error_analysis'. Name of the computation mode. When a default computation mode measures metrics for sex_priv and sex_dis, an `error_analysis` mode measures metrics for (sex_priv, sex_priv_correct, sex_priv_incorrect) and (sex_dis, sex_dis_correct, sex_dis_incorrect). Therefore, a user can analyze how a model is certain about its incorrect predictions.
+
 * **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
 * **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
@@ -68,9 +72,10 @@ config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
 config_yaml_content = """
 dataset_name: Law_School
 bootstrap_fraction: 0.8
+random_state: 42
 computation_mode: error_analysis
 n_estimators: 30  # Better to input the higher number of estimators than 100; this is only for this use case example
-sensitive_attributes_dct: {'male': '0.0', 'race': 'Non-White', 'male&race': None}
+sensitive_attributes_dct: {'male': '0', 'race': 'Non-White', 'male&race': None}
 """
 
 with open(config_yaml_path, 'w', encoding='utf-8') as f:
@@ -87,7 +92,7 @@ SAVE_RESULTS_DIR_PATH = os.path.join(ROOT_DIR, 'results', f'{config.dataset_name
 
 
 ```python
-from virny.datasets.data_loaders import LawSchoolDataset
+from virny.datasets import LawSchoolDataset
 
 data_loader = LawSchoolDataset()
 data_loader.X_data[data_loader.X_data.columns[:5]].head()
@@ -181,7 +186,11 @@ column_transformer = ColumnTransformer(transformers=[
 # Create a binary race column for in-processing since aif360 inprocessors use a sensitive attribute during their learning.
 data_loader.X_data['race_binary'] = data_loader.X_data['race'].apply(lambda x: 1 if x == 'White' else 0)
 
-base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET_FRACTION, DATASET_SPLIT_SEED)
+base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                       column_transformer=column_transformer,
+                                       sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                       test_set_fraction=TEST_SET_FRACTION,
+                                       dataset_split_seed=DATASET_SPLIT_SEED)
 base_flow_dataset.X_train_val['race_binary'] = data_loader.X_data.loc[base_flow_dataset.X_train_val.index, 'race_binary']
 base_flow_dataset.X_test['race_binary'] = data_loader.X_data.loc[base_flow_dataset.X_test.index, 'race_binary']
 ```
@@ -226,9 +235,31 @@ class ExpGradientReductionWrapper(BaseInprocessingWrapper):
 
     """
 
-    def __init__(self, inprocessor, sensitive_attr_for_intervention):
+    def __init__(self, estimator, sensitive_attr_for_intervention):
         self.sensitive_attr_for_intervention = sensitive_attr_for_intervention
-        self.inprocessor = inprocessor
+        self.estimator = estimator
+        self.inprocessor = ExponentiatedGradientReduction(estimator=self.estimator,
+                                                          constraints='DemographicParity',
+                                                          drop_prot_attr=True)
+
+    def __copy__(self):
+        new_estimator = copy.copy(self.estimator)
+        return ExpGradientReductionWrapper(estimator=new_estimator,
+                                           sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
+
+    def __deepcopy__(self, memo):
+        new_estimator = copy.deepcopy(self.estimator)
+        return ExpGradientReductionWrapper(estimator=new_estimator,
+                                           sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
+
+    def get_params(self):
+        return {'sensitive_attr_for_intervention': self.sensitive_attr_for_intervention}
+    
+    def set_params(self, random_state):
+        self.estimator.set_params(random_state=random_state)
+        self.inprocessor = ExponentiatedGradientReduction(estimator=self.estimator,
+                                                          constraints='DemographicParity',
+                                                          drop_prot_attr=True)
 
     def fit(self, X, y):
         train_binary_dataset = construct_binary_label_dataset_from_df(X_sample=X,
@@ -261,19 +292,6 @@ class ExpGradientReductionWrapper(BaseInprocessingWrapper):
         test_dataset_pred = self.inprocessor.predict(test_binary_dataset)
         return test_dataset_pred.labels
 
-    def __copy__(self):
-        new_inprocessor = copy.copy(self.inprocessor)
-        return ExpGradientReductionWrapper(inprocessor=new_inprocessor,
-                                           sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
-
-    def __deepcopy__(self, memo):
-        new_inprocessor = copy.deepcopy(self.inprocessor)
-        return ExpGradientReductionWrapper(inprocessor=new_inprocessor,
-                                           sensitive_attr_for_intervention=self.sensitive_attr_for_intervention)
-
-    def get_params(self):
-        return {'sensitive_attr_for_intervention': self.sensitive_attr_for_intervention}
-
 ```
 
 
@@ -282,14 +300,10 @@ class ExpGradientReductionWrapper(BaseInprocessingWrapper):
 # Note that in the above wrapper, 1 is used as a favorable label, and 0 is used as an unfavorable label.
 sensitive_attr_for_intervention = 'race_binary'
 
-# Define an inprocessor
+# Define an estimator
 estimator = LogisticRegression(solver='lbfgs', max_iter=1000)
-inprocessor = ExponentiatedGradientReduction(estimator=estimator,
-                                             constraints='DemographicParity',
-                                             drop_prot_attr=True)
-
 models_config = {
-    'ExponentiatedGradientReduction': ExpGradientReductionWrapper(inprocessor=inprocessor, 
+    'ExponentiatedGradientReduction': ExpGradientReductionWrapper(estimator=estimator,
                                                                   sensitive_attr_for_intervention=sensitive_attr_for_intervention)
 }
 ```
@@ -355,84 +369,84 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
   <tbody>
     <tr>
       <th>0</th>
-      <td>Mean_Prediction</td>
-      <td>0.023388</td>
-      <td>0.020879</td>
-      <td>0.014551</td>
-      <td>0.086595</td>
-      <td>0.026703</td>
+      <td>Aleatoric_Uncertainty</td>
+      <td>0.005905</td>
+      <td>0.004883</td>
+      <td>0.003296</td>
+      <td>0.021364</td>
+      <td>0.007256</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>Overall_Uncertainty</td>
-      <td>0.022109</td>
-      <td>0.019718</td>
-      <td>0.013374</td>
-      <td>0.085599</td>
-      <td>0.025269</td>
+      <td>IQR</td>
+      <td>0.010355</td>
+      <td>0.009922</td>
+      <td>0.008073</td>
+      <td>0.029115</td>
+      <td>0.010926</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>Aleatoric_Uncertainty</td>
-      <td>0.008804</td>
-      <td>0.007275</td>
-      <td>0.005080</td>
-      <td>0.030067</td>
-      <td>0.010825</td>
+      <td>Mean_Prediction</td>
+      <td>0.024633</td>
+      <td>0.021842</td>
+      <td>0.015440</td>
+      <td>0.088320</td>
+      <td>0.028322</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>Statistical_Bias</td>
-      <td>0.098350</td>
-      <td>0.089518</td>
-      <td>0.004390</td>
-      <td>0.973543</td>
-      <td>0.110021</td>
+      <td>Overall_Uncertainty</td>
+      <td>0.020169</td>
+      <td>0.018285</td>
+      <td>0.012946</td>
+      <td>0.073729</td>
+      <td>0.022659</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>IQR</td>
-      <td>0.010310</td>
-      <td>0.009667</td>
-      <td>0.007016</td>
-      <td>0.037194</td>
-      <td>0.011161</td>
+      <td>Statistical_Bias</td>
+      <td>0.098458</td>
+      <td>0.089847</td>
+      <td>0.004210</td>
+      <td>0.979146</td>
+      <td>0.109838</td>
     </tr>
     <tr>
       <th>5</th>
       <td>Std</td>
-      <td>0.009641</td>
-      <td>0.008739</td>
-      <td>0.005772</td>
-      <td>0.039553</td>
-      <td>0.010832</td>
+      <td>0.009615</td>
+      <td>0.008868</td>
+      <td>0.006229</td>
+      <td>0.036276</td>
+      <td>0.010603</td>
     </tr>
     <tr>
       <th>6</th>
       <td>Epistemic_Uncertainty</td>
-      <td>0.013305</td>
-      <td>0.012443</td>
-      <td>0.008294</td>
-      <td>0.055532</td>
-      <td>0.014444</td>
+      <td>0.014264</td>
+      <td>0.013402</td>
+      <td>0.009650</td>
+      <td>0.052365</td>
+      <td>0.015403</td>
     </tr>
     <tr>
       <th>7</th>
       <td>Label_Stability</td>
-      <td>0.987516</td>
-      <td>0.988232</td>
-      <td>0.991728</td>
-      <td>0.951923</td>
-      <td>0.986570</td>
+      <td>0.989087</td>
+      <td>0.989696</td>
+      <td>0.992222</td>
+      <td>0.963462</td>
+      <td>0.988281</td>
     </tr>
     <tr>
       <th>8</th>
       <td>Jitter</td>
-      <td>0.009299</td>
-      <td>0.008656</td>
-      <td>0.006096</td>
-      <td>0.035234</td>
-      <td>0.010149</td>
+      <td>0.008198</td>
+      <td>0.007553</td>
+      <td>0.005556</td>
+      <td>0.028294</td>
+      <td>0.009050</td>
     </tr>
     <tr>
       <th>9</th>
@@ -446,20 +460,20 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>10</th>
       <td>TNR</td>
-      <td>0.138889</td>
+      <td>0.141204</td>
       <td>0.133028</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.144860</td>
+      <td>0.149533</td>
     </tr>
     <tr>
       <th>11</th>
       <td>PPV</td>
-      <td>0.908487</td>
+      <td>0.908711</td>
       <td>0.918534</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.895129</td>
+      <td>0.895642</td>
     </tr>
     <tr>
       <th>12</th>
@@ -473,50 +487,41 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:6]].head(20)
     <tr>
       <th>13</th>
       <td>FPR</td>
-      <td>0.861111</td>
+      <td>0.858796</td>
       <td>0.866972</td>
       <td>0.000000</td>
       <td>1.000000</td>
-      <td>0.855140</td>
+      <td>0.850467</td>
     </tr>
     <tr>
       <th>14</th>
       <td>Accuracy</td>
-      <td>0.902163</td>
+      <td>0.902404</td>
       <td>0.912162</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.888951</td>
+      <td>0.889509</td>
     </tr>
     <tr>
       <th>15</th>
       <td>F1</td>
-      <td>0.947774</td>
+      <td>0.947895</td>
       <td>0.953468</td>
       <td>1.000000</td>
       <td>0.000000</td>
-      <td>0.940114</td>
+      <td>0.940397</td>
     </tr>
     <tr>
       <th>16</th>
       <td>Selection-Rate</td>
-      <td>0.977163</td>
+      <td>0.976923</td>
       <td>0.979730</td>
       <td>0.986574</td>
       <td>0.908654</td>
-      <td>0.973772</td>
+      <td>0.973214</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>Positive-Rate</td>
-      <td>1.090397</td>
-      <td>1.079070</td>
-      <td>1.000000</td>
-      <td>9.947368</td>
-      <td>1.105830</td>
-    </tr>
-    <tr>
-      <th>18</th>
       <td>Sample_Size</td>
       <td>4160.000000</td>
       <td>2368.000000</td>
@@ -588,41 +593,41 @@ models_composed_metrics_df
     <tr>
       <th>0</th>
       <td>Accuracy_Difference</td>
-      <td>-0.023211</td>
-      <td>-0.180454</td>
-      <td>-0.160337</td>
+      <td>-0.022653</td>
+      <td>-0.178877</td>
+      <td>-0.157307</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Aleatoric_Uncertainty_Difference</td>
-      <td>0.003550</td>
-      <td>0.030174</td>
-      <td>0.032971</td>
+      <td>0.002373</td>
+      <td>0.018372</td>
+      <td>0.021097</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>2</th>
       <td>Aleatoric_Uncertainty_Ratio</td>
-      <td>1.487968</td>
-      <td>8.174811</td>
-      <td>6.327559</td>
+      <td>1.485922</td>
+      <td>6.916304</td>
+      <td>5.985519</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>3</th>
       <td>Epistemic_Uncertainty_Difference</td>
-      <td>0.002002</td>
-      <td>0.010810</td>
-      <td>0.015361</td>
+      <td>0.002001</td>
+      <td>0.009870</td>
+      <td>0.014769</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>4</th>
       <td>Epistemic_Uncertainty_Ratio</td>
-      <td>1.160858</td>
-      <td>1.927304</td>
-      <td>2.270925</td>
+      <td>1.149317</td>
+      <td>1.773535</td>
+      <td>2.128039</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
@@ -636,97 +641,97 @@ models_composed_metrics_df
     <tr>
       <th>6</th>
       <td>Equalized_Odds_FPR</td>
-      <td>-0.011832</td>
-      <td>0.082345</td>
-      <td>0.057266</td>
+      <td>-0.016505</td>
+      <td>0.076428</td>
+      <td>0.045638</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>7</th>
       <td>IQR_Difference</td>
-      <td>0.001494</td>
-      <td>0.018301</td>
-      <td>0.021933</td>
+      <td>0.001005</td>
+      <td>0.010219</td>
+      <td>0.012572</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>8</th>
       <td>Jitter_Difference</td>
-      <td>0.001493</td>
-      <td>0.015634</td>
-      <td>0.017956</td>
+      <td>0.001498</td>
+      <td>0.009698</td>
+      <td>0.013220</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>9</th>
       <td>Label_Stability_Ratio</td>
-      <td>0.998318</td>
-      <td>0.979427</td>
-      <td>0.976888</td>
+      <td>0.998571</td>
+      <td>0.988954</td>
+      <td>0.984495</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>10</th>
       <td>Label_Stability_Difference</td>
-      <td>-0.001662</td>
-      <td>-0.020380</td>
-      <td>-0.022865</td>
+      <td>-0.001415</td>
+      <td>-0.010944</td>
+      <td>-0.015355</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>11</th>
       <td>Overall_Uncertainty_Difference</td>
-      <td>0.005552</td>
-      <td>0.040984</td>
-      <td>0.048332</td>
+      <td>0.004374</td>
+      <td>0.028242</td>
+      <td>0.035866</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>12</th>
       <td>Overall_Uncertainty_Ratio</td>
-      <td>1.281547</td>
-      <td>3.583619</td>
-      <td>3.644668</td>
+      <td>1.239210</td>
+      <td>2.780147</td>
+      <td>3.070293</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>13</th>
-      <td>Disparate_Impact</td>
-      <td>1.024800</td>
-      <td>1.248497</td>
-      <td>1.215937</td>
+      <td>Statistical_Parity_Difference</td>
+      <td>-0.006515</td>
+      <td>-0.011852</td>
+      <td>-0.014432</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>Statistical_Parity_Difference</td>
-      <td>-0.005957</td>
-      <td>-0.010275</td>
-      <td>-0.011401</td>
+      <td>Disparate_Impact</td>
+      <td>0.993350</td>
+      <td>0.987890</td>
+      <td>0.985245</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>15</th>
       <td>Std_Difference</td>
-      <td>0.002092</td>
-      <td>0.011726</td>
-      <td>0.015143</td>
+      <td>0.001734</td>
+      <td>0.009583</td>
+      <td>0.013289</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>16</th>
       <td>Std_Ratio</td>
-      <td>1.239415</td>
-      <td>2.493035</td>
-      <td>2.794353</td>
+      <td>1.195550</td>
+      <td>2.175074</td>
+      <td>2.552202</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
       <th>17</th>
       <td>Equalized_Odds_TNR</td>
-      <td>0.011832</td>
-      <td>-0.082345</td>
-      <td>-0.057266</td>
+      <td>0.016505</td>
+      <td>-0.076428</td>
+      <td>-0.045638</td>
       <td>ExponentiatedGradientReduction</td>
     </tr>
     <tr>
@@ -766,13 +771,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-88507ce88f374bfc8d4eeffaae67738f"></div>
+<div id="altair-viz-8ce6245c8e8d4e6f8824812fc7a9ae5c"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-88507ce88f374bfc8d4eeffaae67738f") {
-      outputDiv = document.getElementById("altair-viz-88507ce88f374bfc8d4eeffaae67738f");
+    if (outputDiv.id !== "altair-viz-8ce6245c8e8d4e6f8824812fc7a9ae5c") {
+      outputDiv = document.getElementById("altair-viz-8ce6245c8e8d4e6f8824812fc7a9ae5c");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -818,7 +823,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-8e1abd75ad4d8436dab939cadfc9eb86"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-8e1abd75ad4d8436dab939cadfc9eb86": [{"overall": 0.9021634615384616, "metric": "Accuracy", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9477736430129604, "metric": "F1", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9084870848708488, "metric": "PPV", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9771634615384616, "metric": "Selection-Rate", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.1388888888888889, "metric": "TNR", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9906115879828328, "metric": "TPR", "model_name": "ExponentiatedGradientReduction"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-00bd6fa3450886cb6828b3ef903a5bbc"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-00bd6fa3450886cb6828b3ef903a5bbc": [{"overall": 0.9024038461538462, "metric": "Accuracy", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9478952772073922, "metric": "F1", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9087106299212598, "metric": "PPV", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9769230769230768, "metric": "Selection-Rate", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.1412037037037037, "metric": "TNR", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.9906115879828328, "metric": "TPR", "model_name": "ExponentiatedGradientReduction"}]}}, {"mode": "vega-lite"});
 </script>
 
 
@@ -835,13 +840,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-4b9935d05e4044f3b5cfdd1f45c67c9c"></div>
+<div id="altair-viz-f83bc2fb3db24a83af2824154ab458aa"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-4b9935d05e4044f3b5cfdd1f45c67c9c") {
-      outputDiv = document.getElementById("altair-viz-4b9935d05e4044f3b5cfdd1f45c67c9c");
+    if (outputDiv.id !== "altair-viz-f83bc2fb3db24a83af2824154ab458aa") {
+      outputDiv = document.getElementById("altair-viz-f83bc2fb3db24a83af2824154ab458aa");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -887,5 +892,5 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-a874bf725903e4febd75fa4668d469cb"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Aleatoric_Uncertainty", "Epistemic_Uncertainty", "Std", "IQR", "Jitter"], "title": "Stability and Uncertainty Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-a874bf725903e4febd75fa4668d469cb": [{"overall": 0.008804261223772, "metric": "Aleatoric_Uncertainty", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0133050928217114, "metric": "Epistemic_Uncertainty", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0103101389257501, "metric": "IQR", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0092987400530503, "metric": "Jitter", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.009640551539234, "metric": "Std", "model_name": "ExponentiatedGradientReduction"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-239735fb1c50932b034e359354331276"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Aleatoric_Uncertainty", "Epistemic_Uncertainty", "Std", "IQR", "Jitter"], "title": "Stability and Uncertainty Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-239735fb1c50932b034e359354331276": [{"overall": 0.0059052534542708, "metric": "Aleatoric_Uncertainty", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0142638880612976, "metric": "Epistemic_Uncertainty", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0103545201281254, "metric": "IQR", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0081979442970822, "metric": "Jitter", "model_name": "ExponentiatedGradientReduction"}, {"overall": 0.0096154295342772, "metric": "Std", "model_name": "ExponentiatedGradientReduction"}]}}, {"mode": "vega-lite"});
 </script>

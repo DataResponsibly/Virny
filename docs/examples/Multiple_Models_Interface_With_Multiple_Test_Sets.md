@@ -1,6 +1,7 @@
 # Multiple Models Interface For Multiple Test Sets
 
-In this example, we are going to conduct a deep performance profiling for 2 models. For that, we will use `compute_metrics_with_multiple_test_sets` interface that will run metric computation for multiple models and test each model using multiple test sets.
+In this example, we are going to conduct a deep performance profiling for 2 models under multiple test sets. It turns out particularly effective in case we want to test models on different test sets, but to avoid an overhead with retraining a bootstrap with 50-200 estimators.
+For that, we will use `compute_metrics_with_multiple_test_sets` interface that will run metric computation for multiple models and test each model using multiple test sets.
 
 ## Import dependencies
 
@@ -19,7 +20,7 @@ from sklearn.preprocessing import StandardScaler
 from virny.user_interfaces.multiple_models_with_multiple_test_sets_api import compute_metrics_with_multiple_test_sets
 from virny.utils.custom_initializers import create_config_obj, create_models_metrics_dct_from_database_df
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
-from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
+from virny.datasets import CompasWithoutSensitiveAttrsDataset
 ```
 
 
@@ -37,6 +38,47 @@ Based on the library flow, we need to create 3 input objects for a user interfac
 ```python
 TEST_SET_FRACTION = 0.2
 DATASET_SPLIT_SEED = 42
+```
+
+### Create a config object
+
+`compute_metrics_with_multiple_test_sets` interface requires that your **yaml file** includes the following parameters:
+
+* **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
+
+* **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
+
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
+* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
+
+* **computation_mode**: str, 'default' or 'error_analysis'. Name of the computation mode. When a default computation mode measures metrics for sex_priv and sex_dis, an `error_analysis` mode measures metrics for (sex_priv, sex_priv_correct, sex_priv_incorrect) and (sex_dis, sex_dis_correct, sex_dis_incorrect). Therefore, a user can analyze how a model is certain about its incorrect predictions.
+
+* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+
+Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
+
+
+
+```python
+ROOT_DIR = os.getcwd()
+config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
+config_yaml_content = \
+"""dataset_name: COMPAS_Without_Sensitive_Attributes
+bootstrap_fraction: 0.8
+random_state: 42
+n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
+computation_mode: error_analysis
+sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}
+"""
+
+with open(config_yaml_path, 'w', encoding='utf-8') as f:
+    f.write(config_yaml_content)
+```
+
+
+```python
+config = create_config_obj(config_yaml_path=config_yaml_path)
 ```
 
 ### Create a Dataset class
@@ -140,43 +182,11 @@ column_transformer = ColumnTransformer(transformers=[
 
 
 ```python
-base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET_FRACTION, DATASET_SPLIT_SEED)
-```
-
-### Create a config object
-
-`compute_metrics_with_multiple_test_sets` interface requires that your **yaml file** includes the following parameters:
-
-* **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
-
-* **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
-
-* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
-
-* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
-
-Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
-
-
-
-```python
-ROOT_DIR = os.getcwd()
-config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
-config_yaml_content = \
-"""dataset_name: COMPAS_Without_Sensitive_Attributes
-bootstrap_fraction: 0.8
-n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
-computation_mode: error_analysis
-sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}
-"""
-
-with open(config_yaml_path, 'w', encoding='utf-8') as f:
-    f.write(config_yaml_content)
-```
-
-
-```python
-config = create_config_obj(config_yaml_path=config_yaml_path)
+base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                       column_transformer=column_transformer,
+                                       sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                       test_set_fraction=TEST_SET_FRACTION,
+                                       dataset_split_seed=DATASET_SPLIT_SEED)
 ```
 
 ### Create a models config
@@ -238,7 +248,7 @@ print('Current session uuid: ', custom_table_fields_dct['session_uuid'])
 
 
 ```python
-extra_test_sets_lst = [(base_flow_dataset.X_test, base_flow_dataset.y_test, base_flow_dataset.init_features_df)]
+extra_test_sets_lst = [(base_flow_dataset.X_test, base_flow_dataset.y_test, base_flow_dataset.init_sensitive_attrs_df)]
 compute_metrics_with_multiple_test_sets(dataset=base_flow_dataset,
                                         extra_test_sets_lst=extra_test_sets_lst,
                                         config=config,
@@ -246,6 +256,12 @@ compute_metrics_with_multiple_test_sets(dataset=base_flow_dataset,
                                         custom_tbl_fields_dct=custom_table_fields_dct,
                                         db_writer_func=db_writer_func)
 ```
+
+    Analyze multiple models:   0%|[31m          [0m| 0/2 [00:00<?, ?it/s]
+    Classifiers testing by bootstrap: 100%|[34m██████████[0m| 50/50 [00:00<00:00, 112.87it/s]
+    Analyze multiple models:  50%|[31m█████     [0m| 1/2 [00:06<00:06,  6.70s/it]
+    Classifiers testing by bootstrap: 100%|[34m██████████[0m| 50/50 [00:03<00:00, 16.63it/s]
+    Analyze multiple models: 100%|[31m██████████[0m| 2/2 [00:16<00:00,  8.05s/it]
 
 
 

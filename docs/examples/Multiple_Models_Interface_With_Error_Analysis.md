@@ -30,7 +30,7 @@ from sklearn.preprocessing import StandardScaler
 
 from virny.utils.custom_initializers import create_config_obj, read_model_metric_dfs, create_models_config_from_tuned_params_df
 from virny.user_interfaces.multiple_models_api import compute_metrics_with_config
-from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
+from virny.datasets import CompasWithoutSensitiveAttrsDataset
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
 from virny.custom_classes.metrics_visualizer import MetricsVisualizer
 from virny.custom_classes.metrics_composer import MetricsComposer
@@ -62,6 +62,8 @@ TEST_SET_FRACTION = 0.2
 
 * **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
 
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
 * **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
 
 * **computation_mode**: str, 'default' or 'error_analysis'. Name of the computation mode. When a default computation mode measures metrics for sex_priv and sex_dis, an `error_analysis` mode measures metrics for (sex_priv, sex_priv_correct, sex_priv_incorrect) and (sex_dis, sex_dis_correct, sex_dis_incorrect). Therefore, a user can analyze how a model is certain about its incorrect predictions.
@@ -77,6 +79,7 @@ config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
 config_yaml_content = """
 dataset_name: COMPAS_Without_Sensitive_Attributes
 bootstrap_fraction: 0.8
+random_state: 42
 n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
 computation_mode: error_analysis
 sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}
@@ -193,7 +196,11 @@ column_transformer = ColumnTransformer(transformers=[
 
 
 ```python
-base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET_FRACTION, DATASET_SPLIT_SEED)
+base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                       column_transformer=column_transformer,
+                                       sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                       test_set_fraction=TEST_SET_FRACTION,
+                                       dataset_split_seed=DATASET_SPLIT_SEED)
 ```
 
 ### Create a models config for metrics computation
@@ -289,81 +296,81 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:5]].head(20)
   <tbody>
     <tr>
       <th>0</th>
-      <td>Mean_Prediction</td>
-      <td>0.521995</td>
-      <td>0.577845</td>
-      <td>0.601574</td>
-      <td>0.525711</td>
+      <td>Statistical_Bias</td>
+      <td>0.416691</td>
+      <td>0.413261</td>
+      <td>0.324033</td>
+      <td>0.618208</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>Std</td>
-      <td>0.072253</td>
-      <td>0.075557</td>
-      <td>0.068902</td>
-      <td>0.090176</td>
+      <td>Overall_Uncertainty</td>
+      <td>0.887649</td>
+      <td>0.898580</td>
+      <td>0.880975</td>
+      <td>0.939015</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>Overall_Uncertainty</td>
-      <td>0.887763</td>
-      <td>0.896446</td>
-      <td>0.875769</td>
-      <td>0.941874</td>
+      <td>Aleatoric_Uncertainty</td>
+      <td>0.859615</td>
+      <td>0.866990</td>
+      <td>0.852746</td>
+      <td>0.899708</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>Aleatoric_Uncertainty</td>
-      <td>0.860720</td>
-      <td>0.866208</td>
-      <td>0.850550</td>
-      <td>0.900606</td>
+      <td>IQR</td>
+      <td>0.087474</td>
+      <td>0.088773</td>
+      <td>0.081936</td>
+      <td>0.104479</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>IQR</td>
-      <td>0.082323</td>
-      <td>0.084506</td>
-      <td>0.074594</td>
-      <td>0.106282</td>
+      <td>Std</td>
+      <td>0.073404</td>
+      <td>0.076654</td>
+      <td>0.071201</td>
+      <td>0.089178</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>Statistical_Bias</td>
-      <td>0.416585</td>
-      <td>0.411295</td>
-      <td>0.320042</td>
-      <td>0.611776</td>
+      <td>Mean_Prediction</td>
+      <td>0.519733</td>
+      <td>0.575657</td>
+      <td>0.597694</td>
+      <td>0.525040</td>
     </tr>
     <tr>
       <th>6</th>
       <td>Epistemic_Uncertainty</td>
-      <td>0.027043</td>
-      <td>0.030239</td>
-      <td>0.025219</td>
-      <td>0.041268</td>
+      <td>0.028034</td>
+      <td>0.031589</td>
+      <td>0.028229</td>
+      <td>0.039308</td>
     </tr>
     <tr>
       <th>7</th>
       <td>Jitter</td>
-      <td>0.110380</td>
-      <td>0.130717</td>
-      <td>0.099423</td>
-      <td>0.199468</td>
+      <td>0.108416</td>
+      <td>0.130465</td>
+      <td>0.102774</td>
+      <td>0.194069</td>
     </tr>
     <tr>
       <th>8</th>
       <td>Label_Stability</td>
-      <td>0.859508</td>
-      <td>0.825403</td>
-      <td>0.871448</td>
-      <td>0.724242</td>
+      <td>0.862917</td>
+      <td>0.827488</td>
+      <td>0.866939</td>
+      <td>0.736875</td>
     </tr>
     <tr>
       <th>9</th>
       <td>TPR</td>
-      <td>0.651805</td>
-      <td>0.466667</td>
+      <td>0.656051</td>
+      <td>0.493333</td>
       <td>1.000000</td>
       <td>0.000000</td>
     </tr>
@@ -378,16 +385,16 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:5]].head(20)
     <tr>
       <th>11</th>
       <td>PPV</td>
-      <td>0.663067</td>
-      <td>0.573770</td>
+      <td>0.664516</td>
+      <td>0.587302</td>
       <td>1.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>12</th>
       <td>FNR</td>
-      <td>0.348195</td>
-      <td>0.533333</td>
+      <td>0.343949</td>
+      <td>0.506667</td>
       <td>0.000000</td>
       <td>1.000000</td>
     </tr>
@@ -402,42 +409,34 @@ sample_model_metrics_df[sample_model_metrics_df.columns[:5]].head(20)
     <tr>
       <th>14</th>
       <td>Accuracy</td>
-      <td>0.696970</td>
-      <td>0.687204</td>
+      <td>0.698864</td>
+      <td>0.696682</td>
       <td>1.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>15</th>
       <td>F1</td>
-      <td>0.657388</td>
-      <td>0.514706</td>
+      <td>0.660256</td>
+      <td>0.536232</td>
       <td>1.000000</td>
       <td>0.000000</td>
     </tr>
     <tr>
       <th>16</th>
       <td>Selection-Rate</td>
-      <td>0.438447</td>
-      <td>0.289100</td>
-      <td>0.241379</td>
-      <td>0.393939</td>
+      <td>0.440341</td>
+      <td>0.298578</td>
+      <td>0.251701</td>
+      <td>0.406250</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>Positive-Rate</td>
-      <td>0.983015</td>
-      <td>0.813333</td>
-      <td>1.000000</td>
-      <td>0.650000</td>
-    </tr>
-    <tr>
-      <th>18</th>
       <td>Sample_Size</td>
       <td>1056.000000</td>
       <td>211.000000</td>
-      <td>145.000000</td>
-      <td>66.000000</td>
+      <td>147.000000</td>
+      <td>64.000000</td>
     </tr>
   </tbody>
 </table>
@@ -489,13 +488,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-3416c4f16d5a4cb1a078edf5cf83739a"></div>
+<div id="altair-viz-126d304fec474bfc872160b0fc9f694b"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-3416c4f16d5a4cb1a078edf5cf83739a") {
-      outputDiv = document.getElementById("altair-viz-3416c4f16d5a4cb1a078edf5cf83739a");
+    if (outputDiv.id !== "altair-viz-126d304fec474bfc872160b0fc9f694b") {
+      outputDiv = document.getElementById("altair-viz-126d304fec474bfc872160b0fc9f694b");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -541,7 +540,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-4377aaea72661c7a7f79f075a0cf02b3"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-4377aaea72661c7a7f79f075a0cf02b3": [{"overall": 0.696969696969697, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6573875802997858, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6630669546436285, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4384469696969697, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.7333333333333333, "metric": "TNR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6518046709129511, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6837121212121212, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6369565217391304, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.6525612472160356, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.4251893939393939, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.7333333333333333, "metric": "TNR", "model_name": "LogisticRegression"}, {"overall": 0.6220806794055201, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.7007575757575758, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6594827586206896, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6695842450765864, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.4327651515151515, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.7418803418803419, "metric": "TNR", "model_name": "RandomForestClassifier"}, {"overall": 0.6496815286624203, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.7073863636363636, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6680988184747583, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.6760869565217391, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.4356060606060606, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.7452991452991453, "metric": "TNR", "model_name": "XGBClassifier"}, {"overall": 0.6602972399150743, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-dab0d6e1048f7a830144e19e84985bcd"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Accuracy", "F1", "TPR", "TNR", "PPV", "Selection-Rate"], "title": "Accuracy Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-dab0d6e1048f7a830144e19e84985bcd": [{"overall": 0.6988636363636364, "metric": "Accuracy", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6602564102564102, "metric": "F1", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6645161290322581, "metric": "PPV", "model_name": "DecisionTreeClassifier"}, {"overall": 0.4403409090909091, "metric": "Selection-Rate", "model_name": "DecisionTreeClassifier"}, {"overall": 0.7333333333333333, "metric": "TNR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6560509554140127, "metric": "TPR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.6846590909090909, "metric": "Accuracy", "model_name": "LogisticRegression"}, {"overall": 0.6392199349945829, "metric": "F1", "model_name": "LogisticRegression"}, {"overall": 0.6526548672566371, "metric": "PPV", "model_name": "LogisticRegression"}, {"overall": 0.428030303030303, "metric": "Selection-Rate", "model_name": "LogisticRegression"}, {"overall": 0.7316239316239316, "metric": "TNR", "model_name": "LogisticRegression"}, {"overall": 0.6263269639065817, "metric": "TPR", "model_name": "LogisticRegression"}, {"overall": 0.6988636363636364, "metric": "Accuracy", "model_name": "RandomForestClassifier"}, {"overall": 0.6580645161290323, "metric": "F1", "model_name": "RandomForestClassifier"}, {"overall": 0.6666666666666666, "metric": "PPV", "model_name": "RandomForestClassifier"}, {"overall": 0.4346590909090909, "metric": "Selection-Rate", "model_name": "RandomForestClassifier"}, {"overall": 0.7384615384615385, "metric": "TNR", "model_name": "RandomForestClassifier"}, {"overall": 0.6496815286624203, "metric": "TPR", "model_name": "RandomForestClassifier"}, {"overall": 0.7064393939393939, "metric": "Accuracy", "model_name": "XGBClassifier"}, {"overall": 0.6652267818574514, "metric": "F1", "model_name": "XGBClassifier"}, {"overall": 0.676923076923077, "metric": "PPV", "model_name": "XGBClassifier"}, {"overall": 0.4308712121212121, "metric": "Selection-Rate", "model_name": "XGBClassifier"}, {"overall": 0.7487179487179487, "metric": "TNR", "model_name": "XGBClassifier"}, {"overall": 0.6539278131634819, "metric": "TPR", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 
@@ -558,13 +557,13 @@ visualizer.create_overall_metrics_bar_char(
 
 
 
-<div id="altair-viz-4eb6bce4207946df99654e2b95bae3ce"></div>
+<div id="altair-viz-c03fc3701181413f9899589d0833d97d"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-4eb6bce4207946df99654e2b95bae3ce") {
-      outputDiv = document.getElementById("altair-viz-4eb6bce4207946df99654e2b95bae3ce");
+    if (outputDiv.id !== "altair-viz-c03fc3701181413f9899589d0833d97d") {
+      outputDiv = document.getElementById("altair-viz-c03fc3701181413f9899589d0833d97d");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
@@ -610,7 +609,7 @@ visualizer.create_overall_metrics_bar_char(
         .catch(showError)
         .then(() => displayChart(vegaEmbed));
     }
-  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-3614bc049170c97b2d93016ad918ed87"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Aleatoric_Uncertainty", "Overall_Uncertainty", "Label_Stability", "Std", "IQR", "Jitter"], "title": "Stability and Uncertainty Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-3614bc049170c97b2d93016ad918ed87": [{"overall": 0.8607199637290075, "metric": "Aleatoric_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.0823234508592164, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.1103795609152753, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8595075757575757, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8877630638614109, "metric": "Overall_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.0722530200070569, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9098846506898132, "metric": "Aleatoric_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.0305957160788724, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.0497835497835497, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.9365151515151516, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9127038364381584, "metric": "Overall_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.0225548750141018, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.90655470177347, "metric": "Aleatoric_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.0526181463140505, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.0670949288806432, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9121969696969696, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9122376701069465, "metric": "Overall_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.0393746870091122, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.8269357681274414, "metric": "Aleatoric_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.0908706365153193, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.1086966604823747, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.8509848484848486, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.855431345573202, "metric": "Overall_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.0696154683828353, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
+  })({"config": {"view": {"continuousWidth": 400, "continuousHeight": 300}, "axis": {"labelFontSize": 16, "titleFontSize": 20}, "headerRow": {"labelAlign": "left", "labelAngle": 0, "labelFontSize": 16, "labelPadding": 10, "titleFontSize": 20}}, "data": {"name": "data-bf9607cbc75b22c48ce4f12ba2d48d9a"}, "mark": "bar", "encoding": {"color": {"field": "model_name", "legend": {"labelFontSize": 15, "labelLimit": 300, "title": "Model Name", "titleFontSize": 15, "titleLimit": 300}, "scale": {"scheme": "tableau20"}, "type": "nominal"}, "row": {"field": "metric", "sort": ["Aleatoric_Uncertainty", "Overall_Uncertainty", "Label_Stability", "Std", "IQR", "Jitter"], "title": "Stability and Uncertainty Metrics", "type": "nominal"}, "x": {"axis": {"grid": true}, "field": "overall", "title": "", "type": "quantitative"}, "y": {"axis": null, "field": "model_name", "type": "nominal"}}, "height": 50, "width": 500, "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json", "datasets": {"data-bf9607cbc75b22c48ce4f12ba2d48d9a": [{"overall": 0.8596149143454702, "metric": "Aleatoric_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.087474054180414, "metric": "IQR", "model_name": "DecisionTreeClassifier"}, {"overall": 0.1084160482374766, "metric": "Jitter", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8629166666666667, "metric": "Label_Stability", "model_name": "DecisionTreeClassifier"}, {"overall": 0.8876488942284766, "metric": "Overall_Uncertainty", "model_name": "DecisionTreeClassifier"}, {"overall": 0.073404117593217, "metric": "Std", "model_name": "DecisionTreeClassifier"}, {"overall": 0.9123450427125208, "metric": "Aleatoric_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.0270831502569582, "metric": "IQR", "model_name": "LogisticRegression"}, {"overall": 0.0400301484230055, "metric": "Jitter", "model_name": "LogisticRegression"}, {"overall": 0.948371212121212, "metric": "Label_Stability", "model_name": "LogisticRegression"}, {"overall": 0.9149482865790672, "metric": "Overall_Uncertainty", "model_name": "LogisticRegression"}, {"overall": 0.0215960150909949, "metric": "Std", "model_name": "LogisticRegression"}, {"overall": 0.9079228906658654, "metric": "Aleatoric_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.0537871389523129, "metric": "IQR", "model_name": "RandomForestClassifier"}, {"overall": 0.0781462585034014, "metric": "Jitter", "model_name": "RandomForestClassifier"}, {"overall": 0.9001515151515153, "metric": "Label_Stability", "model_name": "RandomForestClassifier"}, {"overall": 0.9136493218001832, "metric": "Overall_Uncertainty", "model_name": "RandomForestClassifier"}, {"overall": 0.0397114850011915, "metric": "Std", "model_name": "RandomForestClassifier"}, {"overall": 0.8280432820320129, "metric": "Aleatoric_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.0936997464829773, "metric": "IQR", "model_name": "XGBClassifier"}, {"overall": 0.1112786023500308, "metric": "Jitter", "model_name": "XGBClassifier"}, {"overall": 0.848030303030303, "metric": "Label_Stability", "model_name": "XGBClassifier"}, {"overall": 0.8572713761346069, "metric": "Overall_Uncertainty", "model_name": "XGBClassifier"}, {"overall": 0.0705523192882537, "metric": "Std", "model_name": "XGBClassifier"}]}}, {"mode": "vega-lite"});
 </script>
 
 

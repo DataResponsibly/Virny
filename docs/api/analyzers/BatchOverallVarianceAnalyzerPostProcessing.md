@@ -54,6 +54,10 @@ Analyzer to compute subgroup variance metrics using the defined post-processor.
 
     Number of estimators in ensemble to measure base_model stability
 
+- **random_state** (*int*) – defaults to `None`
+
+    [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
+
 - **with_predict_proba** (*bool*) – defaults to `True`
 
     [Optional] A flag if model can return probabilities for its predictions.  If no, only metrics based on labels (not labels and probabilities) will be computed.

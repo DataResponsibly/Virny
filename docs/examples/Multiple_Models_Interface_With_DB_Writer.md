@@ -31,7 +31,7 @@ from virny.utils.custom_initializers import create_config_obj, create_models_met
 from virny.custom_classes.metrics_visualizer import MetricsVisualizer
 from virny.custom_classes.metrics_composer import MetricsComposer
 from virny.preprocessing.basic_preprocessing import preprocess_dataset
-from virny.datasets.data_loaders import CompasWithoutSensitiveAttrsDataset
+from virny.datasets import CompasWithoutSensitiveAttrsDataset
 ```
 
 
@@ -49,6 +49,44 @@ Based on the library flow, we need to create 3 input objects for a user interfac
 ```python
 TEST_SET_FRACTION = 0.2
 DATASET_SPLIT_SEED = 42
+```
+
+### Create a config object
+
+`compute_metrics_with_db_writer` interface requires that your **yaml file** includes the following parameters:
+
+* **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
+
+* **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
+
+* **random_state**: int, a seed to control the randomness of the whole model evaluation pipeline.
+
+* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
+
+* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
+
+Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
+
+
+
+```python
+ROOT_DIR = os.getcwd()
+config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
+config_yaml_content = \
+"""dataset_name: COMPAS_Without_Sensitive_Attributes
+bootstrap_fraction: 0.8
+random_state: 42
+n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
+sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}
+"""
+
+with open(config_yaml_path, 'w', encoding='utf-8') as f:
+    f.write(config_yaml_content)
+```
+
+
+```python
+config = create_config_obj(config_yaml_path=config_yaml_path)
 ```
 
 ### Create a Dataset class
@@ -152,42 +190,11 @@ column_transformer = ColumnTransformer(transformers=[
 
 
 ```python
-base_flow_dataset = preprocess_dataset(data_loader, column_transformer, TEST_SET_FRACTION, DATASET_SPLIT_SEED)
-```
-
-### Create a config object
-
-`compute_metrics_with_db_writer` interface requires that your **yaml file** includes the following parameters:
-
-* **dataset_name**: str, a name of your dataset; it will be used to name files with metrics.
-
-* **bootstrap_fraction**: float, the fraction from a train set in the range [0.0 - 1.0] to fit models in bootstrap (usually more than 0.5).
-
-* **n_estimators**: int, the number of estimators for bootstrap to compute subgroup stability metrics.
-
-* **sensitive_attributes_dct**: dict, a dictionary where keys are sensitive attribute names (including intersectional attributes), and values are disadvantaged values for these attributes. Intersectional attributes must include '&' between sensitive attributes. You do not need to specify disadvantaged values for intersectional groups since they will be derived from disadvantaged values in sensitive_attributes_dct for each separate sensitive attribute in this intersectional pair.
-
-Note that disadvantaged value in a sensitive attribute dictionary must be **the same as in the original dataset**. For example, when distinct values of the _sex_ column in the original dataset are 'F' and 'M', and after pre-processing they became 0 and 1 respectively, you still need to set a disadvantaged value as 'F' or 'M' in the sensitive attribute dictionary.
-
-
-
-```python
-ROOT_DIR = os.getcwd()
-config_yaml_path = os.path.join(ROOT_DIR, 'experiment_config.yaml')
-config_yaml_content = \
-"""dataset_name: COMPAS_Without_Sensitive_Attributes
-bootstrap_fraction: 0.8
-n_estimators: 50  # Better to input the higher number of estimators than 100; this is only for this use case example
-sensitive_attributes_dct: {'sex': 1, 'race': 'African-American', 'sex&race': None}
-"""
-
-with open(config_yaml_path, 'w', encoding='utf-8') as f:
-    f.write(config_yaml_content)
-```
-
-
-```python
-config = create_config_obj(config_yaml_path=config_yaml_path)
+base_flow_dataset = preprocess_dataset(data_loader=data_loader,
+                                       column_transformer=column_transformer,
+                                       sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                       test_set_fraction=TEST_SET_FRACTION,
+                                       dataset_split_seed=DATASET_SPLIT_SEED)
 ```
 
 ### Create a models config

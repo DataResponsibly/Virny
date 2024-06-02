@@ -5,6 +5,7 @@ notebooks
 .DS_Store
 .ipynb_checkpoints
 docs/examples/test.py
+tests/results
 
 # Remove big files from GitHub repo
 virny/datasets/2018

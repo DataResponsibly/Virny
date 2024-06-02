@@ -36,7 +36,7 @@ class MetricsVisualizer:
         self.sensitive_attributes_dct = sensitive_attributes_dct
 
         # Metric names
-        self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY, POSITIVE_RATE]
+        self.all_accuracy_metrics = [STATISTICAL_BIAS, TPR, TNR, PPV, FNR, FPR, F1, ACCURACY]
         self.all_stability_metrics = [STD, IQR, JITTER, LABEL_STABILITY]
         self.all_uncertainty_metrics = [ALEATORIC_UNCERTAINTY, OVERALL_UNCERTAINTY, EPISTEMIC_UNCERTAINTY]
         self.all_error_disparity_metrics = [EQUALIZED_ODDS_TPR, EQUALIZED_ODDS_TNR, EQUALIZED_ODDS_FPR, EQUALIZED_ODDS_FNR, DISPARATE_IMPACT, STATISTICAL_PARITY_DIFFERENCE, ACCURACY_DIFFERENCE]
