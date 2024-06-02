@@ -157,7 +157,8 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                                                         boostrap_size=boostrap_size,
                                                         with_replacement=with_replacement,
                                                         random_state=classifier_random_state)
-                classifier.set_params(random_state=classifier_random_state)
+                if 'random_state' in classifier.get_params():
+                    classifier.set_params(random_state=classifier_random_state)
                 classifier = self._fit_model(classifier, X_sample, y_sample)
 
             # Use a predict_proba method if the classifier supports it.
