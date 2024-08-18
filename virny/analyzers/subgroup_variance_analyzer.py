@@ -120,6 +120,14 @@ class SubgroupVarianceAnalyzer:
     def set_test_protected_groups(self, new_test_protected_groups):
         self.__subgroup_variance_calculator.test_protected_groups = new_test_protected_groups
 
+    def set_fitted_bootstrap(self, fitted_bootstrap: list):
+        models_lst = [None] * self.n_estimators
+        for i in range(self.n_estimators):
+            model_dct = fitted_bootstrap[i]
+            models_lst[model_dct['model_idx']] = model_dct['model_obj']
+
+        self.__overall_variance_analyzer.models_lst = models_lst
+
     def compute_metrics(self, save_results: bool, result_filename: str = None,
                         save_dir_path: str = None, with_fit: bool = True):
         """
