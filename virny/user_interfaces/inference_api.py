@@ -7,8 +7,8 @@ from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 
 
-def compute_metric_with_fitted_bootstrap(fitted_bootstrap: list, test_base_flow_dataset: BaseFlowDataset,
-                                         config, with_predict_proba: bool = True, verbose: int = 0):
+def compute_metrics_with_fitted_bootstrap(fitted_bootstrap: list, test_base_flow_dataset: BaseFlowDataset,
+                                          config, with_predict_proba: bool = True, verbose: int = 0):
     model_setting = ModelSetting.BATCH
     X_test, y_test = test_base_flow_dataset.X_test, test_base_flow_dataset.y_test
     test_protected_groups = create_test_protected_groups(X_test, config.init_sensitive_attrs_df, config.sensitive_attributes_dct)
