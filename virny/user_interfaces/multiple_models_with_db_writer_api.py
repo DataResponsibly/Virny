@@ -8,7 +8,7 @@ from virny.user_interfaces.multiple_models_api import run_metrics_computation
 def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_config: dict,
                                    custom_tbl_fields_dct: dict, db_writer_func, postprocessor=None,
                                    with_predict_proba: bool = True, notebook_logs_stdout: bool = False,
-                                   verbose: int = 0) -> dict:
+                                   return_fitted_bootstrap: bool = False, verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
     Save results to a database after each run appending fields and value from custom_tbl_fields_dct and using db_writer_func.
@@ -36,6 +36,9 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
+    return_fitted_bootstrap
+        [Optional] If True, the fitted bootstrap of models is returned. Can be useful to reuse this bootstrap on other test sets.
+         Default, False.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported. Currently, verbose works only with notebook_logs_stdout = False.
@@ -47,21 +50,21 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
 
     multiple_models_metrics_dct = dict()
     run_models_metrics_df = pd.DataFrame()
-    models_metrics_dct = run_metrics_computation(dataset=dataset,
-                                                 bootstrap_fraction=config.bootstrap_fraction,
-                                                 dataset_name=config.dataset_name,
-                                                 models_config=models_config,
-                                                 n_estimators=config.n_estimators,
-                                                 sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                                 random_state=config.random_state,
-                                                 model_setting=config.model_setting,
-                                                 computation_mode=config.computation_mode,
-                                                 postprocessor=postprocessor,
-                                                 postprocessing_sensitive_attribute=config.postprocessing_sensitive_attribute,
-                                                 save_results=False,
-                                                 with_predict_proba=with_predict_proba,
-                                                 notebook_logs_stdout=notebook_logs_stdout,
-                                                 verbose=verbose)
+    models_metrics_dct, models_fitted_bootstraps_dct = run_metrics_computation(dataset=dataset,
+                                                                               bootstrap_fraction=config.bootstrap_fraction,
+                                                                               dataset_name=config.dataset_name,
+                                                                               models_config=models_config,
+                                                                               n_estimators=config.n_estimators,
+                                                                               sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                                               random_state=config.random_state,
+                                                                               model_setting=config.model_setting,
+                                                                               computation_mode=config.computation_mode,
+                                                                               postprocessor=postprocessor,
+                                                                               postprocessing_sensitive_attribute=config.postprocessing_sensitive_attribute,
+                                                                               save_results=False,
+                                                                               with_predict_proba=with_predict_proba,
+                                                                               notebook_logs_stdout=notebook_logs_stdout,
+                                                                               verbose=verbose)
 
     # Concatenate current run metrics with previous results and
     # create melted_model_metrics_df to save it in a database
@@ -95,5 +98,8 @@ def compute_metrics_with_db_writer(dataset: BaseFlowDataset, config, models_conf
 
     # Save results for this run in a database
     db_writer_func(run_models_metrics_df)
+
+    if return_fitted_bootstrap:
+        return multiple_models_metrics_dct, models_fitted_bootstraps_dct
 
     return multiple_models_metrics_dct
