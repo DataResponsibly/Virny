@@ -1,6 +1,7 @@
 import gc
 import sys
 import pandas as pd
+from copy import deepcopy
 
 from virny.utils.stability_utils import generate_bootstrap
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -77,9 +78,10 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                          verbose=verbose)
 
         self.postprocessor = postprocessor
+        self.postprocessors_lst = [deepcopy(self.postprocessor) for _ in range(n_estimators)]
         self.sensitive_attribute = sensitive_attribute
         self.test_binary_label_dataset = construct_binary_label_dataset_from_df(X_test, y_test, target_column, sensitive_attribute)
-        
+
     def UQ_by_boostrap(self, boostrap_size: int, with_replacement: bool, with_fit: bool = True) -> dict:
         """
         Quantifying uncertainty of the base model by constructing an ensemble from bootstrapped samples
@@ -119,6 +121,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
+            postprocessor = self.postprocessors_lst[idx]
             if with_fit:
                 classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
                 X_sample, y_sample = generate_bootstrap(features=self.X_train,
@@ -136,13 +139,14 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
             train_binary_label_dataset_sample = construct_binary_label_dataset_from_samples(X_sample, y_sample, self.X_train.columns, self.target_column, self.sensitive_attribute)
             train_binary_label_dataset_sample_pred = predict_on_binary_label_dataset(classifier, train_binary_label_dataset_sample)
             test_binary_label_dataset_pred = predict_on_binary_label_dataset(classifier, self.test_binary_label_dataset)
-            postprocessor_fitted = self.postprocessor.fit(train_binary_label_dataset_sample, train_binary_label_dataset_sample_pred)
+            postprocessor_fitted = postprocessor.fit(train_binary_label_dataset_sample, train_binary_label_dataset_sample_pred)
 
             # Note that model predictions do not preserve X_test indexes.
             # Indexes of the predictions will be aligned with X_test later in the pipeline.
             models_predictions[idx] = postprocessor_fitted.predict(test_binary_label_dataset_pred).labels.ravel()
             self.models_lst[idx] = classifier
-            
+            self.postprocessors_lst[idx] = postprocessor_fitted
+
         if self._verbose >= 1:
             print('\n', flush=True)
         self._logger.info('Successfully tested classifiers by bootstrap')
