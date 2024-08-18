@@ -15,12 +15,12 @@ from .multiple_models_with_multiple_test_sets_api import (
     run_metrics_computation_with_multiple_test_sets,
     compute_one_model_metrics_with_multiple_test_sets
 )
-from .inference_api import compute_metric_with_fitted_bootstrap
+from .inference_api import compute_metrics_with_fitted_bootstrap
 
 
 __all__ = [
     "compute_metrics_with_config",
     "compute_metrics_with_db_writer",
     "compute_metrics_with_multiple_test_sets",
-    "compute_metric_with_fitted_bootstrap",
+    "compute_metrics_with_fitted_bootstrap",
 ]
