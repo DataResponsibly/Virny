@@ -1,5 +1,8 @@
 *_venv
 virny_env
+virny_env10
+virny_env11
+virny_env12
 notebooks
 *.env
 .DS_Store
