@@ -1,12 +1,12 @@
 wheel~=0.38.4
 twine~=4.0.2
-aif360~=0.5.0
+aif360~=0.6.1
 numpy==1.23.5
 fairlearn~=0.9.0
 matplotlib~=3.6.2
 pandas~=1.5.2
 altair~=4.2.0
-scikit-learn~=1.2.0
+scikit-learn>=1.2.0
 tqdm~=4.64.1
 seaborn~=0.12.1
 folktables~=0.0.11
