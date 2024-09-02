@@ -65,7 +65,7 @@ def test_count_prediction_metrics_true2(COMPAS_y_test, COMPAS_RF_bootstrap_predi
 # ========================== Test generate_bootstrap ==========================
 def test_generate_bootstrap_true1(compas_without_sensitive_attrs_dataset_class, config_params):
     column_transformer = ColumnTransformer(transformers=[
-        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), compas_without_sensitive_attrs_dataset_class.categorical_columns),
+        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse_output=False), compas_without_sensitive_attrs_dataset_class.categorical_columns),
         ('numerical_features', StandardScaler(), compas_without_sensitive_attrs_dataset_class.numerical_columns),
     ])
     base_flow_ds = preprocess_dataset(compas_without_sensitive_attrs_dataset_class,

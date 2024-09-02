@@ -13,7 +13,8 @@ from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test_sets_lst,
                                             config, models_config: dict, custom_tbl_fields_dct: dict,
                                             db_writer_func, with_predict_proba: bool = True,
-                                            notebook_logs_stdout: bool = False, verbose: int = 0):
+                                            notebook_logs_stdout: bool = False, return_fitted_bootstrap: bool = False,
+                                            verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Arguments are defined as an input config object. Save results to a database after each run
@@ -43,6 +44,9 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
     notebook_logs_stdout
         [Optional] True, if this interface was execute in a Jupyter notebook,
          False, otherwise.
+    return_fitted_bootstrap
+        [Optional] If True, the fitted bootstrap of models is returned. Can be useful to reuse this bootstrap on other test sets.
+         Default, False.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported. Currently, verbose works only with notebook_logs_stdout = False.
@@ -52,19 +56,20 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
     if notebook_logs_stdout:
         verbose = 0
 
-    models_metrics_dct = run_metrics_computation_with_multiple_test_sets(dataset=dataset,
-                                                                         bootstrap_fraction=config.bootstrap_fraction,
-                                                                         dataset_name=config.dataset_name,
-                                                                         extra_test_sets_lst=extra_test_sets_lst,
-                                                                         models_config=models_config,
-                                                                         n_estimators=config.n_estimators,
-                                                                         sensitive_attributes_dct=config.sensitive_attributes_dct,
-                                                                         random_state=config.random_state,
-                                                                         model_setting=config.model_setting,
-                                                                         computation_mode=config.computation_mode,
-                                                                         with_predict_proba=with_predict_proba,
-                                                                         notebook_logs_stdout=notebook_logs_stdout,
-                                                                         verbose=verbose)
+    models_metrics_dct, models_fitted_bootstraps_dct =\
+        run_metrics_computation_with_multiple_test_sets(dataset=dataset,
+                                                        bootstrap_fraction=config.bootstrap_fraction,
+                                                        dataset_name=config.dataset_name,
+                                                        extra_test_sets_lst=extra_test_sets_lst,
+                                                        models_config=models_config,
+                                                        n_estimators=config.n_estimators,
+                                                        sensitive_attributes_dct=config.sensitive_attributes_dct,
+                                                        random_state=config.random_state,
+                                                        model_setting=config.model_setting,
+                                                        computation_mode=config.computation_mode,
+                                                        with_predict_proba=with_predict_proba,
+                                                        notebook_logs_stdout=notebook_logs_stdout,
+                                                        verbose=verbose)
     # Concatenate current run metrics with previous results and
     # create melted_model_metrics_df to save it in a database
     run_models_metrics_df = pd.DataFrame()
@@ -94,13 +99,16 @@ def compute_metrics_with_multiple_test_sets(dataset: BaseFlowDataset, extra_test
     if verbose >= 1:
         print('Metrics computation interface was successfully executed!')
 
+    if return_fitted_bootstrap:
+        return models_fitted_bootstraps_dct
+
 
 def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bootstrap_fraction: float, dataset_name: str,
                                                     extra_test_sets_lst: list, models_config: dict, n_estimators: int,
                                                     sensitive_attributes_dct: dict, random_state: int = None,
                                                     model_setting: str = ModelSetting.BATCH.value,
                                                     computation_mode: str = None, with_predict_proba: bool = True,
-                                                    notebook_logs_stdout: bool = False, verbose: int = 0) -> dict:
+                                                    notebook_logs_stdout: bool = False, verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config based on dataset.X_test and each extra test set
      in extra_test_sets_lst. Save results in `save_results_dir_path` folder.
@@ -149,6 +157,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         from tqdm import tqdm
 
     models_metrics_dct = dict()
+    models_fitted_bootstraps_dct = dict()
     num_models = len(models_config)
     for model_idx, model_name in tqdm(enumerate(models_config.keys()),
                                       total=num_models,
@@ -160,26 +169,28 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         try:
             base_model = models_config[model_name]
             computation_start_date_time = datetime.now()
-            model_metrics_dfs_lst = compute_one_model_metrics_with_multiple_test_sets(base_model=base_model,
-                                                                                      n_estimators=n_estimators,
-                                                                                      dataset=dataset,
-                                                                                      extra_test_sets_lst=extra_test_sets_lst,
-                                                                                      bootstrap_fraction=bootstrap_fraction,
-                                                                                      sensitive_attributes_dct=sensitive_attributes_dct,
-                                                                                      random_state=random_state,
-                                                                                      model_setting=model_setting,
-                                                                                      computation_mode=computation_mode,
-                                                                                      dataset_name=dataset_name,
-                                                                                      base_model_name=model_name,
-                                                                                      with_predict_proba=with_predict_proba,
-                                                                                      notebook_logs_stdout=notebook_logs_stdout,
-                                                                                      verbose=verbose)
+            model_metrics_dfs_lst, fitted_bootstrap =\
+                compute_one_model_metrics_with_multiple_test_sets(base_model=base_model,
+                                                                  n_estimators=n_estimators,
+                                                                  dataset=dataset,
+                                                                  extra_test_sets_lst=extra_test_sets_lst,
+                                                                  bootstrap_fraction=bootstrap_fraction,
+                                                                  sensitive_attributes_dct=sensitive_attributes_dct,
+                                                                  random_state=random_state,
+                                                                  model_setting=model_setting,
+                                                                  computation_mode=computation_mode,
+                                                                  dataset_name=dataset_name,
+                                                                  base_model_name=model_name,
+                                                                  with_predict_proba=with_predict_proba,
+                                                                  notebook_logs_stdout=notebook_logs_stdout,
+                                                                  verbose=verbose)
             computation_end_date_time = datetime.now()
             computation_runtime = (computation_end_date_time - computation_start_date_time).total_seconds() / 60.0
             for model_metrics_df in model_metrics_dfs_lst:
                 model_metrics_df['Runtime_in_Mins'] = computation_runtime
 
             models_metrics_dct[model_name] = model_metrics_dfs_lst
+            models_fitted_bootstraps_dct[model_name] = fitted_bootstrap
         except Exception as err:
             print('#' * 20, f'ERROR with {model_name}', '#' * 20)
             traceback.print_exc()
@@ -187,7 +198,7 @@ def run_metrics_computation_with_multiple_test_sets(dataset: BaseFlowDataset, bo
         if verbose >= 1:
             print('\n\n\n')
 
-    return models_metrics_dct
+    return models_metrics_dct, models_fitted_bootstraps_dct
 
 
 def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: int,
@@ -259,6 +270,7 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
 
     test_sets_lst = [(dataset.X_test, dataset.y_test, dataset.init_sensitive_attrs_df)] + extra_test_sets_lst
     all_test_sets_metrics_lst = []
+    fitted_bootstrap = []
     for set_idx, (new_X_test, new_y_test, cur_init_sensitive_attrs_df) in enumerate(test_sets_lst):
         new_test_protected_groups = create_test_protected_groups(new_X_test, cur_init_sensitive_attrs_df, sensitive_attributes_dct)
         if verbose >= 2:
@@ -271,10 +283,18 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
         subgroup_variance_analyzer.set_test_protected_groups(new_test_protected_groups)
 
         # Compute stability metrics for subgroups
-        y_preds, variance_metrics_df = subgroup_variance_analyzer.compute_metrics(save_results=False,
-                                                                                  result_filename=None,
-                                                                                  save_dir_path=None,
-                                                                                  with_fit=True if set_idx == 0 else False)
+        if set_idx == 0:
+            y_preds, variance_metrics_df, fitted_bootstrap =\
+                subgroup_variance_analyzer.compute_metrics(save_results=False,
+                                                           result_filename=None,
+                                                           save_dir_path=None,
+                                                           with_fit=True)
+        else:
+            y_preds, variance_metrics_df, _ = \
+                subgroup_variance_analyzer.compute_metrics(save_results=False,
+                                                           result_filename=None,
+                                                           save_dir_path=None,
+                                                           with_fit=False)
 
         # Compute accuracy metrics for subgroups
         error_analyzer = SubgroupErrorAnalyzer(X_test=new_X_test,
@@ -298,4 +318,4 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
 
         all_test_sets_metrics_lst.append(metrics_df)
 
-    return all_test_sets_metrics_lst
+    return all_test_sets_metrics_lst, fitted_bootstrap

@@ -120,6 +120,14 @@ class SubgroupVarianceAnalyzer:
     def set_test_protected_groups(self, new_test_protected_groups):
         self.__subgroup_variance_calculator.test_protected_groups = new_test_protected_groups
 
+    def set_fitted_bootstrap(self, fitted_bootstrap: list):
+        models_lst = [None] * self.n_estimators
+        for i in range(self.n_estimators):
+            model_dct = fitted_bootstrap[i]
+            models_lst[model_dct['model_idx']] = model_dct['model_obj']
+
+        self.__overall_variance_analyzer.models_lst = models_lst
+
     def compute_metrics(self, save_results: bool, result_filename: str = None,
                         save_dir_path: str = None, with_fit: bool = True):
         """
@@ -144,6 +152,15 @@ class SubgroupVarianceAnalyzer:
         y_preds = pd.Series(y_preds, index=y_test_true.index)
         self.overall_variance_metrics_dct = self.__overall_variance_analyzer.prediction_metrics
 
+        # Create a list of fitted models from the bootstrap
+        fitted_bootstrap = []
+        for model_idx in range(len(self.__overall_variance_analyzer.models_lst)):
+            model = self.__overall_variance_analyzer.models_lst[model_idx]
+            model_dct = {'model_idx': model_idx, 'model_obj': model}
+            if isinstance(self.__overall_variance_analyzer, BatchOverallVarianceAnalyzerPostProcessing):
+                model_dct['postprocessor'] = self.__overall_variance_analyzer.postprocessors_lst[model_idx]
+            fitted_bootstrap.append(model_dct)
+
         # Count and display fairness metrics
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
         self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
@@ -151,4 +168,4 @@ class SubgroupVarianceAnalyzer:
             save_results, result_filename, save_dir_path
         )
 
-        return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct)
+        return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct), fitted_bootstrap

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pandas as pd
 
@@ -84,8 +85,13 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
 
 
 def generate_bootstrap(features, labels, boostrap_size, with_replacement=True, random_state=None):
-    # Create a local random state
-    rng = np.random.RandomState(random_state)
+    # Create a local random state.
+    # Note that to keep reverse compatibility we need to use different generators for different python versions
+    # since random number generation was changed in Python 3.12
+    if sys.version_info.major == 3 and sys.version_info.minor >= 12:
+        rng = np.random.default_rng(seed=random_state)
+    else:
+        rng = np.random.RandomState(random_state)
 
     # Generate bootstrapped indexes
     bootstrap_index = rng.choice(features.shape[0], size=boostrap_size, replace=with_replacement)
