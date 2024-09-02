@@ -23,7 +23,7 @@ def test_subgroup_variance_and_error_analyzers(COMPAS_y_test, COMPAS_RF_bootstra
     data_loader = CompasWithoutSensitiveAttrsDataset()
     sensitive_attributes_dct = {'sex': 1, 'race': 'African-American', 'sex&race': None}
     column_transformer = ColumnTransformer(transformers=[
-        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), data_loader.categorical_columns),
+        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse_output=False), data_loader.categorical_columns),
         ('numerical_features', StandardScaler(), data_loader.numerical_columns),
     ])
     base_flow_dataset = preprocess_dataset(data_loader=data_loader,

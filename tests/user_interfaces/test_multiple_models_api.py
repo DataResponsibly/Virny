@@ -1,3 +1,4 @@
+import sys
 import copy
 import pathlib
 
@@ -76,15 +77,18 @@ def test_compute_metrics_with_config_should_equal_prev_release_results(law_schoo
                                               models_config=copy.deepcopy(models_config),
                                               save_results_dir_path=save_results_dir_path)
 
-    metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k'))
+    if sys.version_info.major == 3 and sys.version_info.minor >= 12:
+        print("Python 3.12 or newer is installed.")
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_12+'))
+    else:
+        print("Older version of Python is installed.")
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_11-'))
+
     expected_metrics_dct = read_model_metric_dfs(metrics_path, model_names=['LogisticRegression', 'DecisionTreeClassifier'])
 
     # Drop technical columns
     metrics_dct['LogisticRegression'] = metrics_dct['LogisticRegression'].drop('Runtime_in_Mins', axis=1)
     metrics_dct['DecisionTreeClassifier'] = metrics_dct['DecisionTreeClassifier'].drop('Runtime_in_Mins', axis=1)
-
-    expected_metrics_dct['LogisticRegression'] = expected_metrics_dct['LogisticRegression'].drop('Runtime_in_Mins', axis=1)
-    expected_metrics_dct['DecisionTreeClassifier'] = expected_metrics_dct['DecisionTreeClassifier'].drop('Runtime_in_Mins', axis=1)
 
     assert compare_metric_dfs_with_tolerance(expected_metrics_dct['LogisticRegression'], metrics_dct['LogisticRegression'])
     assert compare_metric_dfs_with_tolerance(expected_metrics_dct['DecisionTreeClassifier'], metrics_dct['DecisionTreeClassifier'])

@@ -32,7 +32,7 @@ def law_school_dataset_1k_params(common_seed):
 
     # Preprocess the dataset
     column_transformer = ColumnTransformer(transformers=[
-        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), data_loader.categorical_columns),
+        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse_output=False), data_loader.categorical_columns),
         ('numerical_features', StandardScaler(), data_loader.numerical_columns),
     ])
     base_flow_dataset = preprocess_dataset(data_loader=data_loader,
@@ -64,7 +64,7 @@ def law_school_dataset_20k_params(common_seed):
 
     # Preprocess the dataset
     column_transformer = ColumnTransformer(transformers=[
-        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), data_loader.categorical_columns),
+        ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse_output=False), data_loader.categorical_columns),
         ('numerical_features', StandardScaler(), data_loader.numerical_columns),
     ])
     base_flow_dataset = preprocess_dataset(data_loader=data_loader,
