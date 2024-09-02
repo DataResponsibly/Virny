@@ -1,6 +1,6 @@
 # Virny Software Library
 
-<p align="left">
+<p align="center">
   <!-- Tests -->
   <a href="https://github.com/DataResponsibly/Virny/actions/workflows/ci.yml">
     <img src="https://github.com/DataResponsibly/Virny/actions/workflows/ci.yml/badge.svg" alt="CI Pipeline">
@@ -13,10 +13,8 @@
   <a href="https://pypi.org/project/virny">
     <img src="https://img.shields.io/pypi/v/virny.svg?label=release&color=blue&style=flat-square" alt="pypi">
   </a>
-  <!-- License -->
-  <a href="https://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_(%22BSD_License_2.0%22,_%22Revised_BSD_License%22,_%22New_BSD_License%22,_or_%22Modified_BSD_License%22)">
-    <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square" alt="bsd_3_license">
-  </a>
+  <!-- Python Versions -->
+  <a href="https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue"><img alt="Python Versions" src="https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue"></a>
   <!-- Code Size -->
   <a href="">
     <img src="https://img.shields.io/github/languages/code-size/DataResponsibly/Virny.svg" alt="code_size">
@@ -24,6 +22,10 @@
   <!-- Last Commit -->
   <a href="">
     <img src="https://img.shields.io/github/last-commit/DataResponsibly/Virny.svg" alt="last_commit">
+  </a>
+  <!-- License -->
+  <a href="https://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_(%22BSD_License_2.0%22,_%22Revised_BSD_License%22,_%22New_BSD_License%22,_or_%22Modified_BSD_License%22)">
+    <img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square" alt="bsd_3_license">
   </a>
 </p>
 

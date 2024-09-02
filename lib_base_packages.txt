@@ -6,7 +6,7 @@ scikit-learn~=1.2.0
 tqdm~=4.64.1
 gradio==4.10.0
 seaborn~=0.12.1
-aif360~=0.5.0
+aif360[Reductions]~=0.5.0
 folktables~=0.0.11
 munch~=2.5.0
 PyYAML~=6.0
