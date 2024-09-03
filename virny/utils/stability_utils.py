@@ -70,7 +70,7 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
         # Convert predict proba results of each model to correspondent labels.
         # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
         # Hence, if a value is, for example, 0.3 --> label == 1, 0.6 -- > label == 0
-        uq_labels = results.applymap(lambda x: int(x<0.5))
+        uq_labels = results.map(lambda x: int(x<0.5))
 
     # Compute metrics for prediction labels
     for metric in METRICS_FOR_LABELS:
