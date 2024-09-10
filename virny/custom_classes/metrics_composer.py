@@ -69,7 +69,7 @@ class MetricsComposer:
         for model_name in self.models_metrics_dct.keys():
             columns_to_group = [col for col in self.models_metrics_dct[model_name].columns
                                 if col not in ('Model_Seed', 'Run_Number')]
-            models_average_metrics_dct[model_name] = self.models_metrics_dct[model_name][columns_to_group].groupby(['Metric', 'Model_Name']).mean().reset_index()
+            models_average_metrics_dct[model_name] = self.models_metrics_dct[model_name][columns_to_group].groupby(['Metric', 'Model_Name']).mean(numeric_only=True).reset_index()
 
         self.models_average_metrics_dct = models_average_metrics_dct
 
