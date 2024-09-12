@@ -6,9 +6,9 @@ import pandas as pd
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod
 
+from virny.utils.common_helpers import has_method
 from virny.custom_classes.custom_logger import get_logger
-from virny.utils.stability_utils import generate_bootstrap
-from virny.utils.stability_utils import count_prediction_metrics
+from virny.utils.stability_utils import generate_bootstrap, count_prediction_metrics
 
 
 class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
@@ -74,15 +74,15 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.y_test = y_test
 
     @abstractmethod
-    def _fit_model(self, classifier, X_train, y_train):
+    def _fit_model(self, classifier, X_train, y_train, random_state: int):
         pass
 
     @abstractmethod
-    def _batch_predict(self, classifier, X_test):
+    def _batch_predict(self, classifier, X_test, random_state: int):
         pass
 
     @abstractmethod
-    def _batch_predict_proba(self, classifier, X_test):
+    def _batch_predict_proba(self, classifier, X_test, random_state: int):
         pass
 
     def compute_metrics(self, save_results: bool = True, with_fit: bool = True):
@@ -148,26 +148,26 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
+            classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
 
             # If True, fit the classifier. Otherwise, use already fitted classifier.
             if with_fit:
-                classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
                 X_sample, y_sample = generate_bootstrap(features=self.X_train,
                                                         labels=self.y_train,
                                                         boostrap_size=boostrap_size,
                                                         with_replacement=with_replacement,
                                                         random_state=classifier_random_state)
-                if 'random_state' in classifier.get_params():
+                if 'random_state' in classifier.get_params() and has_method(classifier, 'set_params'):
                     classifier.set_params(random_state=classifier_random_state)
-                classifier = self._fit_model(classifier, X_sample, y_sample)
+                classifier = self._fit_model(classifier, X_sample, y_sample, random_state=classifier_random_state)
 
             # Use a predict_proba method if the classifier supports it.
             # Note that model predictions do not preserve X_test indexes.
             # Indexes of the predictions will be aligned with X_test later in the pipeline.
             if self.with_predict_proba:
-                models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test)
+                models_predictions[idx] = self._batch_predict_proba(classifier, self.X_test, random_state=classifier_random_state)
             else:
-                models_predictions[idx] = self._batch_predict(classifier, self.X_test)
+                models_predictions[idx] = self._batch_predict(classifier, self.X_test, random_state=classifier_random_state)
 
             self.models_lst[idx] = classifier
 

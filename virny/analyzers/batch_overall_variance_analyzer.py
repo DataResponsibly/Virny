@@ -1,3 +1,4 @@
+import inspect
 import pandas as pd
 
 from virny.analyzers.abstract_overall_variance_analyzer import AbstractOverallVarianceAnalyzer
@@ -61,20 +62,41 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
                          verbose=verbose)
         self.target_column = target_column
 
-    def _fit_model(self, classifier, X_train: pd.DataFrame, y_train: pd.DataFrame):
+    def _fit_model(self, classifier, X_train: pd.DataFrame, y_train: pd.DataFrame, random_state: int):
         """
         Fit a classifier that is an instance of self.base_model
         """
+        # Get the signature of the function
+        signature = inspect.signature(classifier.fit)
+        if 'random_state' in signature.parameters:
+            return classifier.fit(X_train, y_train.values.ravel(), random_state=random_state)
+        elif 'seed' in signature.parameters:
+            return classifier.fit(X_train, y_train.values.ravel(), seed=random_state)
+
         return classifier.fit(X_train, y_train.values.ravel())
 
-    def _batch_predict(self, classifier, X_test: pd.DataFrame):
+    def _batch_predict(self, classifier, X_test: pd.DataFrame, random_state: int):
         """
         Predict with the classifier for X_test set and return predictions
         """
+        # Get the signature of the function
+        signature = inspect.signature(classifier.predict)
+        if 'random_state' in signature.parameters:
+            return classifier.predict(X_test, random_state=random_state)
+        elif 'seed' in signature.parameters:
+            return classifier.predict(X_test, seed=random_state)
+
         return classifier.predict(X_test)
 
-    def _batch_predict_proba(self, classifier, X_test: pd.DataFrame):
+    def _batch_predict_proba(self, classifier, X_test: pd.DataFrame, random_state: int):
         """
         Predict with the classifier for X_test set and return probabilities for each class for each test point
         """
+        # Get the signature of the function
+        signature = inspect.signature(classifier.predict_proba)
+        if 'random_state' in signature.parameters:
+            return classifier.predict_proba(X_test, random_state=random_state)[:, 0]
+        elif 'seed' in signature.parameters:
+            return classifier.predict_proba(X_test, seed=random_state)[:, 0]
+
         return classifier.predict_proba(X_test)[:, 0]
