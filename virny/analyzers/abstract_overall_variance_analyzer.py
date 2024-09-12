@@ -157,7 +157,9 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
                                                         boostrap_size=boostrap_size,
                                                         with_replacement=with_replacement,
                                                         random_state=classifier_random_state)
-                if 'random_state' in classifier.get_params() and has_method(classifier, 'set_params'):
+                if (has_method(classifier, 'get_params')
+                        and 'random_state' in classifier.get_params()
+                        and has_method(classifier, 'set_params')):
                     classifier.set_params(random_state=classifier_random_state)
                 classifier = self._fit_model(classifier, X_sample, y_sample, random_state=classifier_random_state)
 
