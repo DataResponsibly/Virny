@@ -69,9 +69,10 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         # Get the signature of the function
         signature = inspect.signature(classifier.fit)
         if 'random_state' in signature.parameters:
-            return classifier.fit(X_train, y_train, random_state=random_state)
+            return classifier.fit(X_train, y_train.values.ravel(), random_state=random_state)
+        # PyTorch Tabular API
         elif 'seed' in signature.parameters:
-            return classifier.fit(X_train, y_train, seed=random_state)
+            return classifier.fit(train=pd.concat([X_train, y_train], axis=1), seed=random_state)
 
         # Sklearn API
         return classifier.fit(X_train, y_train.values.ravel())
