@@ -69,10 +69,11 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         # Get the signature of the function
         signature = inspect.signature(classifier.fit)
         if 'random_state' in signature.parameters:
-            return classifier.fit(X_train, y_train.values.ravel(), random_state=random_state)
+            return classifier.fit(X_train, y_train, random_state=random_state)
         elif 'seed' in signature.parameters:
-            return classifier.fit(X_train, y_train.values.ravel(), seed=random_state)
+            return classifier.fit(X_train, y_train, seed=random_state)
 
+        # Sklearn API
         return classifier.fit(X_train, y_train.values.ravel())
 
     def _batch_predict(self, classifier, X_test: pd.DataFrame, random_state: int):
@@ -86,6 +87,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         elif 'seed' in signature.parameters:
             return classifier.predict(X_test, seed=random_state)
 
+        # Sklearn API
         return classifier.predict(X_test)
 
     def _batch_predict_proba(self, classifier, X_test: pd.DataFrame, random_state: int):
@@ -99,4 +101,5 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         elif 'seed' in signature.parameters:
             return classifier.predict_proba(X_test, seed=random_state)[:, 0]
 
+        # Sklearn API
         return classifier.predict_proba(X_test)[:, 0]
