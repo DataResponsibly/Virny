@@ -79,10 +79,19 @@ def test_compute_metrics_with_config_should_equal_prev_release_results(law_schoo
 
     if sys.version_info.major == 3 and sys.version_info.minor >= 12:
         print("Python 3.12 or newer is installed.")
-        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_12+'))
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_12'))
+    elif sys.version_info.major == 3 and sys.version_info.minor == 11:
+        print("Python 3.11 or newer is installed.")
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_11'))
+    elif sys.version_info.major == 3 and sys.version_info.minor == 10:
+        print("Python 3.10 or newer is installed.")
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_10'))
+    elif sys.version_info.major == 3 and sys.version_info.minor == 9:
+        print("Python 3.9 or newer is installed.")
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_9'))
     else:
         print("Older version of Python is installed.")
-        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_11-'))
+        metrics_path = str(pathlib.Path(__file__).parent.parent.joinpath('files_for_tests', 'law_school_dataset_20k', 'python_3_8'))
 
     expected_metrics_dct = read_model_metric_dfs(metrics_path, model_names=['LogisticRegression', 'DecisionTreeClassifier'])
 
