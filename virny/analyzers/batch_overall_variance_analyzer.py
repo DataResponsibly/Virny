@@ -98,8 +98,10 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         """
         # PyTorch Tabular API
         if not has_method(classifier, 'predict_proba'):
-            print('type(classifier):', type(classifier))
-            return classifier.predict(X_test)[:, 0]
+            new_df = X_test
+            new_df['Diabetic'] = None
+            return classifier.predict(test=new_df, tta_seed=random_state)[:, 0]
+            # return classifier.predict(X_test, tta_seed=random_state)[:, 0]
 
         # Get the signature of the function
         signature = inspect.signature(classifier.predict_proba)
