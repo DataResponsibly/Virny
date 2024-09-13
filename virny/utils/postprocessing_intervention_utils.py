@@ -39,7 +39,7 @@ def predict_on_binary_label_dataset(model, orig_dataset, random_state, threshold
 
     # PyTorch Tabular API
     if not has_method(model, 'predict_proba'):
-        y_pred_prob = model.predict_proba(orig_dataset.features, tta_seed=random_state)[f'{fav_idx}_probability']
+        y_pred_prob = model.predict_proba(orig_dataset.features, tta_seed=random_state)[f'{fav_idx}_probability'].values
     else:
         # Get the signature of the function
         signature = inspect.signature(model.predict_proba)
