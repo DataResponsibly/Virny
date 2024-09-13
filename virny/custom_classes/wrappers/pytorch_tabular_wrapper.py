@@ -22,7 +22,7 @@ class PytorchTabularWrapper:
     def get_params(self):
         return eval(str(self.estimator.config))
 
-    def set_params(self, random_state: int):
+    def set_params(self, **params):
         pass
 
     def fit(self, X: pd.DataFrame, y: pd.DataFrame, seed: int):
