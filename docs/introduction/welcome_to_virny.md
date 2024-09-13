@@ -23,7 +23,7 @@ For quickstart, look at [use case examples](https://dataresponsibly.github.io/Vi
 
 ## 🛠 Installation
 
-Virny supports **Python 3.8 and 3.9** and can be installed with `pip`:
+Virny supports **Python 3.9-3.12** and can be installed with `pip`:
 
 ```bash
 pip install virny
