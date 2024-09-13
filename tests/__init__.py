@@ -1,5 +1,6 @@
 import os
 import pytest
+import pathlib
 import numpy as np
 import pandas as pd
 
@@ -137,6 +138,23 @@ def models_config():
                                        n_estimators=200,
                                        max_depth=7),
     }
+
+
+@pytest.fixture(scope='package')
+def folk_employment_NY_2018_loader():
+    df_path = pathlib.Path(__file__).parent.joinpath('files_for_tests').joinpath('folk_employment_NY_2018.csv')
+    full_df = pd.read_csv(df_path, header=0)
+
+    target = 'ESR'
+    numerical_columns = ['AGEP']
+    categorical_columns = ['MAR', 'MIL', 'ESP', 'MIG', 'DREM', 'NATIVITY', 'DIS', 'DEAR', 'DEYE', 'SEX', 'RAC1P',
+                           'RELP', 'CIT', 'ANC', 'SCHL']
+
+    full_df[categorical_columns] = full_df[categorical_columns].astype('str')
+    return BaseDataLoader(full_df=full_df,
+                          target=target,
+                          numerical_columns=numerical_columns,
+                          categorical_columns=categorical_columns)
 
 
 @pytest.fixture(scope='package')
