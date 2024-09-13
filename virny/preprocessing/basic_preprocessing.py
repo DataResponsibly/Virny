@@ -3,9 +3,11 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-from virny.configs.constants import INTERSECTION_SIGN
 from virny.datasets.base import BaseDataLoader
+from virny.configs.constants import INTERSECTION_SIGN
+from virny.custom_classes.wrappers.pytorch_tabular_wrapper import PytorchTabularWrapper
 from virny.custom_classes.base_dataset import BaseFlowDataset
+from virny.utils.common_helpers import get_source_library_name
 
 
 def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTransformer, sensitive_attributes_dct: dict,
@@ -52,6 +54,12 @@ def preprocess_dataset(data_loader: BaseDataLoader, column_transformer: ColumnTr
                            target=data_loader.target,
                            numerical_columns=data_loader.numerical_columns,
                            categorical_columns=data_loader.categorical_columns)
+
+
+def preprocess_base_model(base_model):
+    if get_source_library_name(base_model) == 'pytorch_tabular':
+        return PytorchTabularWrapper(estimator=base_model)
+    return base_model
 
 
 def get_dummies(data: pd.DataFrame, categorical_columns: list, numerical_columns: list):

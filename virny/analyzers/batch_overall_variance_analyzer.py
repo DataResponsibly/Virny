@@ -71,12 +71,9 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         signature = inspect.signature(classifier.fit)
         if 'random_state' in signature.parameters:
             return classifier.fit(X_train, y_train.values.ravel(), random_state=random_state)
-        # PyTorch Tabular API
         elif 'seed' in signature.parameters:
-            classifier.fit(train=pd.concat([X_train, y_train], axis=1), seed=random_state)
-            return classifier
+            return classifier.fit(X_train, y_train, seed=random_state)
 
-        # Sklearn API
         return classifier.fit(X_train, y_train.values.ravel())
 
     def _batch_predict(self, classifier, X_test: pd.DataFrame, random_state: int):
@@ -90,17 +87,12 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         elif 'seed' in signature.parameters:
             return classifier.predict(X_test, seed=random_state)
 
-        # Sklearn API
         return classifier.predict(X_test)
 
     def _batch_predict_proba(self, classifier, X_test: pd.DataFrame, random_state: int):
         """
         Predict with the classifier for X_test set and return probabilities for each class for each test point
         """
-        # PyTorch Tabular API
-        if not has_method(classifier, 'predict_proba'):
-            return classifier.predict(X_test, tta_seed=random_state)['0_probability'].values
-
         # Get the signature of the function
         signature = inspect.signature(classifier.predict_proba)
         if 'random_state' in signature.parameters:
@@ -108,5 +100,4 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         elif 'seed' in signature.parameters:
             return classifier.predict_proba(X_test, seed=random_state)[:, 0]
 
-        # Sklearn API
         return classifier.predict_proba(X_test)[:, 0]

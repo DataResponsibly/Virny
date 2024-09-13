@@ -96,9 +96,13 @@ def str_to_float(str_var: str, var_name: str):
         raise ValueError(f"{var_name} must be a float number with a '.' separator.")
 
 
-# Check if the instance has a method with the specific name
 def has_method(obj, method_name):
+    # Check if the instance has a method with the specific name
     return hasattr(obj, method_name) and callable(getattr(obj, method_name))
+
+
+def get_source_library_name(obj):
+    return obj.__class__.__module__.split('.')[0]
 
 
 def save_metrics_to_file(metrics_df, result_filename, save_dir_path):
