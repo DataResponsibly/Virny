@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 from copy import deepcopy
 
+from virny.utils.common_helpers import has_method
 from virny.utils.stability_utils import generate_bootstrap
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
 from virny.utils.postprocessing_intervention_utils import (construct_binary_label_dataset_from_df,
@@ -120,25 +121,28 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
 
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
+            classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
             classifier = self.models_lst[idx]
             postprocessor = self.postprocessors_lst[idx]
             if with_fit:
-                classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
                 X_sample, y_sample = generate_bootstrap(features=self.X_train,
                                                         labels=self.y_train,
                                                         boostrap_size=boostrap_size,
                                                         with_replacement=with_replacement,
                                                         random_state=classifier_random_state)
-                classifier.set_params(random_state=classifier_random_state)
-                classifier = self._fit_model(classifier, X_sample, y_sample)
+                if (has_method(classifier, 'get_params')
+                        and 'random_state' in classifier.get_params()
+                        and has_method(classifier, 'set_params')):
+                    classifier.set_params(random_state=classifier_random_state)
+                classifier = self._fit_model(classifier, X_sample, y_sample, random_state=classifier_random_state)
                 
             # Force garbage collection to avoid out of memory error
             if with_fit and ((idx + 1) % 10 == 0 or (idx + 1) == self.n_estimators):
                 gc.collect()
 
             train_binary_label_dataset_sample = construct_binary_label_dataset_from_samples(X_sample, y_sample, self.X_train.columns, self.target_column, self.sensitive_attribute)
-            train_binary_label_dataset_sample_pred = predict_on_binary_label_dataset(classifier, train_binary_label_dataset_sample)
-            test_binary_label_dataset_pred = predict_on_binary_label_dataset(classifier, self.test_binary_label_dataset)
+            train_binary_label_dataset_sample_pred = predict_on_binary_label_dataset(classifier, train_binary_label_dataset_sample, random_state=classifier_random_state)
+            test_binary_label_dataset_pred = predict_on_binary_label_dataset(classifier, self.test_binary_label_dataset, random_state=classifier_random_state)
             postprocessor_fitted = postprocessor.fit(train_binary_label_dataset_sample, train_binary_label_dataset_sample_pred)
 
             # Note that model predictions do not preserve X_test indexes.

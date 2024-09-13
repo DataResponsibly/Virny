@@ -1,8 +1,10 @@
 import copy
-
+import inspect
 import numpy as np
 import pandas as pd
 from aif360.datasets import BinaryLabelDataset
+
+from virny.utils.common_helpers import has_method
 
 
 def construct_binary_label_dataset_from_samples(X_sample, y_sample, column_names, target_column, sensitive_attribute):
@@ -31,11 +33,23 @@ def construct_binary_label_dataset_from_df(X_sample, y_sample, target_column, se
     return binary_label_dataset
 
 
-def predict_on_binary_label_dataset(model, orig_dataset, threshold=0.5):
+def predict_on_binary_label_dataset(model, orig_dataset, random_state, threshold=0.5):
     orig_dataset_pred = copy.deepcopy(orig_dataset)
-
     fav_idx = np.where(model.classes_ == orig_dataset.favorable_label)[0][0]
-    y_pred_prob = model.predict_proba(orig_dataset.features)[:, fav_idx]
+
+    # PyTorch Tabular API
+    if not has_method(model, 'predict_proba'):
+        y_pred_prob = model.predict_proba(orig_dataset.features, tta_seed=random_state)[f'{fav_idx}_probability'].values
+    else:
+        # Get the signature of the function
+        signature = inspect.signature(model.predict_proba)
+        if 'random_state' in signature.parameters:
+            y_pred_prob = model.predict_proba(orig_dataset.features, random_state=random_state)[:, fav_idx]
+        elif 'seed' in signature.parameters:
+            y_pred_prob = model.predict_proba(orig_dataset.features, seed=random_state)[:, fav_idx]
+        else:
+            y_pred_prob = model.predict_proba(orig_dataset.features)[:, fav_idx]
+
     orig_dataset.scores = y_pred_prob.reshape(-1, 1)
 
     y_pred = np.zeros_like(orig_dataset.labels)

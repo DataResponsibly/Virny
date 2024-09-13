@@ -297,8 +297,13 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Name'] = base_model_name
-    metrics_df['Model_Params'] = str(base_model.get_params())
     metrics_df['Virny_Random_State'] = random_state
+
+    # Pytorch Tabular API
+    if hasattr(base_model, 'config'):
+        metrics_df['Model_Params'] = str(base_model.config)
+    else:
+        metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics
