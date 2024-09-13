@@ -37,18 +37,14 @@ def predict_on_binary_label_dataset(model, orig_dataset, random_state, threshold
     orig_dataset_pred = copy.deepcopy(orig_dataset)
     fav_idx = np.where(model.classes_ == orig_dataset.favorable_label)[0][0]
 
-    # PyTorch Tabular API
-    if not has_method(model, 'predict_proba'):
-        y_pred_prob = model.predict_proba(orig_dataset.features, tta_seed=random_state)[f'{fav_idx}_probability'].values
+    # Get the signature of the function
+    signature = inspect.signature(model.predict_proba)
+    if 'random_state' in signature.parameters:
+        y_pred_prob = model.predict_proba(orig_dataset.features, random_state=random_state)[:, fav_idx]
+    elif 'seed' in signature.parameters:
+        y_pred_prob = model.predict_proba(orig_dataset.features, seed=random_state)[:, fav_idx]
     else:
-        # Get the signature of the function
-        signature = inspect.signature(model.predict_proba)
-        if 'random_state' in signature.parameters:
-            y_pred_prob = model.predict_proba(orig_dataset.features, random_state=random_state)[:, fav_idx]
-        elif 'seed' in signature.parameters:
-            y_pred_prob = model.predict_proba(orig_dataset.features, seed=random_state)[:, fav_idx]
-        else:
-            y_pred_prob = model.predict_proba(orig_dataset.features)[:, fav_idx]
+        y_pred_prob = model.predict_proba(orig_dataset.features)[:, fav_idx]
 
     orig_dataset.scores = y_pred_prob.reshape(-1, 1)
 
