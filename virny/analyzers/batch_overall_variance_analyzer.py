@@ -1,6 +1,7 @@
 import inspect
 import pandas as pd
 
+from virny.utils.common_helpers import has_method
 from virny.analyzers.abstract_overall_variance_analyzer import AbstractOverallVarianceAnalyzer
 
 
@@ -69,7 +70,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         # Get the signature of the function
         signature = inspect.signature(classifier.fit)
         if 'random_state' in signature.parameters:
-            return classifier.fit(X_train, y_train.values.ravel(), random_state=random_state)
+            return classifier.fit(X_train, y_train.values.ravel()   , random_state=random_state)
         # PyTorch Tabular API
         elif 'seed' in signature.parameters:
             return classifier.fit(train=pd.concat([X_train, y_train], axis=1), seed=random_state)
@@ -95,6 +96,10 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         """
         Predict with the classifier for X_test set and return probabilities for each class for each test point
         """
+        # PyTorch Tabular API
+        if not has_method(classifier, 'predict_proba'):
+            return classifier.predict(X_test)[:, 0]
+
         # Get the signature of the function
         signature = inspect.signature(classifier.predict_proba)
         if 'random_state' in signature.parameters:
