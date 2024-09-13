@@ -1,7 +1,6 @@
 import inspect
 import pandas as pd
 
-from virny.utils.common_helpers import has_method
 from virny.analyzers.abstract_overall_variance_analyzer import AbstractOverallVarianceAnalyzer
 
 

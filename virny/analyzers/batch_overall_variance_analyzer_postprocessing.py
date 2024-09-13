@@ -130,9 +130,12 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                                                         boostrap_size=boostrap_size,
                                                         with_replacement=with_replacement,
                                                         random_state=classifier_random_state)
-                if ('random_state' in classifier.get_params()
-                        and has_method(classifier, 'set_params')):
-                    classifier.set_params(random_state=classifier_random_state)
+                if has_method(classifier, 'set_params'):
+                    if 'random_state' in classifier.get_params():
+                        classifier.set_params(random_state=classifier_random_state)
+                    elif 'seed' in classifier.get_params():
+                        classifier.set_params(seed=classifier_random_state)
+
                 classifier = self._fit_model(classifier, X_sample, y_sample, random_state=classifier_random_state)
                 
             # Force garbage collection to avoid out of memory error

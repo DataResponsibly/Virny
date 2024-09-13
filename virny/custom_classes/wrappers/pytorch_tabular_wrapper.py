@@ -1,8 +1,5 @@
 import copy
-import numpy as np
 import pandas as pd
-
-from virny.utils.postprocessing_intervention_utils import construct_binary_label_dataset_from_df
 
 
 class PytorchTabularWrapper:
