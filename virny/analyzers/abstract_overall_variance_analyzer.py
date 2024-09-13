@@ -59,7 +59,6 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.dataset_name = dataset_name
         self.n_estimators = n_estimators
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
-        print('type(self.models_lst[0]):', type(self.models_lst[0]))
         self.random_state = random_state
         self.with_predict_proba = with_predict_proba
         self.models_predictions = None
@@ -149,7 +148,6 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         # Train and test each estimator in models_predictions
         for idx in cycle_range:
             classifier = self.models_lst[idx]
-            print('type(classifier)2:', type(classifier))
             classifier_random_state = self.random_state + idx + 1 if self.random_state is not None else None
 
             # If True, fit the classifier. Otherwise, use already fitted classifier.
