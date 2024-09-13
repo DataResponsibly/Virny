@@ -59,6 +59,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         self.dataset_name = dataset_name
         self.n_estimators = n_estimators
         self.models_lst = [deepcopy(base_model) for _ in range(n_estimators)]
+        print('type(self.models_lst[0]):', type(self.models_lst[0]))
         self.random_state = random_state
         self.with_predict_proba = with_predict_proba
         self.models_predictions = None
