@@ -98,6 +98,7 @@ class BatchOverallVarianceAnalyzer(AbstractOverallVarianceAnalyzer):
         """
         # PyTorch Tabular API
         if not has_method(classifier, 'predict_proba'):
+            print('type(classifier):', type(classifier))
             return classifier.predict(X_test)[:, 0]
 
         # Get the signature of the function
