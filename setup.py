@@ -28,11 +28,11 @@ about: dict = {}
 with open(os.path.join(HERE, NAME, "__version__.py")) as f:
     exec(f.read(), about)
 
-with pathlib.Path('lib_base_packages.txt').open() as lib_base_packages_txt:
+with pathlib.Path('requirements.txt').open() as requirements:
     base_packages = [
         str(requirement)
         for requirement
-        in pkg_resources.parse_requirements(lib_base_packages_txt)
+        in pkg_resources.parse_requirements(requirements)
     ]
 
 # This call to setup() does all the work
@@ -54,7 +54,6 @@ setup(
         "Topic :: Scientific/Engineering",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -67,9 +66,18 @@ setup(
     include_package_data=True,
     install_requires=base_packages,
     extras_require={
+        "test": base_packages
+                + [
+                    "pytest~=7.2.1",
+                ],
         "dev": base_packages
                 + [
                     "pytest~=7.2.1",
+                    "aif360>=0.6.1",
+                    "fairlearn>=0.9.0",
+                    "xgboost>=1.7.2",
+                    "python-dotenv>=1.0.0",
+                    "pymongo==4.3.3",
                 ],
         "docs": [
                     "scikit-learn",
@@ -90,4 +98,5 @@ setup(
                     "spacy",
                 ],
     },
+    python_requires='>=3.9',
 )

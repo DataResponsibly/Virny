@@ -48,7 +48,7 @@ jobs:
       - name: Build Virny
         run: |
           source ~/.venv/bin/activate
-          pip install -e ".[dev,docs]"
+          pip install -e ".[test,docs]"
           pip install requests-toolbelt==1.0.0
 
       # We should delete the git project from the build cache to avoid conflicts
