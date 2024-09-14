@@ -9,6 +9,9 @@ notebooks
 .ipynb_checkpoints
 docs/examples/test.py
 tests/results
+.pt_tmp
+lightning_logs
+saved_models
 
 # Remove big files from GitHub repo
 virny/datasets/2018

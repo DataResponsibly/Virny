@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 from virny.configs.constants import ModelSetting
 from virny.custom_classes.base_dataset import BaseFlowDataset
+from virny.preprocessing.basic_preprocessing import preprocess_base_model
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
 from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
@@ -161,6 +162,7 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
         try:
             base_model = models_config[model_name]
+            base_model = preprocess_base_model(base_model)
             computation_start_date_time = datetime.now()
             model_metrics_df, fitted_bootstrap = compute_one_model_metrics(base_model=base_model,
                                                                            n_estimators=n_estimators,
@@ -297,8 +299,8 @@ def compute_one_model_metrics(base_model, n_estimators: int, dataset: BaseFlowDa
     metrics_df = metrics_df.reset_index()
     metrics_df = metrics_df.rename(columns={"index": "Metric"})
     metrics_df['Model_Name'] = base_model_name
-    metrics_df['Model_Params'] = str(base_model.get_params())
     metrics_df['Virny_Random_State'] = random_state
+    metrics_df['Model_Params'] = str(base_model.get_params())
 
     if save_results:
         # Save metrics

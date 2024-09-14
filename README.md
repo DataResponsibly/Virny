@@ -92,6 +92,7 @@ In contrast to existing fairness software libraries and model card generating fr
 * Metric static and interactive visualizations
 * Data loaders with subsampling for popular fair-ML benchmark datasets
 * User-friendly parameters input via config yaml files 
+* Integration with PyTorch Tabular
 
 Check out [our documentation](https://dataresponsibly.github.io/Virny/) for a comprehensive overview.
 

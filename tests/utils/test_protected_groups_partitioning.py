@@ -1,8 +1,10 @@
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from virny.datasets import ACSEmploymentDataset
 from virny.utils.protected_groups_partitioning import check_sensitive_attrs_in_columns, create_test_protected_groups
 
-from tests import config_params, folk_emp_config_params, compas_dataset_class, compas_without_sensitive_attrs_dataset_class
+from tests import (config_params, folk_emp_config_params, compas_dataset_class,
+                   compas_without_sensitive_attrs_dataset_class, folk_employment_NY_2018_loader)
 
 
 def test_check_sensitive_attrs_in_columns_true(config_params):
@@ -81,13 +83,11 @@ def test_create_test_protected_groups_true2(compas_without_sensitive_attrs_datas
     assert actual_test_protected_groups['race_dis'].shape[0] == 642
 
 
-def test_create_test_protected_groups_folk_true1(folk_emp_config_params):
-    data_loader = ACSEmploymentDataset(state=['NY'], year=2018, with_nulls=False,
-                                       subsample_size=20_000, subsample_seed=42)
+def test_create_test_protected_groups_folk_true1(folk_emp_config_params, folk_employment_NY_2018_loader):
+    data_loader = folk_employment_NY_2018_loader
 
     seed = 100
-    X_train, X_test, y_train, y_test = train_test_split(data_loader.X_data,
-                                                        data_loader.y_data,
+    X_train, X_test, y_train, y_test = train_test_split(data_loader.X_data, data_loader.y_data,
                                                         test_size=folk_emp_config_params.test_set_fraction,
                                                         random_state=seed)
     actual_test_protected_groups = create_test_protected_groups(X_test,
@@ -104,9 +104,8 @@ def test_create_test_protected_groups_folk_true1(folk_emp_config_params):
     assert actual_test_protected_groups['SEX&RAC1P_dis'].shape[0] == X_test[(X_test.SEX == '2') & (X_test.RAC1P == '2')].shape[0]
 
 
-def test_create_test_protected_groups_folk_true2(folk_emp_config_params):
-    data_loader = ACSEmploymentDataset(state=['NY'], year=2018, with_nulls=False,
-                                       subsample_size=20_000, subsample_seed=42)
+def test_create_test_protected_groups_folk_true2(folk_emp_config_params, folk_employment_NY_2018_loader):
+    data_loader = folk_employment_NY_2018_loader
     new_sensitive_attributes_dct = {'SEX': '2', 'RAC1P': ['2', '3', '4', '5', '6', '7', '8', '9']}
 
     seed = 100
