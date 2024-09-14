@@ -6,3 +6,4 @@ nav:
     - Multiple_Models_Interface_With_Multiple_Test_Sets.md
     - Multiple_Models_Interface_With_Inprocessor.md
     - Multiple_Models_Interface_With_Postprocessor.md
+    - Multiple_Models_Interface_With_PyTorch_Tabular.md

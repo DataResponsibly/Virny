@@ -175,7 +175,7 @@ data_loader.X_data[data_loader.X_data.columns[:5]].head()
 
 ```python
 column_transformer = ColumnTransformer(transformers=[
-    ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse=False), data_loader.categorical_columns),
+    ('categorical_features', OneHotEncoder(handle_unknown='ignore', sparse_output=False), data_loader.categorical_columns),
     ('numerical_features', StandardScaler(), data_loader.numerical_columns),
 ])
 ```

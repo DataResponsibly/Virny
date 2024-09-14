@@ -77,6 +77,7 @@ setup(
                     "fairlearn>=0.9.0",
                     "xgboost>=1.7.2",
                     "python-dotenv>=1.0.0",
+                    "pytorch-tabular>=1.1.0",
                     "pymongo==4.3.3",
                 ],
         "docs": [
