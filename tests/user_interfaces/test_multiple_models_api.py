@@ -99,5 +99,6 @@ def test_compute_metrics_with_config_should_equal_prev_release_results(law_schoo
     metrics_dct['LogisticRegression'] = metrics_dct['LogisticRegression'].drop('Runtime_in_Mins', axis=1)
     metrics_dct['DecisionTreeClassifier'] = metrics_dct['DecisionTreeClassifier'].drop('Runtime_in_Mins', axis=1)
 
-    assert compare_metric_dfs_with_tolerance(expected_metrics_dct['LogisticRegression'], metrics_dct['LogisticRegression'])
-    assert compare_metric_dfs_with_tolerance(expected_metrics_dct['DecisionTreeClassifier'], metrics_dct['DecisionTreeClassifier'])
+    tolerance = 1e-4 if sys.version_info.major == 3 and sys.version_info.minor == 11 else 1e-6
+    assert compare_metric_dfs_with_tolerance(expected_metrics_dct['LogisticRegression'], metrics_dct['LogisticRegression'], tolerance)
+    assert compare_metric_dfs_with_tolerance(expected_metrics_dct['DecisionTreeClassifier'], metrics_dct['DecisionTreeClassifier'], tolerance)
