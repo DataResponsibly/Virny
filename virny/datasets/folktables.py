@@ -55,6 +55,7 @@ class ACSIncomeDataset(BaseDataLoader):
         acs_data = data_source.get_data(states=state, download=True)
         if with_filter:
             acs_data = adult_filter(acs_data)
+            acs_data = acs_data.reset_index(drop=True)
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
@@ -137,6 +138,7 @@ class ACSEmploymentDataset(BaseDataLoader):
         acs_data = data_source.get_data(states=state, download=True)
         if with_filter:
             acs_data = employment_filter(acs_data)
+            acs_data = acs_data.reset_index(drop=True)
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
@@ -285,6 +287,7 @@ class ACSPublicCoverageDataset(BaseDataLoader):
         acs_data = data_source.get_data(states=state, download=True)
         if with_filter:
             acs_data = public_coverage_filter(acs_data)
+            acs_data = acs_data.reset_index(drop=True)
         if subsample_size:
             acs_data = acs_data.sample(subsample_size, random_state=subsample_seed) if subsample_seed is not None \
                 else acs_data.sample(subsample_size)
