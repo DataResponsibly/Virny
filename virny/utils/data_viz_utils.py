@@ -544,8 +544,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
                     pd_condition &= (pivoted_model_metrics_df[metric] >= min_range_val) & (pivoted_model_metrics_df[metric] <= max_range_val)
 
         num_satisfied_models_df = pivoted_model_metrics_df[pd_condition]['Model_Type'].value_counts().reset_index()
-        num_satisfied_models_df.rename(columns = {'Model_Type': 'Number_of_Models'}, inplace = True)
-        num_satisfied_models_df.rename(columns = {'index': 'Model_Type'}, inplace = True)
+        num_satisfied_models_df.rename(columns = {'count': 'Number_of_Models'}, inplace = True)
         # If a constraint for a metric group is not satisfied, add zeros for all model names
         if num_satisfied_models_df.shape[0] == 0:
             num_satisfied_models_df = pd.DataFrame({'Model_Type': model_types,

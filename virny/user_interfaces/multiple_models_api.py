@@ -14,12 +14,12 @@ from virny.utils.common_helpers import save_metrics_to_file
 
 
 def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config: dict,
-                                save_results_dir_path: str, postprocessor=None, with_predict_proba: bool = True,
+                                save_results_dir_path: str = None, postprocessor=None, with_predict_proba: bool = True,
                                 notebook_logs_stdout: bool = False, return_fitted_bootstrap: bool = False,
                                 verbose: int = 0):
     """
     Compute stability and accuracy metrics for each model in models_config. Arguments are defined as an input config object.
-    Save results in `save_results_dir_path` folder.
+    Save results in `save_results_dir_path` folder if needed.
 
     Return a dictionary where keys are model names, and values are metrics for sensitive attributes defined in config.
 
@@ -32,7 +32,7 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
     models_config
         Dictionary where keys are model names, and values are initialized models
     save_results_dir_path
-        Location where to save result files with metrics
+        [Optional] Location where to save result files with metrics
     postprocessor
         [Optional] Postprocessor object to apply to model predictions before metrics computation
     with_predict_proba
@@ -55,7 +55,8 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         verbose = 0
 
     start_datetime = datetime.now(timezone.utc)
-    os.makedirs(save_results_dir_path, exist_ok=True)
+    if save_results_dir_path:
+        os.makedirs(save_results_dir_path, exist_ok=True)
 
     model_metrics_dct = dict()
     models_metrics_dct, models_fitted_bootstraps_dct = run_metrics_computation(dataset=dataset,
@@ -79,8 +80,9 @@ def compute_metrics_with_config(dataset: BaseFlowDataset, config, models_config:
         model_metrics_df = models_metrics_dct[model_name]
         model_metrics_dct[model_name] = model_metrics_df
 
-        result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
-        model_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
+        if save_results_dir_path:
+            result_filename = f'Metrics_{config.dataset_name}_{model_name}_{config.n_estimators}_Estimators_{start_datetime.strftime("%Y%m%d__%H%M%S")}.csv'
+            model_metrics_dct[model_name].to_csv(f'{save_results_dir_path}/{result_filename}', index=False, mode='w')
 
     if return_fitted_bootstrap:
         return model_metrics_dct, models_fitted_bootstraps_dct
