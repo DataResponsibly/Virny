@@ -838,7 +838,7 @@ class MetricsInteractiveVisualizer:
             alt.layer(
                 models_metrics_chart, text, data=filtered_metrics_df
             ).properties(
-                width=500,
+                width=280 if metrics_type == 'group' else 300,
                 height=100
             ).facet(
                 row=alt.Row('Metric:N', title=metrics_title, sort=metrics_names)
