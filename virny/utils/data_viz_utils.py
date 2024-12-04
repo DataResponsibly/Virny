@@ -502,7 +502,6 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
         subgroup_metrics_per_model_df = all_subgroup_metrics_per_model_dct[model_name][
             (all_subgroup_metrics_per_model_dct[model_name]['Subgroup'] == 'overall')
             ]
-        subgroup_metrics_per_model_df['Subgroup'] = subgroup_metrics_per_model_df['Subgroup']
         aligned_subgroup_metrics_per_model_df = subgroup_metrics_per_model_df[group_metrics_per_model_df.columns]
 
         combined_metrics_per_model_df = pd.concat([group_metrics_per_model_df, aligned_subgroup_metrics_per_model_df]).reset_index(drop=True)
@@ -543,8 +542,14 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
                 else:
                     pd_condition &= (pivoted_model_metrics_df[metric] >= min_range_val) & (pivoted_model_metrics_df[metric] <= max_range_val)
 
+        # If-statement for different pandas versions
         num_satisfied_models_df = pivoted_model_metrics_df[pd_condition]['Model_Type'].value_counts().reset_index()
-        num_satisfied_models_df.rename(columns = {'count': 'Number_of_Models'}, inplace = True)
+        if 'count' in num_satisfied_models_df.columns:
+            num_satisfied_models_df.rename(columns = {'count': 'Number_of_Models'}, inplace = True)
+        else:
+            num_satisfied_models_df.rename(columns = {'Model_Type': 'Number_of_Models'}, inplace = True)
+            num_satisfied_models_df.rename(columns = {'index': 'Model_Type'}, inplace = True)
+
         # If a constraint for a metric group is not satisfied, add zeros for all model names
         if num_satisfied_models_df.shape[0] == 0:
             num_satisfied_models_df = pd.DataFrame({'Model_Type': model_types,
