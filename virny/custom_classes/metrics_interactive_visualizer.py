@@ -180,7 +180,7 @@ class MetricsInteractiveVisualizer:
                         overall_metric_max_val1 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         disparity_metric1 = gr.Dropdown(
-                            sorted(self.all_disparity_metrics),
+                            ['None'] + sorted(self.all_disparity_metrics),
                             value='Equalized_Odds_FPR', multiselect=False, label="Disparity Constraint (C2)",
                             scale=2
                         )
@@ -188,7 +188,7 @@ class MetricsInteractiveVisualizer:
                         disparity_metric_max_val1 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         overall_metric2 = gr.Dropdown(
-                            sorted(self.all_overall_metrics),
+                            ['None'] + sorted(self.all_overall_metrics),
                             value='Label_Stability', multiselect=False, label="Overall Constraint (C3)",
                             scale=2
                         )
@@ -196,7 +196,7 @@ class MetricsInteractiveVisualizer:
                         overall_metric_max_val2 = gr.Text(value="1.0", label="Max value", scale=1)
                     with gr.Row():
                         disparity_metric2 = gr.Dropdown(
-                            sorted(self.all_disparity_metrics),
+                            ['None'] + sorted(self.all_disparity_metrics),
                             value='Label_Stability_Ratio', multiselect=False, label="Disparity Constraint (C4)",
                             scale=2
                         )
@@ -206,7 +206,7 @@ class MetricsInteractiveVisualizer:
                     btn_view1 = gr.Button("Submit")
                 with gr.Column(scale=3):
                     bar_plot_for_model_selection = gr.Plot(label="Bar Chart")
-                    df_with_models_satisfied_all_constraints = gr.DataFrame(label='Models that satisfy all 4 constraints')
+                    df_with_models_satisfied_all_constraints = gr.DataFrame(label='Models that satisfy all constraints')
 
             btn_view1.click(self._create_bar_plot_for_model_selection,
                             inputs=[group_name,
@@ -575,13 +575,20 @@ class MetricsInteractiveVisualizer:
         # Create individual constraints
         metrics_value_range_dct = dict()
         for constraint in [overall_constraint1, disparity_constraint1, overall_constraint2, disparity_constraint2]:
-            metrics_value_range_dct[constraint[0]] = [constraint[1], constraint[2]]
+            if constraint[0] != 'None':
+                metrics_value_range_dct[constraint[0]] = [constraint[1], constraint[2]]
+
         # Create intersectional constraints
-        metrics_value_range_dct[f'{overall_constraint1[0]}&{disparity_constraint1[0]}'] = None
-        metrics_value_range_dct[f'{overall_constraint1[0]}&{overall_constraint2[0]}'] = None
-        metrics_value_range_dct[f'{overall_constraint1[0]}&{disparity_constraint2[0]}'] = None
-        metrics_value_range_dct[(f'{overall_constraint1[0]}&{disparity_constraint1[0]}'
-                                 f'&{overall_constraint2[0]}&{disparity_constraint2[0]}')] = None
+        for constrain_pair in [(overall_constraint1[0], disparity_constraint1[0]),
+                               (overall_constraint1[0], overall_constraint2[0]),
+                               (overall_constraint1[0], disparity_constraint2[0])]:
+            if constrain_pair[0] != 'None' and constrain_pair[1] != 'None':
+                metrics_value_range_dct[f'{constrain_pair[0]}&{constrain_pair[1]}'] = None
+
+        all_constrains_str = '&'.join(
+            [c for c in [overall_constraint1[0], disparity_constraint1[0], overall_constraint2[0], disparity_constraint2[0]] if c != 'None']
+        )
+        metrics_value_range_dct[all_constrains_str] = None
 
         melted_all_subgroup_metrics_per_model_dct = dict()
         for model_name in self.melted_model_metrics_df['Model_Name'].unique():
@@ -597,6 +604,7 @@ class MetricsInteractiveVisualizer:
                                                             melted_all_group_metrics_per_model_dct,
                                                             metrics_value_range_dct,
                                                             group=group_name,
+                                                            num_constrains=all_constrains_str.count('&') + 1,
                                                             metric_name_to_alias_dct=metric_name_to_alias_dct)
 
     def _create_subgroup_model_rank_heatmap(self, model_names: list, subgroup_accuracy_metrics_lst: list,
