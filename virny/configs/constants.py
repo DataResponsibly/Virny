@@ -7,6 +7,7 @@ class ModelSetting(Enum):
 
 class ComputationMode(Enum):
     ERROR_ANALYSIS = "error_analysis"
+    NO_BOOTSTRAP = "no_bootstrap"
 
 
 INTERSECTION_SIGN = '&'

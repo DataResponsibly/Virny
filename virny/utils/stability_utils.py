@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from virny.configs.constants import ALEATORIC_UNCERTAINTY, EPISTEMIC_UNCERTAINTY, OVERALL_UNCERTAINTY
+from virny.configs.constants import ALEATORIC_UNCERTAINTY, EPISTEMIC_UNCERTAINTY, OVERALL_UNCERTAINTY, ComputationMode
 from virny.metrics import METRIC_TO_FUNCTION, METRICS_FOR_PREDICT_PROBA, METRICS_FOR_LABELS
 
 
@@ -31,7 +31,7 @@ def combine_bootstrap_predictions(bootstrap_predictions: dict, y_test_indexes: n
     return pd.Series(y_preds, index=y_test_indexes)
 
 
-def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True):
+def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True, computation_mode = None):
     """
     Compute means, stds, iqr, entropy, jitter, label stability, and transform predictions to pd.Dataframe.
 
@@ -46,6 +46,8 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
     with_predict_proba
         [Optional] A flag if model can return probabilities for its predictions.
          If no, only metrics based on labels (not labels and probabilities) will be computed.
+    computation_mode
+        [Optional] A mode for computing metrics
 
     """
     if isinstance(uq_results, np.ndarray):
@@ -54,27 +56,28 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
         results = pd.DataFrame(uq_results).transpose()
 
     metrics_dct = dict()
-    # Compute metrics for prediction probabilities
-    if not with_predict_proba:
-        uq_labels = results
-    else:
-        uq_predict_probas = results
-        for metric in METRICS_FOR_PREDICT_PROBA:
-            if metric == EPISTEMIC_UNCERTAINTY: # skip computation for a metric that is based on two other metrics
-                continue
+    if computation_mode != ComputationMode.NO_BOOTSTRAP.value: # Do not compute stability and uncertainty metrics for NO_BOOTSTRAP
+        # Compute metrics for prediction probabilities
+        if not with_predict_proba:
+            uq_labels = results
+        else:
+            uq_predict_probas = results
+            for metric in METRICS_FOR_PREDICT_PROBA:
+                if metric == EPISTEMIC_UNCERTAINTY: # skip computation for a metric that is based on two other metrics
+                    continue
 
-            metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_predict_probas)
+                metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_predict_probas)
 
-        metrics_dct[EPISTEMIC_UNCERTAINTY] = metrics_dct[OVERALL_UNCERTAINTY] - metrics_dct[ALEATORIC_UNCERTAINTY]
+            metrics_dct[EPISTEMIC_UNCERTAINTY] = metrics_dct[OVERALL_UNCERTAINTY] - metrics_dct[ALEATORIC_UNCERTAINTY]
 
-        # Convert predict proba results of each model to correspondent labels.
-        # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
-        # Hence, if a value is, for example, 0.3 --> label == 1, 0.6 -- > label == 0
-        uq_labels = (results < 0.5).astype(int)
+            # Convert predict proba results of each model to correspondent labels.
+            # Here we use int(x<0.5) since we use predict_prob()[:, 0] to make predictions.
+            # Hence, if a value is, for example, 0.3 --> label == 1, 0.6 -- > label == 0
+            uq_labels = (results < 0.5).astype(int)
 
-    # Compute metrics for prediction labels
-    for metric in METRICS_FOR_LABELS:
-        metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_labels)
+        # Compute metrics for prediction labels
+        for metric in METRICS_FOR_LABELS:
+            metrics_dct[metric] = METRIC_TO_FUNCTION[metric](y_true, uq_labels)
 
     if with_predict_proba:
         y_preds = np.array([int(x<0.5) for x in results.mean().values])
@@ -85,6 +88,9 @@ def count_prediction_metrics(y_true, uq_results, with_predict_proba: bool = True
 
 
 def generate_bootstrap(features, labels, boostrap_size, with_replacement=True, random_state=None):
+    if boostrap_size == features.shape[0]:
+        return pd.DataFrame(features), pd.DataFrame(labels)
+
     # Create a local random state.
     # Note that to keep reverse compatibility we need to use different generators for different python versions
     # since random number generation was changed in Python 3.12

@@ -103,7 +103,9 @@ class SubgroupVarianceCalculator(AbstractSubgroupAnalyzer):
         return results
 
     def _compute_metrics(self, y_test: pd.DataFrame, group_models_predictions):
-        _, prediction_metrics = count_prediction_metrics(y_test, group_models_predictions,
+        _, prediction_metrics = count_prediction_metrics(y_true=y_test,
+                                                         uq_results=group_models_predictions,
+                                                         computation_mode=self.computation_mode,
                                                          with_predict_proba=self.with_predict_proba)
         return prediction_metrics
 

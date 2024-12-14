@@ -3,7 +3,7 @@ import traceback
 import pandas as pd
 from datetime import datetime, timezone
 
-from virny.configs.constants import ModelSetting
+from virny.configs.constants import ModelSetting, ComputationMode
 from virny.utils.protected_groups_partitioning import create_test_protected_groups
 from virny.preprocessing.basic_preprocessing import preprocess_base_model
 from virny.custom_classes.base_dataset import BaseFlowDataset
@@ -254,6 +254,8 @@ def compute_one_model_metrics_with_multiple_test_sets(base_model, n_estimators: 
             As for now, 0, 1, 2 levels are supported.
 
     """
+    if computation_mode == ComputationMode.NO_BOOTSTRAP.value:
+        with_predict_proba = False
     model_setting = ModelSetting.BATCH if model_setting is None else ModelSetting[model_setting.upper()]
     subgroup_variance_analyzer = SubgroupVarianceAnalyzer(model_setting=model_setting,
                                                           n_estimators=n_estimators,
