@@ -360,11 +360,12 @@ def create_model_performance_summary_visualization(main_matrix, matrix_for_color
 
 
 def create_flexible_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
-                                                 metrics_value_range_dct: dict, group: str, metric_name_to_alias_dct: dict):
+                                                 metrics_value_range_dct: dict, group: str, metric_name_to_alias_dct: dict,
+                                                 num_constrains: int):
     # Compute the number of models that satisfy the conditions
     models_in_range_df, df_with_models_satisfied_all_constraints = (
         create_models_in_range_dct(all_subgroup_metrics_per_model_dct, all_group_metrics_per_model_dct,
-                                   metrics_value_range_dct, group))
+                                   metrics_value_range_dct, group, num_constrains=num_constrains))
 
     def get_column_alias(metric_group):
         if '&' not in metric_group:
@@ -492,7 +493,7 @@ def create_bar_plot_for_model_selection(all_subgroup_metrics_per_model_dct: dict
 
 
 def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_group_metrics_per_model_dct: dict,
-                               metrics_value_range_dct: dict, group: str):
+                               metrics_value_range_dct: dict, group: str, num_constrains: int = 4):
     # Merge subgroup and group metrics for each model and align their columns
     all_metrics_for_all_models_df = pd.DataFrame()
     for model_name in all_subgroup_metrics_per_model_dct.keys():
@@ -562,7 +563,7 @@ def create_models_in_range_dct(all_subgroup_metrics_per_model_dct: dict, all_gro
             # Concatenate based on rows
             models_in_range_df = pd.concat([models_in_range_df, num_satisfied_models_df], ignore_index=True, sort=False)
 
-        if metric_group.count('&') == 3:
+        if metric_group.count('&') == num_constrains - 1:
             df_with_models_satisfied_all_constraints = pivoted_model_metrics_df[pd_condition][['Model_Type', 'Model_Name']]
 
     return models_in_range_df, df_with_models_satisfied_all_constraints
