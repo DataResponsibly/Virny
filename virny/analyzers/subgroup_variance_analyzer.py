@@ -1,6 +1,6 @@
 import pandas as pd
 
-from virny.configs.constants import ModelSetting
+from virny.configs.constants import ModelSetting, ComputationMode
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_variance_calculator import SubgroupVarianceCalculator
 from virny.analyzers.batch_overall_variance_analyzer import BatchOverallVarianceAnalyzer
@@ -76,6 +76,7 @@ class SubgroupVarianceAnalyzer:
                                                                                        target_column=dataset.target,
                                                                                        n_estimators=n_estimators,
                                                                                        random_state=random_state,
+                                                                                       computation_mode=computation_mode,
                                                                                        with_predict_proba=with_predict_proba,
                                                                                        notebook_logs_stdout=notebook_logs_stdout,
                                                                                        verbose=verbose)
@@ -91,12 +92,14 @@ class SubgroupVarianceAnalyzer:
                                                                          target_column=dataset.target,
                                                                          n_estimators=n_estimators,
                                                                          random_state=random_state,
+                                                                         computation_mode=computation_mode,
                                                                          with_predict_proba=with_predict_proba,
                                                                          notebook_logs_stdout=notebook_logs_stdout,
                                                                          verbose=verbose)
         else:
             raise ValueError('model_setting is incorrect or not supported')
 
+        self.computation_mode = computation_mode
         self.dataset_name = overall_variance_analyzer.dataset_name
         self.n_estimators = overall_variance_analyzer.n_estimators
         self.base_model_name = overall_variance_analyzer.base_model_name
@@ -161,11 +164,12 @@ class SubgroupVarianceAnalyzer:
                 model_dct['postprocessor'] = self.__overall_variance_analyzer.postprocessors_lst[model_idx]
             fitted_bootstrap.append(model_dct)
 
-        # Count and display fairness metrics
+        # Count variance metrics for subgroups
         self.__subgroup_variance_calculator.set_overall_variance_metrics(self.overall_variance_metrics_dct)
-        self.subgroup_variance_metrics_dct = self.__subgroup_variance_calculator.compute_subgroup_metrics(
-            y_preds, self.__overall_variance_analyzer.models_predictions,
-            save_results, result_filename, save_dir_path
-        )
+        self.subgroup_variance_metrics_dct = dict() if self.computation_mode == ComputationMode.NO_BOOTSTRAP.value else \
+            self.__subgroup_variance_calculator.compute_subgroup_metrics(
+                y_preds, self.__overall_variance_analyzer.models_predictions,
+                save_results, result_filename, save_dir_path
+            )
 
         return y_preds, pd.DataFrame(self.subgroup_variance_metrics_dct), fitted_bootstrap

@@ -43,6 +43,8 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         Number of estimators in ensemble to measure base_model stability
     random_state
         [Optional] Controls the randomness of the bootstrap approach for model arbitrariness evaluation
+    computation_mode
+        [Optional] A non-default mode for metrics computation. Should be included in the ComputationMode enum.
     with_predict_proba
         [Optional] A flag if model can return probabilities for its predictions.
          If no, only metrics based on labels (not labels and probabilities) will be computed.
@@ -58,7 +60,8 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                  base_model, base_model_name: str, bootstrap_fraction: float,
                  X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
                  target_column: str, dataset_name: str, n_estimators: int, random_state: int = None,
-                 with_predict_proba: bool = True, notebook_logs_stdout: bool = False, verbose: int = 0):
+                 computation_mode: str = None, with_predict_proba: bool = True,
+                 notebook_logs_stdout: bool = False, verbose: int = 0):
         if sensitive_attribute is None:
             raise ValueError('Sensitive attribute for postprocessing is not defined. '
                              'Please, set postprocessing_sensitive_attribute argument in the metric computation config.')
@@ -74,6 +77,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
                          dataset_name=dataset_name,
                          n_estimators=n_estimators,
                          random_state=random_state,
+                         computation_mode=computation_mode,
                          with_predict_proba=with_predict_proba,
                          notebook_logs_stdout=notebook_logs_stdout,
                          verbose=verbose)
