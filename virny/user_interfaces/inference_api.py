@@ -1,6 +1,6 @@
 import pandas as pd
 
-from virny.configs.constants import ModelSetting
+from virny.configs.constants import ModelSetting, ComputationMode
 from virny.custom_classes.base_dataset import BaseFlowDataset
 from virny.analyzers.subgroup_error_analyzer import SubgroupErrorAnalyzer
 from virny.analyzers.subgroup_variance_analyzer import SubgroupVarianceAnalyzer
@@ -10,6 +10,9 @@ from virny.utils.protected_groups_partitioning import create_test_protected_grou
 def compute_metrics_with_fitted_bootstrap(fitted_bootstrap: list, test_base_flow_dataset: BaseFlowDataset,
                                           config, with_predict_proba: bool = True, verbose: int = 0):
     model_setting = ModelSetting.BATCH
+    if config.computation_mode == ComputationMode.NO_BOOTSTRAP.value:
+        with_predict_proba = False
+
     X_test, y_test = test_base_flow_dataset.X_test, test_base_flow_dataset.y_test
     test_protected_groups = create_test_protected_groups(X_test,
                                                          test_base_flow_dataset.init_sensitive_attrs_df,
