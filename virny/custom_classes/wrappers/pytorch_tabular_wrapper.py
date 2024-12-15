@@ -33,4 +33,4 @@ class PytorchTabularWrapper:
         return self.estimator.predict(X, tta_seed=seed).values
 
     def predict(self, X, seed: int):
-        return self.estimator.predict(X, tta_seed=seed)
+        return self.estimator.predict(X, tta_seed=seed).values[:, -1]
