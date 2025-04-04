@@ -77,13 +77,15 @@ class DiabetesDataset2019(BaseDataLoader):
 
         # Preprocess features
         df = df.rename(columns={'Pregancies': 'Pregnancies'})
-        df['RegularMedicine'].replace('o', 'no', inplace=True)
+        df['RegularMedicine'] = df['RegularMedicine'].replace('o', 'no')
         df['BPLevel'] = df['BPLevel'].str.strip().str.lower()
+        df['Pdiabetes']= df['Pdiabetes'].replace('0','no')
+        df['Pdiabetes']= df['Pdiabetes'].str.lower().str.strip()
 
         # Preprocess a target
         df['Diabetic'] = df['Diabetic'].str.strip()
-        df['Diabetic'].replace('no', 0, inplace=True)
-        df['Diabetic'].replace('yes', 1, inplace=True)
+        df['Diabetic'] = df['Diabetic'].replace('no', 0)
+        df['Diabetic'] = df['Diabetic'].replace('yes', 1)
 
         target = 'Diabetic'
         numerical_columns = ['BMI', 'Sleep', 'SoundSleep', 'Pregnancies']
