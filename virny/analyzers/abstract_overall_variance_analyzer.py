@@ -142,7 +142,7 @@ class AbstractOverallVarianceAnalyzer(metaclass=ABCMeta):
         else:
             from tqdm import tqdm
 
-        cycle_range = range(self.n_estimators) if with_fit is False or self.n_estimators == 1 else \
+        cycle_range = range(self.n_estimators) if self._notebook_logs_stdout is None or with_fit is False or self.n_estimators == 1 else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
                  colour="blue",

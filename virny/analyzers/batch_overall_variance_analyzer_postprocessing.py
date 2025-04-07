@@ -116,7 +116,7 @@ class BatchOverallVarianceAnalyzerPostProcessing(BatchOverallVarianceAnalyzer):
         else:
             from tqdm import tqdm
 
-        cycle_range = range(self.n_estimators) if with_fit is False else \
+        cycle_range = range(self.n_estimators) if self._notebook_logs_stdout is None or with_fit is False else \
             tqdm(range(self.n_estimators),
                  desc="Classifiers testing by bootstrap",
                  colour="blue",

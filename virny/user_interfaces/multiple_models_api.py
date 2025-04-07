@@ -138,8 +138,9 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
          False, otherwise. Note that if it is set to False, only metrics based on labels (not labels and probabilities) will be computed.
          Ignored when a postprocessor is not None, and set to False in this case.
     notebook_logs_stdout
-        [Optional] True, if this interface was execute in a Jupyter notebook,
-         False, otherwise.
+        [Optional] True, if to display a progress bar in a Jupyter notebook,
+         False, if to display a progress bar in a python module,
+         None, if to disable a progress bar.
     verbose
         [Optional] Level of logs printing. The greater level provides more logs.
             As for now, 0, 1, 2 levels are supported.
@@ -151,14 +152,17 @@ def run_metrics_computation(dataset: BaseFlowDataset, bootstrap_fraction: float,
     else:
         from tqdm import tqdm
 
+    num_models = len(models_config)
+    cycle_range = enumerate(models_config.keys()) if notebook_logs_stdout is None else \
+        tqdm(enumerate(models_config.keys()),
+             total=num_models,
+             desc="Analyze multiple models",
+             colour="red",
+             file=sys.stdout)
+
     models_metrics_dct = dict()
     models_fitted_bootstraps_dct = dict()
-    num_models = len(models_config)
-    for model_idx, model_name in tqdm(enumerate(models_config.keys()),
-                                      total=num_models,
-                                      desc="Analyze multiple models",
-                                      colour="red",
-                                      file=sys.stdout):
+    for model_idx, model_name in cycle_range:
         if verbose >= 1:
             print('\n\n', flush=True)
             print('#' * 30, f' [Model {model_idx + 1} / {num_models}] Analyze {model_name} ', '#' * 30)
