@@ -1,6 +1,5 @@
 import os
 import pathlib
-import pkg_resources
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -30,9 +29,9 @@ with open(os.path.join(HERE, NAME, "__version__.py")) as f:
 
 with pathlib.Path('requirements.txt').open() as requirements:
     base_packages = [
-        str(requirement)
-        for requirement
-        in pkg_resources.parse_requirements(requirements)
+        line.strip()
+        for line in requirements
+        if line.strip() and not line.strip().startswith('#')
     ]
 
 # This call to setup() does all the work
